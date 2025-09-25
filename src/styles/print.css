@@ -1,0 +1,10 @@
+@media print {
+  .paper.A4 { width: 210mm; }
+  table.items{ table-layout: fixed; border-collapse: collapse; width: 100%; }
+  table.items th, table.items td{ vertical-align: middle; line-height: 1.2; font-size: 12px; }
+  /* Alinear numéricas */
+  table.items th:nth-child(8),
+  table.items td:nth-child(8),
+  table.items th:nth-child(10),
+  table.items td:nth-child(10){ text-align: right; }
+}
