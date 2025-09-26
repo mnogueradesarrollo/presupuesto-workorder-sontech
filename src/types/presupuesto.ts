@@ -1,34 +1,34 @@
-import type { Currency, QuoteStatus } from './common';
+import type { Currency, QuoteStatus } from "./common";
 
-export type ItemTipo = 'Producto' | 'Servicio' | 'Reparación';
+export type GarantiaUnidad = "dias" | "meses" | "anios";
+
+export type Aceptacion = {
+  nombre: string;
+  dni?: string;
+  metodo: "firma" | "email" | "whatsapp" | "otro";
+  firmaDataUrl?: string;
+  aceptadoAt: number; // Date.now()
+};
 
 export type ItemPresupuesto = {
   id: string;
-  tipo: ItemTipo;
+  tipo: "Producto" | "Servicio" | "Reparación";
   descripcion: string;
   cantidad: number;
   precioUnitario: number;
   descuentoPct?: number;
 
-  // extras para IT/Celulares (opcionales)
   marca?: string;
   modelo?: string;
   imeiSerie?: string;
-  estado?: 'Nuevo' | 'Usado' | 'Reacondicionado';
-  garantiaMeses?: number;
+  estado?: "Nuevo" | "Usado" | "Reacondicionado";
+  garantiaMeses?: number; // puedes seguir usándolo si querés
+  garantiaValor?: number; // NUEVO
+  garantiaUnidad?: GarantiaUnidad; // NUEVO
   nota?: string;
 
-  // si es servicio/reparación
   horas?: number;
   tarifaHora?: number;
-};
-
-export type Aceptacion = {
-  nombre: string;
-  dni?: string;
-  metodo: 'firma' | 'email' | 'whatsapp' | 'otro';
-  firmaDataUrl?: string;
-  aceptadoAt: number; // Date.now()
 };
 
 export type Presupuesto = {
@@ -37,17 +37,16 @@ export type Presupuesto = {
   fecha: string; // ISO
   moneda?: Currency;
   items: ItemPresupuesto[];
-
+  anio?: number; // NUEVO
+  numero?: number; // NUEVO (incremental por año)
+  codigo?: string; // NUEVO "P-YYYY-0001"
   ivaPct?: number;
   recargoTarjetaPct?: number;
   bonificacionPct?: number;
-
   notas?: string;
-  total: number;      // si lo persistís
+  total: number;
   createdAt: number;
-
-  // NUEVO
   status: QuoteStatus;
   aceptacion?: Aceptacion;
-  ordenId?: string;   // id de la OT creada al aceptar
+  ordenId?: string;
 };
