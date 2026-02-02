@@ -15,6 +15,7 @@ export type TrabajoHecho = {
   id: string;
   descripcion: string;
   horas?: number;
+  precio?: number;
   tecnico?: string;
 };
 
@@ -60,6 +61,12 @@ export type Orden = {
   totalEstimado?: number; // tomado del presupuesto
   totalFinal?: number; // si cambia (repuestos extra/horas)
   saldo?: number; // totalFinal o estimado - pagos
+  pagado?: number; // total pagado acumulado
+
+  /** Numeración */
+  codigo?: string;
+  anio?: number;
+  numero?: number;
 
   /** Si querés guardar pagos embebidos (no obligatorio; también hay colección 'pagos') */
   pagos?: Pago[];

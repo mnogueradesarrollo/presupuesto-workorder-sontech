@@ -14,7 +14,19 @@ export default function Navbar() {
           end
           className={({ isActive }) => (isActive ? "link active" : "link")}
         >
-          Inicio
+          Dashboard
+        </NavLink>
+        <NavLink
+          to="/gestion"
+          className={({ isActive }) => (isActive ? "link active" : "link")}
+        >
+          Gestión
+        </NavLink>
+        <NavLink
+          to="/settings"
+          className={({ isActive }) => (isActive ? "link active" : "link")}
+        >
+          ⚙️
         </NavLink>
         <NavLink
           to="/presupuesto-it"

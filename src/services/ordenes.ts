@@ -17,6 +17,8 @@ export type OrdenListItem = Pick<
   | "status"
   | "payStatus"
   | "saldo"
+  | "pagado"
+  | "codigo"
   | "createdAt"
   | "totalEstimado"
   | "totalFinal"
@@ -43,7 +45,12 @@ export async function listOrdenes(opts?: {
       cliente: data.cliente,
       status: data.status,
       payStatus: data.payStatus,
-      saldo: data.saldo ?? data.totalFinal ?? data.totalEstimado ?? 0,
+      saldo:
+        data.saldo !== undefined
+          ? data.saldo
+          : (data.totalFinal ?? data.totalEstimado ?? 0) - (data.pagado ?? 0),
+      pagado: data.pagado ?? 0,
+      codigo: data.codigo,
       createdAt: data.createdAt,
       totalEstimado: data.totalEstimado,
       totalFinal: data.totalFinal,

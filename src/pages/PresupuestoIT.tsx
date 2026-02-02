@@ -14,26 +14,63 @@ import {
 } from "../services/presupuestos";
 import { aceptarPresupuesto } from "../services/flujo";
 import { generarPresupuestoPDF, toDataURL } from "../lib/pdf";
+import { getSettings } from "../services/settings";
+import { toast } from "react-hot-toast";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import logoUrl from "../assets/logotipo-sontech.png";
+
+const schema = z.object({
+  cliente: z.string().min(1, "El cliente es obligatorio"),
+  items: z.array(z.object({
+    id: z.string(),
+    tipo: z.enum(["Producto", "Servicio", "Reparación"]),
+    descripcion: z.string().min(1, "La descripción es necesaria"),
+    cantidad: z.coerce.number().min(1),
+    precioUnitario: z.coerce.number().optional(),
+    horas: z.coerce.number().optional(),
+    tarifaHora: z.coerce.number().optional(),
+    marca: z.string().optional(),
+    modelo: z.string().optional(),
+    imeiSerie: z.string().optional(),
+    estado: z.string().optional(),
+    garantiaValor: z.coerce.number().optional(),
+    garantiaUnidad: z.string().optional(),
+    descuentoPct: z.coerce.number().optional(),
+  })).min(1, "Debe haber al menos un ítem"),
+});
+
 
 export default function PresupuestoIT() {
   const [params] = useSearchParams();
   const editingId = params.get("id");
-
-  const [items, setItems] = useState<ItemPresupuesto[]>([
-    {
-      id: crypto.randomUUID(),
-      tipo: "Producto",
-      descripcion: "",
-      cantidad: 1,
-      precioUnitario: 0,
-    },
-  ]);
-  const [cliente, setCliente] = useState("");
+  const isViewMode = params.get("view") === "true";
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [codigo, setCodigo] = useState<string | undefined>(undefined);
 
-  const navigate = useNavigate();
+  const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm<any>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      cliente: "",
+      items: [{
+        id: crypto.randomUUID(),
+        tipo: "Producto",
+        descripcion: "",
+        cantidad: 1,
+        precioUnitario: 0,
+      }]
+    }
+  });
+
+  const { append, remove } = useFieldArray({
+    control,
+    name: "items"
+  });
+
+  const items = watch("items") as ItemPresupuesto[];
+  const cliente = watch("cliente");
 
   // SIN IVA por ahora
   const t = totals({
@@ -49,57 +86,44 @@ export default function PresupuestoIT() {
       if (!editingId) return;
       const p = await getPresupuesto(editingId);
       if (!p) return;
-      setItems(p.items || []);
-      setCliente(p.cliente || "");
+      reset({
+        cliente: p.cliente || "",
+        items: p.items || []
+      });
       setCodigo(p.codigo);
     })();
-  }, [editingId]);
+  }, [editingId, reset]);
 
-  const addItem = () =>
-    setItems((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        tipo: "Producto",
-        descripcion: "",
-        cantidad: 1,
-        precioUnitario: 0,
-      },
-    ]);
-
-  const removeItem = (id: string) =>
-    setItems((prev) => prev.filter((i) => i.id !== id));
-
-  // Guardar (crear o actualizar)
-  const handleGuardar = async () => {
-    if (!cliente.trim()) {
-      alert("Ingresá el cliente");
-      return;
-    }
+  const onSubmit = async (data: any) => {
+    console.log("Submitting Data:", data);
     setSaving(true);
     try {
       if (editingId) {
         await updatePresupuesto(editingId, {
-          cliente,
-          items,
+          cliente: data.cliente,
+          items: data.items as ItemPresupuesto[],
           total: t.total,
           fecha: new Date().toISOString(),
           ivaPct: 0,
         } as Partial<Presupuesto>);
-        alert("Presupuesto actualizado.");
+        toast.success("Presupuesto actualizado.");
       } else {
-        const { id, codigo } = await crearPresupuesto({
-          cliente,
+        const { id, codigo: newCodigo } = await crearPresupuesto({
+          cliente: data.cliente,
           fecha: new Date().toISOString(),
           moneda: "ARS",
-          items,
+          items: data.items as ItemPresupuesto[],
           ivaPct: 0,
           notas: "",
           total: t.total,
         });
-        setCodigo(codigo);
+        setCodigo(newCodigo);
+        toast.success("Presupuesto creado.");
         navigate(`/presupuesto-it?id=${id}`);
       }
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al guardar el presupuesto.");
     } finally {
       setSaving(false);
     }
@@ -134,7 +158,10 @@ export default function PresupuestoIT() {
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
-    const logoDataUrl = await toDataURL(logoUrl);
+
+    // Intentar obtener ajustes del negocio
+    const biz = await getSettings();
+    const logoDataUrl = biz?.logoUrl ? await toDataURL(biz.logoUrl) : await toDataURL(logoUrl);
 
     const doc = await generarPresupuestoPDF({
       cliente: cliente || "Cliente",
@@ -143,7 +170,11 @@ export default function PresupuestoIT() {
       total: t.total,
       moneda: "ARS",
       logoDataUrl: logoDataUrl ?? undefined,
-      sub: "Informática y Celulares",
+      sub: biz?.name || "Informática y Celulares",
+      address: biz?.address || "Mendoza 4459, Paso del Rey",
+      phone: biz?.phone || "11 3458 1490 (Whatsapp)",
+      email: biz?.email || "sontech.sistemas@gmail.com",
+      footerText: biz?.footerText,
       codigo, // << acá va el código para imprimirse en el título del PDF
     });
 
@@ -156,7 +187,7 @@ export default function PresupuestoIT() {
   // Aceptar → crear Orden (mejor hacerlo desde Home, pero lo dejo por si lo usás)
   const handleAceptar = async () => {
     if (!editingId) {
-      alert("Guardá el presupuesto primero.");
+      toast.error("Guardá el presupuesto primero.");
       return;
     }
     const aceptacion: Aceptacion = {
@@ -171,11 +202,21 @@ export default function PresupuestoIT() {
   return (
     <>
       <div className="toolbar print-hide">
-        <button onClick={addItem} className="btn">
-          + Agregar ítem
-        </button>
-        <button onClick={handleGuardar} className="btn">
-          {saving ? "Guardando…" : "Guardar"}
+        {!isViewMode && (
+          <>
+            <button onClick={() => append({ id: crypto.randomUUID(), tipo: "Producto", descripcion: "", cantidad: 1, precioUnitario: 0 })} className="btn">
+              + Agregar ítem
+            </button>
+            <button onClick={handleSubmit(onSubmit, (err) => {
+              console.log("Validation Errors:", err);
+              toast.error("Revisá los errores en el formulario");
+            })} className="btn" disabled={saving}>
+              {saving ? "Guardando…" : "Guardar"}
+            </button>
+          </>
+        )}
+        <button onClick={() => navigate(-1)} className="btn">
+          ← Volver
         </button>
         <button onClick={handleDescargarPDF} className="btn">
           Descargar PDF
@@ -189,7 +230,7 @@ export default function PresupuestoIT() {
         </button>
       </div>
 
-      <div className="card paper A4">
+      <form onSubmit={handleSubmit(onSubmit)} className="card paper A4">
         <h2 className="title">
           Presupuesto IT{" "}
           {codigo ? (
@@ -200,31 +241,35 @@ export default function PresupuestoIT() {
         <div
           style={{
             display: "flex",
-            gap: 12,
-            alignItems: "center",
+            flexDirection: "column",
+            gap: 4,
             marginBottom: 12,
           }}
         >
           <label>
             Cliente:{" "}
             <input
-              value={cliente}
-              onChange={(e) => setCliente(e.target.value)}
+              {...register("cliente")}
+              disabled={isViewMode}
+              className={errors.cliente ? "error" : ""}
             />
           </label>
+          {errors.cliente && <span style={{ color: "red", fontSize: "0.8rem" }}>{(errors.cliente as any).message}</span>}
         </div>
 
         <ItemsTableIT
           items={items}
-          onChange={setItems}
-          onRemoveItem={removeItem}
+          register={register}
+          remove={remove}
+          errors={errors}
+          readOnly={isViewMode}
         />
 
         <div className="right" style={{ marginTop: 12 }}>
           <div style={{ color: "#667085" }}>IVA no incluido</div>
           <strong>Total: {t.total.toFixed(2)}</strong>
         </div>
-      </div>
+      </form>
     </>
   );
 }

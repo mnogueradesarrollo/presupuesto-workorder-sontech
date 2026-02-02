@@ -1,11 +1,14 @@
 import { useMemo } from "react";
 import type { ItemPresupuesto, GarantiaUnidad } from "../types/presupuesto";
 import { lineTotal } from "../lib/calc";
+import type { UseFormRegister, FieldErrors } from "react-hook-form";
 
 type Props = {
   items: ItemPresupuesto[];
-  onChange: (items: ItemPresupuesto[]) => void;
-  onRemoveItem?: (id: string) => void;
+  register: UseFormRegister<any>;
+  remove: (index: number) => void;
+  errors: FieldErrors<any>;
+  readOnly?: boolean;
 };
 
 const UNIDADES: { label: string; value: GarantiaUnidad }[] = [
@@ -14,17 +17,11 @@ const UNIDADES: { label: string; value: GarantiaUnidad }[] = [
   { label: "Años", value: "anios" },
 ];
 
-export default function ItemsTableIT({ items, onChange, onRemoveItem }: Props) {
+export default function ItemsTableIT({ items, register, remove, errors, readOnly }: Props) {
   const total = useMemo(
     () => items.reduce((a, i) => a + lineTotal(i), 0),
     [items]
   );
-
-  const update = (idx: number, patch: Partial<ItemPresupuesto>) => {
-    const next = items.slice();
-    next[idx] = { ...next[idx], ...patch } as ItemPresupuesto;
-    onChange(next);
-  };
 
   const COLS = [
     "140px" /* Tipo */,
@@ -69,20 +66,18 @@ export default function ItemsTableIT({ items, onChange, onRemoveItem }: Props) {
           {items.map((it, idx) => (
             <tr key={it.id}>
               <td>
-                <select
-                  value={it.tipo}
-                  onChange={(e) => update(idx, { tipo: e.target.value as any })}
-                >
-                  <option>Producto</option>
-                  <option>Servicio</option>
-                  <option>Reparación</option>
+                <select {...register(`items.${idx}.tipo`)} disabled={readOnly}>
+                  <option value="Producto">Producto</option>
+                  <option value="Servicio">Servicio</option>
+                  <option value="Reparación">Reparación</option>
                 </select>
               </td>
 
               <td>
                 <input
-                  value={it.descripcion}
-                  onChange={(e) => update(idx, { descripcion: e.target.value })}
+                  {...register(`items.${idx}.descripcion`)}
+                  disabled={readOnly}
+                  className={(errors.items as any)?.[idx]?.descripcion ? "error" : ""}
                 />
               </td>
 
@@ -95,36 +90,34 @@ export default function ItemsTableIT({ items, onChange, onRemoveItem }: Props) {
                   }}
                 >
                   <input
-                    value={it.marca ?? ""}
+                    {...register(`items.${idx}.marca`)}
+                    disabled={readOnly}
                     placeholder="Marca"
-                    onChange={(e) => update(idx, { marca: e.target.value })}
                   />
                   <input
-                    value={it.modelo ?? ""}
+                    {...register(`items.${idx}.modelo`)}
+                    disabled={readOnly}
                     placeholder="Modelo"
-                    onChange={(e) => update(idx, { modelo: e.target.value })}
                   />
                 </div>
               </td>
 
               <td>
                 <input
-                  value={it.imeiSerie ?? ""}
-                  onChange={(e) => update(idx, { imeiSerie: e.target.value })}
+                  {...register(`items.${idx}.imeiSerie`)}
+                  disabled={readOnly}
                 />
               </td>
 
               <td>
                 <select
-                  value={it.estado ?? ""}
-                  onChange={(e) =>
-                    update(idx, { estado: e.target.value as any })
-                  }
+                  {...register(`items.${idx}.estado`)}
+                  disabled={readOnly}
                 >
                   <option value="">—</option>
-                  <option>Nuevo</option>
-                  <option>Usado</option>
-                  <option>Reacondicionado</option>
+                  <option value="Nuevo">Nuevo</option>
+                  <option value="Usado">Usado</option>
+                  <option value="Reacondicionado">Reacondicionado</option>
                 </select>
               </td>
 
@@ -139,16 +132,12 @@ export default function ItemsTableIT({ items, onChange, onRemoveItem }: Props) {
                   <input
                     type="number"
                     min={0}
-                    value={it.garantiaValor ?? 0}
-                    onChange={(e) =>
-                      update(idx, { garantiaValor: +e.target.value })
-                    }
+                    disabled={readOnly}
+                    {...register(`items.${idx}.garantiaValor`, { valueAsNumber: true })}
                   />
                   <select
-                    value={it.garantiaUnidad ?? "meses"}
-                    onChange={(e) =>
-                      update(idx, { garantiaUnidad: e.target.value as any })
-                    }
+                    {...register(`items.${idx}.garantiaUnidad`)}
+                    disabled={readOnly}
                   >
                     {UNIDADES.map((u) => (
                       <option key={u.value} value={u.value}>
@@ -163,8 +152,8 @@ export default function ItemsTableIT({ items, onChange, onRemoveItem }: Props) {
                 <input
                   type="number"
                   min={1}
-                  value={it.cantidad}
-                  onChange={(e) => update(idx, { cantidad: +e.target.value })}
+                  disabled={readOnly}
+                  {...register(`items.${idx}.cantidad`, { valueAsNumber: true })}
                 />
               </td>
 
@@ -180,25 +169,21 @@ export default function ItemsTableIT({ items, onChange, onRemoveItem }: Props) {
                     <input
                       type="number"
                       placeholder="Horas"
-                      value={it.horas ?? 0}
-                      onChange={(e) => update(idx, { horas: +e.target.value })}
+                      disabled={readOnly}
+                      {...register(`items.${idx}.horas`, { valueAsNumber: true })}
                     />
                     <input
                       type="number"
                       placeholder="Tarifa"
-                      value={it.tarifaHora ?? 0}
-                      onChange={(e) =>
-                        update(idx, { tarifaHora: +e.target.value })
-                      }
+                      disabled={readOnly}
+                      {...register(`items.${idx}.tarifaHora`, { valueAsNumber: true })}
                     />
                   </div>
                 ) : (
                   <input
                     type="number"
-                    value={it.precioUnitario}
-                    onChange={(e) =>
-                      update(idx, { precioUnitario: +e.target.value })
-                    }
+                    disabled={readOnly}
+                    {...register(`items.${idx}.precioUnitario`, { valueAsNumber: true })}
                   />
                 )}
               </td>
@@ -208,20 +193,19 @@ export default function ItemsTableIT({ items, onChange, onRemoveItem }: Props) {
                   type="number"
                   min={0}
                   max={100}
-                  value={it.descuentoPct ?? 0}
-                  onChange={(e) =>
-                    update(idx, { descuentoPct: +e.target.value })
-                  }
+                  disabled={readOnly}
+                  {...register(`items.${idx}.descuentoPct`, { valueAsNumber: true })}
                 />
               </td>
 
               <td style={{ textAlign: "right" }}>{lineTotal(it).toFixed(2)}</td>
 
               <td className="right">
-                {onRemoveItem && (
+                {!readOnly && (
                   <button
+                    type="button"
                     className="btn"
-                    onClick={() => onRemoveItem(it.id)}
+                    onClick={() => remove(idx)}
                     title="Eliminar"
                   >
                     🗑️

@@ -15,11 +15,13 @@
 * {
   box-sizing: border-box;
 }
+
 html,
 body,
 #root {
   height: 100%;
 }
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter,
@@ -46,6 +48,7 @@ body {
   border-bottom: 1px solid var(--border);
   background: var(--card);
 }
+
 .brand {
   display: flex;
   align-items: center;
@@ -54,21 +57,25 @@ body {
   color: inherit;
   font-weight: 600;
 }
+
 .links {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .link {
   padding: 8px 10px;
   border-radius: 8px;
   text-decoration: none;
   color: inherit;
 }
+
 .link.active {
   font-weight: 600;
   border: 1px solid var(--border);
 }
+
 .btn {
   padding: 8px 12px;
   border-radius: 10px;
@@ -78,11 +85,19 @@ body {
   background: #fff;
   box-shadow: var(--shadow);
 }
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+}
+
 .btn.primary {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
 }
+
 .btn.primary:hover {
   background: var(--primary-600);
 }
@@ -95,6 +110,7 @@ body {
   box-shadow: var(--shadow);
   padding: 16px;
 }
+
 .toolbar {
   display: flex;
   gap: 10px;
@@ -105,29 +121,51 @@ body {
 .table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* fuerza a respetar <colgroup> */
+  table-layout: fixed;
+  /* fuerza a respetar <colgroup> */
   font-size: 14px;
 }
+
 .table th,
 .table td {
-  padding: 10px;
+  padding: 12px 16px;
+  text-align: center;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
-.table thead th {
-  background: #f2f4f7;
-  font-weight: 600;
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
 }
-.table tfoot td {
-  background: #fafbfc;
+
+.table th:last-child,
+.table td:last-child {
+  text-align: right;
+}
+
+.table td:last-child {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  display: inline-block;
 }
 
 /* Form controls dentro de la tabla */
 .table input,
 .table select {
   width: 100%;
-  min-width: 0; /* evita overflow en table-layout: fixed */
+  min-width: 0;
   height: 36px;
   padding: 6px 10px;
   border: 1px solid var(--border);
@@ -135,22 +173,71 @@ body {
   background: #fff;
   color: inherit;
   outline: none;
-  appearance: auto; /* asegura el render nativo del <select> */
+  appearance: auto;
 }
+
 .table input:focus,
 .table select:focus {
   border-color: #cbd5e1;
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
 }
-.table td:last-child,
-.table th:last-child {
-  text-align: right;
+
+input.error,
+select.error {
+  border-color: #f04438 !important;
+  box-shadow: 0 0 0 3px rgba(240, 68, 56, 0.12) !important;
+}
+
+.status-borrador {
+  background: #f2f4f7;
+  color: #344054;
+}
+
+.status-aceptado {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.status-anulado {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.status-pendiente {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.status-en_proceso {
+  background: #eff8ff;
+  color: #175cd3;
+}
+
+.status-completado {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.pay-impago {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.pay-parcial {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.pay-pagado {
+  background: #ecfdf3;
+  color: #027a48;
 }
 
 .table-responsive {
   width: 100%;
   overflow: auto;
 }
+
 .paper.A4 {
   max-width: 1100px;
   margin: 0 auto;
@@ -163,9 +250,11 @@ body {
   text-align: center;
   margin: 6px 0 14px;
 }
+
 .right {
   text-align: right;
 }
+
 .print-hide {
   display: block;
 }
@@ -175,16 +264,19 @@ body {
   body {
     background: #fff;
   }
+
   .nav,
   .toolbar,
   .print-hide {
     display: none !important;
   }
+
   .card {
     box-shadow: none;
     border: none;
     padding: 0;
   }
+
   .table th,
   .table td {
     font-size: 12px;
