@@ -146,25 +146,14 @@ const Login: React.FC = () => {
                         src={logoCircle}
                         alt="Sontech"
                         style={{
-                            width: '120px',
-                            height: '120px',
+                            width: '200px',
+                            height: '200px',
                             borderRadius: '50%',
                             border: '4px solid rgba(255, 255, 255, 0.3)',
                             boxShadow: '0 15px 35px rgba(0,0,0,0.4)',
                             objectFit: 'cover'
                         }}
                     />
-                </div>
-
-                <div className="w-100 mb-5">
-                    <h1 className="fw-bold text-white mb-2" style={{ fontSize: '2.8rem', letterSpacing: '-1.5px' }}>
-                        Sontech
-                    </h1>
-                    <div className="d-flex justify-content-center">
-                        <span className="badge bg-white text-dark rounded-pill px-3 py-2 fw-bold" style={{ opacity: 0.8, fontSize: '0.7rem', letterSpacing: '2px' }}>
-                            REPARAMOS TU MUNDO
-                        </span>
-                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="form-container">
