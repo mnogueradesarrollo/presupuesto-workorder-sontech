@@ -37,7 +37,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center px-3 py-5"
+        <div className="d-flex align-items-center justify-content-center p-0"
             style={{
                 background: 'radial-gradient(circle at top left, #1a2a6c, #b21f1f, #fdbb2d)',
                 backgroundSize: '400% 400%',
@@ -45,9 +45,11 @@ const Login: React.FC = () => {
                 position: 'fixed',
                 top: 0,
                 left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 1050
+                width: '100vw',
+                height: '100vh',
+                zIndex: 2000,
+                overflow: 'hidden',
+                margin: 0
             }}>
             <style>
                 {`
