@@ -218,6 +218,7 @@ export async function generarPresupuestoPDF(p: PresupuestoPDF) {
 export async function generarOrdenPDF(o: OrdenPDF) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
   const M = 40;
 
   // ==== Header ====
