@@ -37,20 +37,23 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="d-flex align-items-center justify-content-center p-0"
-            style={{
-                background: 'radial-gradient(circle at top left, #1a2a6c, #b21f1f, #fdbb2d)',
-                backgroundSize: '400% 400%',
-                animation: 'gradientBG 15s ease infinite',
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100vh',
-                zIndex: 2000,
-                overflow: 'hidden',
-                margin: 0
-            }}>
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'radial-gradient(circle at top left, #1a2a6c, #b21f1f, #fdbb2d)',
+            backgroundSize: '400% 400%',
+            animation: 'gradientBG 15s ease infinite',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 9999,
+            overflow: 'hidden',
+            margin: 0,
+            padding: '20px'
+        }}>
             <style>
                 {`
           @keyframes gradientBG {
