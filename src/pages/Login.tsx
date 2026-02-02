@@ -20,15 +20,15 @@ const Login: React.FC = () => {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            toast.success('¡Bienvenido al sistema!');
+            toast.success('¡Acceso concedido!');
             navigate(from, { replace: true });
         } catch (error: any) {
-            console.error('Error en el acceso:', error);
-            let message = 'Error de autenticación';
+            console.error('Error de acceso:', error);
+            let message = 'Error al entrar';
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                message = 'Las credenciales no son válidas';
+                message = 'Credenciales inválidas';
             } else if (error.code === 'auth/too-many-requests') {
-                message = 'Acceso bloqueado temporalmente por demasiados intentos.';
+                message = 'Acceso bloqueado por seguridad. Intenta más tarde.';
             }
             toast.error(message);
         } finally {
@@ -50,7 +50,8 @@ const Login: React.FC = () => {
             width: '100%',
             height: '100%',
             zIndex: 9999,
-            overflow: 'hidden',
+            overflowX: 'hidden',
+            overflowY: 'auto',
             margin: 0,
             padding: '20px'
         }}>
@@ -62,132 +63,163 @@ const Login: React.FC = () => {
             100% { background-position: 0% 50%; }
           }
           .glass-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 2.5rem;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Alineación horizontal de hijos */
+            padding: 3.5rem 2rem;
+            text-align: center;
+          }
+          @media (max-width: 480px) {
+            .glass-card {
+                padding: 2.5rem 1.5rem;
+                border-radius: 2rem;
+            }
+            h1 { font-size: 2.2rem !important; }
+          }
+          .form-container {
+            width: 100%;
+          }
+          .form-group-premium {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            text-align: left; /* Etiquetas a la izquierda por usabilidad */
           }
           .form-control-premium {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: white !important;
-            border-radius: 1rem;
-            padding: 0.75rem 1rem;
+            border-radius: 1.25rem;
+            padding: 1.1rem 1.3rem;
             transition: all 0.3s ease;
+            width: 100%;
+            display: block;
           }
           .form-control-premium:focus {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.18);
             border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+            outline: none;
           }
-          .form-control-premium::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-          }
-          .btn-premium {
+          .btn-animate {
             background: linear-gradient(90deg, #ff8a00, #e52e71);
             border: none;
             color: white;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 1rem;
-            border-radius: 1rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            letter-spacing: 2px;
+            padding: 1.2rem;
+            border-radius: 1.25rem;
+            width: 100%;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
           }
-          .btn-premium:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(229, 46, 113, 0.3);
-            background: linear-gradient(90deg, #ff9a00, #f52e71);
+          .btn-animate:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(229, 46, 113, 0.4);
+            filter: brightness(1.1);
           }
-          .btn-premium:active {
+          .btn-animate:active {
             transform: translateY(0);
           }
-          .floating-icon {
-            animation: float 4s ease-in-out infinite;
-          }
-          @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
+          .logo-wrapper {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            width: 100%;
           }
         `}
             </style>
 
-            <div className="glass-card p-4 p-md-5" style={{ maxWidth: '450px', width: '100%' }}>
-                <div className="text-center mb-5 floating-icon">
+            <div className="glass-card">
+                <div className="logo-wrapper">
                     <img
                         src={logoCircle}
-                        alt="Sontech Logo"
-                        className="img-fluid rounded-circle shadow-lg mb-4"
-                        style={{ width: '120px', height: '120px', objectFit: 'cover', border: '4px solid rgba(255, 255, 255, 0.3)' }}
+                        alt="Sontech"
+                        style={{
+                            width: '120px',
+                            height: '120px',
+                            borderRadius: '50%',
+                            border: '4px solid rgba(255, 255, 255, 0.3)',
+                            boxShadow: '0 15px 35px rgba(0,0,0,0.4)',
+                            objectFit: 'cover'
+                        }}
                     />
-                    <h1 className="fw-bold text-white mb-1" style={{ fontSize: '2.5rem', letterSpacing: '-1px' }}>Sontech</h1>
-                    <div className="badge bg-white text-dark rounded-pill px-3 py-2 fw-bold" style={{ opacity: 0.8 }}>
-                        REPARAMOS TU MUNDO
+                </div>
+
+                <div className="w-100 mb-5">
+                    <h1 className="fw-bold text-white mb-2" style={{ fontSize: '2.8rem', letterSpacing: '-1.5px' }}>
+                        Sontech
+                    </h1>
+                    <div className="d-flex justify-content-center">
+                        <span className="badge bg-white text-dark rounded-pill px-3 py-2 fw-bold" style={{ opacity: 0.8, fontSize: '0.7rem', letterSpacing: '2px' }}>
+                            REPARAMOS TU MUNDO
+                        </span>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="form-label text-white small fw-bold opacity-75 ms-2 uppercase">Usuario / Email</label>
-                        <div className="input-group">
-                            <span className="input-group-text bg-transparent border-0 text-white opacity-50">
-                                <i className="bi bi-person-fill"></i>
-                            </span>
-                            <input
-                                type="email"
-                                className="form-control form-control-premium"
-                                placeholder="tu@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
+                <form onSubmit={handleSubmit} className="form-container">
+                    <div className="form-group-premium">
+                        <label className="text-white small fw-bold opacity-75 ms-3 mb-2 d-block text-uppercase" style={{ letterSpacing: '1px' }}>
+                            Usuario / Email
+                        </label>
+                        <input
+                            type="email"
+                            className="form-control-premium"
+                            placeholder="nombre@ejemplo.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
                     </div>
 
-                    <div className="mb-5">
-                        <label className="form-label text-white small fw-bold opacity-75 ms-2 uppercase">Contraseña</label>
-                        <div className="input-group">
-                            <span className="input-group-text bg-transparent border-0 text-white opacity-50">
-                                <i className="bi bi-lock-fill"></i>
-                            </span>
-                            <input
-                                type="password"
-                                className="form-control form-control-premium"
-                                placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
+                    <div className="form-group-premium">
+                        <label className="text-white small fw-bold opacity-75 ms-3 mb-2 d-block text-uppercase" style={{ letterSpacing: '1px' }}>
+                            Contraseña
+                        </label>
+                        <input
+                            type="password"
+                            className="form-control-premium"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                     </div>
 
                     <button
                         type="submit"
-                        className="btn btn-premium w-100 shadow-lg"
+                        className="btn-animate"
                         disabled={loading}
                     >
                         {loading ? (
                             <div className="d-flex align-items-center justify-content-center">
-                                <span className="spinner-border spinner-border-sm me-3" role="status" aria-hidden="true"></span>
-                                Accediendo...
+                                <span className="spinner-border spinner-border-sm me-3" role="status"></span>
+                                Entrando...
                             </div>
                         ) : (
-                            'Ingresar al Panel'
+                            'Iniciar Sesión'
                         )}
                     </button>
                 </form>
 
-                <div className="mt-5 text-center text-white opacity-50 small">
-                    <p className="mb-0">© 2026 Sontech Gestor v2.0</p>
-                    <div className="mt-2">
-                        <span className="mx-2">Hardware</span>
-                        <span className="mx-2">•</span>
-                        <span className="mx-2">Software</span>
-                        <span className="mx-2">•</span>
-                        <span className="mx-2">Soporte</span>
+                <div className="mt-5 text-white opacity-40 small w-100">
+                    <p className="mb-2">© 2026 Sontech Gestor v2.5</p>
+                    <div className="d-flex justify-content-center gap-3">
+                        <span>Hardware</span>
+                        <span>•</span>
+                        <span>Software</span>
+                        <span>•</span>
+                        <span>Soporte</span>
                     </div>
                 </div>
             </div>
