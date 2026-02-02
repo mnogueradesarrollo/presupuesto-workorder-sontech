@@ -1,10 +1,16 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import logoUrl from "../assets/logotipo-sontech.png";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // No mostrar navbar en el login
+  if (location.pathname === '/login') {
+    return null;
+  }
 
   const handleLogout = async () => {
     await logout();
