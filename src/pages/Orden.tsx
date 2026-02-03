@@ -232,182 +232,265 @@ export default function OrdenPage() {
   };
 
 
-  if (!orden) return <div className="container">Cargando…</div>;
+  if (!orden) return <div className="container py-5 text-center">Cargando orden...</div>;
 
   return (
-    <div className="container">
-      <div className="toolbar print-hide">
-        <button onClick={() => navigate(-1)} className="btn">← Volver</button>
-        <button onClick={handleSubmit(onSubmit, (err) => {
-          console.log("Validation errors:", err);
-          toast.error("Revisá los errores en el formulario");
-        })} className="btn primary" disabled={saving}>
-          {saving ? "Guardando..." : "Guardar Cambios"}
+    <div className="container py-5">
+      {/* Header de la Página */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="m-0 fw-bold text-gradient">
+          Orden de Trabajo
+          <span className="ms-2 text-muted small fw-normal">({orden.codigo || id?.slice(0, 8)})</span>
+        </h2>
+        <button onClick={() => navigate(-1)} className="btn btn-light">
+          <i className="bi bi-arrow-left me-1"></i> Volver
         </button>
-        <button onClick={handlePagar} className="btn">Registrar Pago</button>
-        <button onClick={() => handleImprimir()} className="btn">Imprimir Informe</button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="card paper A4">
-        <h2 className="title">Orden de Trabajo #{id?.slice(0, 8)}</h2>
+      <div className="row">
+        <div className="col-lg-10 mx-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="paper-container mb-4 shadow-lg">
+            {/* Cabecera Sontech */}
+            <div className="d-flex justify-content-between align-items-center mb-5">
+              <img src={logoUrl} alt="Sontech" width={180} />
+              <div className="text-end">
+                <span className={`badge mb-2 status-${orden.status}`}>
+                  {orden.status.replace('_', ' ')}
+                </span>
+                <h1 className="h4 mb-0 fw-bold text-primary">ORDEN DE TRABAJO</h1>
+                <p className="text-muted small mb-0 fw-bold">OT-{orden.codigo || id?.slice(0, 8)}</p>
+              </div>
+            </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
-          <div>
-            <p><strong>Cliente:</strong> {orden.cliente}</p>
-            <p><strong>Equipo:</strong> {orden.equipo?.marca} {orden.equipo?.modelo}</p>
-            <p><strong>IMEI/Serie:</strong> {orden.equipo?.imeiSerie || '—'}</p>
-          </div>
-          <div className="right">
-            <p><strong>Estado:</strong>
-              <select {...register("status")} style={{ marginLeft: 10, padding: '4px 8px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                <option value="pendiente">Pendiente</option>
-                <option value="en_progreso">En Proceso</option>
-                <option value="completado">Completado</option>
-                <option value="anulado">Anulado</option>
-              </select>
-            </p>
-            <p><strong>Total Final:</strong> ${(orden.totalFinal ?? orden.totalEstimado ?? 0).toFixed(2)}</p>
-            <p><strong>Pagado:</strong> ${(orden.pagado ?? 0).toFixed(2)}</p>
-            <p><strong>Saldo:</strong> <span style={{ color: (orden.saldo ?? 0) > 0 ? 'red' : 'green', fontWeight: 'bold' }}>${(orden.saldo ?? 0).toFixed(2)}</span></p>
+            {/* Info Cliente & Equipo */}
+            <div className="row mb-5 g-4">
+              <div className="col-md-6">
+                <div className="bg-light p-3 rounded-3 h-100 border-start border-primary border-4">
+                  <label className="x-small fw-bold text-muted mb-2 d-block text-uppercase">Información del Cliente</label>
+                  <div className="fs-5 fw-bold mb-1">{orden.cliente}</div>
+                  <div className="text-muted small">ID de seguimiento: {id?.slice(0, 12)}</div>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="bg-light p-3 rounded-3 h-100">
+                  <label className="x-small fw-bold text-muted mb-2 d-block text-uppercase">Equipo en Servicio</label>
+                  <div className="fw-bold">{orden.equipo?.marca} {orden.equipo?.modelo}</div>
+                  <div className="text-muted small">SN/IMEI: {orden.equipo?.imeiSerie || 'N/A'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Resumen Financiero Rápido */}
+            <div className="info-box-premium mb-5">
+              <div className="stats-grid-compact">
+                <div className="stat-item">
+                  <label>Total Final</label>
+                  <div className="value">${(orden.totalFinal ?? orden.totalEstimado ?? 0).toLocaleString()}</div>
+                </div>
+                <div className="stat-item">
+                  <label>Pagado</label>
+                  <div className="value text-success">${(orden.pagado ?? 0).toLocaleString()}</div>
+                </div>
+                <div className="stat-item">
+                  <label>Saldo Pendiente</label>
+                  <div className={`value ${(orden.saldo ?? 0) > 0 ? 'balance-negative' : 'balance-positive'}`}>
+                    ${(orden.saldo ?? 0).toLocaleString()}
+                  </div>
+                </div>
+                <div className="stat-item">
+                  <label>Cambiar Estado</label>
+                  <select {...register("status")} className="form-control form-control-sm mt-1">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_progreso">En Proceso</option>
+                    <option value="completado">Completado</option>
+                    <option value="anulado">Anulado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <hr className="my-5 opacity-10" />
+
+            {/* Diagnóstico & Notas */}
+            <div className="row mb-5">
+              <div className="col-md-12 mb-4">
+                <label className="small fw-bold text-muted text-uppercase mb-2 d-block">Informe Técnico / Diagnóstico</label>
+                <textarea
+                  {...register("diagnostico")}
+                  rows={4}
+                  className="form-control w-100"
+                  placeholder="Detalla el problema encontrado y la solución técnica..."
+                />
+              </div>
+              <div className="col-md-12">
+                <label className="small fw-bold text-muted text-uppercase mb-2 d-block">Notas para el Cliente (Informe final)</label>
+                <textarea
+                  {...register("notasEntrega")}
+                  rows={2}
+                  className="form-control w-100"
+                  placeholder="Recomendaciones o aclaraciones para el cliente al entregar el equipo..."
+                />
+              </div>
+            </div>
+
+            {/* Trabajos Realizados */}
+            <div className="mb-5">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="h6 fw-bold text-uppercase m-0">Trabajos Realizados</h3>
+                <button type="button" onClick={() => appendTrabajo({ id: crypto.randomUUID(), descripcion: '', precio: 0 })} className="btn btn-soft-primary btn-sm">
+                  <i className="bi bi-plus-circle me-1"></i> Agregar Trabajo
+                </button>
+              </div>
+
+              <div className="items-container-vertical">
+                {trabajoFields.map((field, index) => (
+                  <div key={field.id} className="item-card p-3">
+                    <div className="row g-3">
+                      <div className="col-md-7">
+                        <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Descripción</label>
+                        <input
+                          {...register(`trabajos.${index}.descripcion`)}
+                          placeholder="Ej: Rebalanceo de carga, Soldadura..."
+                          className={`form-control form-control-sm ${(errors.trabajos as any)?.[index]?.descripcion ? "is-invalid" : ""}`}
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Horas</label>
+                        <input type="number" {...register(`trabajos.${index}.horas`)} className="form-control form-control-sm" />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Precio</label>
+                        <input type="number" {...register(`trabajos.${index}.precio`)} className="form-control form-control-sm" />
+                      </div>
+                      <div className="col-md-1 d-flex align-items-end">
+                        <button type="button" onClick={() => removeTrabajo(index)} className="btn-action btn-soft-danger ms-auto">
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {trabajoFields.length === 0 && <div className="text-center py-4 text-muted small bg-light rounded-3 border-grow">No hay trabajos registrados aún</div>}
+              </div>
+            </div>
+
+            {/* Repuestos / Materiales */}
+            <div className="mb-5">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="h6 fw-bold text-uppercase m-0">Repuestos & Materiales</h3>
+                <button type="button" onClick={() => appendRepuesto({ id: crypto.randomUUID(), descripcion: '', cantidad: 1, precio: 0 })} className="btn btn-soft-primary btn-sm">
+                  <i className="bi bi-plus-circle me-1"></i> Agregar Repuesto
+                </button>
+              </div>
+
+              <div className="items-container-vertical">
+                {repuestoFields.map((field, index) => (
+                  <div key={field.id} className="item-card p-3">
+                    <div className="row g-3">
+                      <div className="col-md-7">
+                        <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Repuesto / Material</label>
+                        <input
+                          {...register(`repuestos.${index}.descripcion`)}
+                          placeholder="Ej: Pantalla OLED, Tornillería..."
+                          className={`form-control form-control-sm ${(errors.repuestos as any)?.[index]?.descripcion ? "is-invalid" : ""}`}
+                        />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Cant.</label>
+                        <input type="number" {...register(`repuestos.${index}.cantidad`)} className="form-control form-control-sm" />
+                      </div>
+                      <div className="col-md-2">
+                        <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Precio Unit.</label>
+                        <input type="number" {...register(`repuestos.${index}.precio`)} className="form-control form-control-sm" />
+                      </div>
+                      <div className="col-md-1 d-flex align-items-end">
+                        <button type="button" onClick={() => removeRepuesto(index)} className="btn-action btn-soft-danger ms-auto">
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {repuestoFields.length === 0 && <div className="text-center py-4 text-muted small bg-light rounded-3 border-grow">No hay repuestos registrados aún</div>}
+              </div>
+            </div>
+
+            {/* Historial de Pagos */}
+            <div className="mb-4">
+              <h3 className="h6 fw-bold text-uppercase mb-3">Historial de Pagos</h3>
+              <div className="table-responsive bg-light rounded-3 p-2">
+                <table className="table table-sm table-borderless m-0">
+                  <thead className="x-small text-muted text-uppercase">
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Método</th>
+                      <th className="text-end">Monto</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody className="small">
+                    {pagos.map((p) => (
+                      <tr key={p.id}>
+                        <td>{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td><span className="badge bg-white text-dark border">{p.metodo}</span></td>
+                        <td className="text-end fw-bold">${p.monto.toLocaleString()}</td>
+                        <td className="text-end">
+                          <button type="button" onClick={() => handleEliminarPago(p.id)} className="btn-action btn-soft-danger btn-xs ms-auto" style={{ width: 24, height: 24 }}>
+                            <i className="bi bi-x"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {pagos.length === 0 && <tr><td colSpan={4} className="text-center py-3 text-muted">No hay pagos registrados</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Referencia Presupuesto Original */}
+            {orden.itemsPresupuesto && orden.itemsPresupuesto.length > 0 && (
+              <div className="info-box-premium mt-5">
+                <label className="x-small fw-bold text-muted text-uppercase d-block mb-2">Base del Presupuesto Original</label>
+                <div className="row row-cols-1 row-cols-md-2 g-2">
+                  {orden.itemsPresupuesto.map((it, idx) => (
+                    <div key={idx} className="col">
+                      <div className="small bg-white p-2 rounded border-start border-2 border-info d-flex justify-content-between">
+                        <span className="text-truncate" style={{ maxWidth: '70%' }}>{it.descripcion}</span>
+                        <span className="fw-bold">${(it.precioUnitario ?? (it.horas! * it.tarifaHora!)).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </form>
+
+          {/* Acciones Finales (FIJAS AL FONDO) */}
+          <div className="sticky-action-bar print-hide">
+            <button type="button" onClick={() => navigate(-1)} className="btn btn-light text-muted me-auto">
+              Volver
+            </button>
+            <button type="button" onClick={handlePagar} className="btn btn-soft-success">
+              <i className="bi bi-cash-stack me-1"></i> Registrar Pago
+            </button>
+            <button type="button" onClick={handleImprimir} className="btn btn-soft-info">
+              <i className="bi bi-file-earmark-pdf me-1"></i> Informe PDF
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              className="btn btn-primary px-5"
+              disabled={saving}
+            >
+              {saving ? (
+                <><span className="spinner-border spinner-border-sm me-2"></span>Gaurdando...</>
+              ) : (
+                <><i className="bi bi-check-lg me-1"></i> Guardar Cambios</>
+              )}
+            </button>
           </div>
         </div>
-
-        <hr />
-
-        <div style={{ marginBottom: 20 }}>
-          <label><strong>Informe Técnico / Diagnóstico:</strong></label>
-          <textarea
-            {...register("diagnostico")}
-            rows={4}
-            style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid var(--border)', marginTop: 8, fontFamily: 'inherit' }}
-            placeholder="Escribe aquí el informe técnico..."
-          />
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <label><strong>Notas de Entrega (Se muestran al cliente):</strong></label>
-          <textarea
-            {...register("notasEntrega")}
-            rows={2}
-            style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid var(--border)', marginTop: 8, fontFamily: 'inherit' }}
-            placeholder="Notas adicionales para el cliente..."
-          />
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h3 style={{ margin: 0 }}>Trabajos Realizados</h3>
-            <button type="button" onClick={() => appendTrabajo({ id: crypto.randomUUID(), descripcion: '' })} className="btn">+ Agregar Trabajo</button>
-          </div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Descripción del trabajo</th>
-                <th style={{ width: 100 }}>Horas</th>
-                <th style={{ width: 120 }}>Precio</th>
-                <th style={{ width: 60 }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {trabajoFields.map((field, index) => (
-                <tr key={field.id}>
-                  <td>
-                    <input {...register(`trabajos.${index}.descripcion`)} placeholder="Ej: Cambio de pantalla" className={(errors.trabajos as any)?.[index]?.descripcion ? "error" : ""} />
-                  </td>
-                  <td>
-                    <input type="number" {...register(`trabajos.${index}.horas`)} />
-                  </td>
-                  <td>
-                    <input type="number" {...register(`trabajos.${index}.precio`)} />
-                  </td>
-                  <td className="right">
-                    <button type="button" onClick={() => removeTrabajo(index)} className="btn">🗑️</button>
-                  </td>
-                </tr>
-              ))}
-              {trabajoFields.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--muted)' }}>No hay trabajos registrados</td></tr>}
-            </tbody>
-          </table>
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h3 style={{ margin: 0 }}>Repuestos / Materiales</h3>
-            <button type="button" onClick={() => appendRepuesto({ id: crypto.randomUUID(), descripcion: '', cantidad: 1 })} className="btn">+ Agregar Repuesto</button>
-          </div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Repuesto</th>
-                <th style={{ width: 100 }}>Cant.</th>
-                <th style={{ width: 120 }}>Precio Unit.</th>
-                <th style={{ width: 60 }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {repuestoFields.map((field, index) => (
-                <tr key={field.id}>
-                  <td>
-                    <input {...register(`repuestos.${index}.descripcion`)} placeholder="Ej: Pantalla iPhone 11" className={(errors.repuestos as any)?.[index]?.descripcion ? "error" : ""} />
-                  </td>
-                  <td>
-                    <input type="number" {...register(`repuestos.${index}.cantidad`)} />
-                  </td>
-                  <td>
-                    <input type="number" {...register(`repuestos.${index}.precio`)} />
-                  </td>
-                  <td className="right">
-                    <button type="button" onClick={() => removeRepuesto(index)} className="btn">🗑️</button>
-                  </td>
-                </tr>
-              ))}
-              {repuestoFields.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--muted)' }}>No hay repuestos registrados</td></tr>}
-            </tbody>
-          </table>
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h3 style={{ margin: 0 }}>Historial de Pagos</h3>
-          </div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Método</th>
-                <th className="right">Monto</th>
-                <th style={{ width: 60 }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {pagos.map((p) => (
-                <tr key={p.id}>
-                  <td>{new Date(p.createdAt).toLocaleString()}</td>
-                  <td>{p.metodo}</td>
-                  <td className="right">${p.monto.toFixed(2)}</td>
-                  <td className="right">
-                    <button type="button" onClick={() => handleEliminarPago(p.id)} className="btn">🗑️</button>
-                  </td>
-                </tr>
-              ))}
-              {pagos.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--muted)' }}>No hay pagos registrados</td></tr>}
-            </tbody>
-          </table>
-        </div>
-
-        {orden.itemsPresupuesto && orden.itemsPresupuesto.length > 0 && (
-          <div style={{ marginTop: 30, padding: 15, background: '#f8fafc', borderRadius: 12, border: '1px dashed #cbd5e1' }}>
-            <h4 style={{ marginTop: 0 }}>Referencia del Presupuesto Original</h4>
-            <ul style={{ fontSize: '0.9rem', color: '#475569' }}>
-              {orden.itemsPresupuesto.map((it, idx) => (
-                <li key={idx}>
-                  {it.descripcion} - {it.cantidad}x ${it.precioUnitario?.toFixed(2) || (it.horas! * it.tarifaHora!).toFixed(2)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </form>
+      </div>
     </div>
   );
 }

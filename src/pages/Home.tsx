@@ -70,6 +70,8 @@ export default function Home() {
     }
   };
 
+  // Función para anular presupuesto (si se requiere en el futuro)
+  /*
   const onAnular = async (id: string) => {
     if (!confirm("¿Anular este presupuesto?")) return;
     try {
@@ -86,6 +88,7 @@ export default function Home() {
       setBusyId(null);
     }
   };
+  */
 
   const filteredPres = useMemo(() => {
     return pres.filter((p) => {
@@ -107,193 +110,201 @@ export default function Home() {
   }, [ords, search]);
 
   return (
-    <div className="container" style={{ padding: 0 }}>
-      <div className="card" style={{ marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Buscar cliente o código</label>
-          <input
-            type="text"
-            placeholder="Ej: Juan Perez o A-001..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)' }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>Estado Presupuesto</label>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'white' }}
-          >
-            <option value="todos">Todos los estados</option>
-            <option value="borrador">Borrador</option>
-            <option value="aceptado">Aceptado</option>
-            <option value="anulado">Anulado</option>
-          </select>
+    <div className="container">
+      <div className="card mb-4">
+        <div className="d-flex gap-3 align-items-center flex-wrap">
+          <div style={{ flex: 1, minWidth: '240px' }}>
+            <label className="d-block small text-muted fw-bold mb-1">BUSCAR</label>
+            <input
+              type="text"
+              placeholder="Nombre del cliente, código o email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="form-control"
+            />
+          </div>
+          <div style={{ minWidth: '200px' }}>
+            <label className="d-block small text-muted fw-bold mb-1">ESTADO</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="form-control"
+            >
+              <option value="todos">Todos los estados</option>
+              <option value="borrador">Borrador</option>
+              <option value="aceptado">Aceptado</option>
+              <option value="anulado">Anulado</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* === Presupuestos === */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <h2 className="title">Presupuestos</h2>
+      <div className="card mb-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h2 className="fs-5 m-0">Presupuestos Recientes</h2>
+          <button className="btn btn-sm btn-light" onClick={() => navigate('/presupuesto-it')}>
+            + Nuevo
+          </button>
+        </div>
+
         {loadingPres ? (
-          <p>Cargando…</p>
+          <p className="text-muted text-center py-4">Cargando presupuestos...</p>
         ) : (
-          <table className="table">
-            <colgroup>
-              <col style={{ width: "110px" }} />
-              <col />
-              <col style={{ width: "110px" }} />
-              <col style={{ width: "100px" }} />
-              <col style={{ width: "100px" }} />
-              <col style={{ width: "240px" }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Cliente</th>
-                <th>Fecha</th>
-                <th className="right">Total</th>
-                <th>Estado</th>
-                <th className="right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPres.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.codigo || "—"}</td>
-                  <td>{p.cliente}</td>
-                  <td>{p.fecha?.slice(0, 10)}</td>
-                  <td className="right">${p.total?.toFixed(2)}</td>
-                  <td>
-                    <span className={`badge status-${p.status}`}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="right">
-                    <button
-                      className="btn btn-sm"
-                      onClick={() => navigate(`/presupuesto-it?id=${p.id}&view=true`)}
-                      title="Ver Presupuesto"
-                    >
-                      👁️
-                    </button>{" "}
-                    <button
-                      className="btn btn-sm"
-                      onClick={() => onEditar(p.id)}
-                      disabled={busyId === p.id}
-                      title="Editar"
-                    >
-                      ✏️
-                    </button>{" "}
-                    <button
-                      className="btn btn-sm"
-                      disabled={
-                        busyId === p.id ||
-                        p.status === "aceptado" ||
-                        p.status === "anulado"
-                      }
-                      onClick={() => onAceptar(p.id, p.cliente)}
-                    >
-                      Aceptar
-                    </button>{" "}
-                    <button
-                      className="btn btn-sm"
-                      disabled={busyId === p.id || p.status === "anulado"}
-                      onClick={() => onAnular(p.id)}
-                    >
-                      Anular
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredPres.length === 0 && (
+          <div className="table-responsive">
+            <table className="table">
+              <colgroup>
+                <col style={{ width: "110px" }} />
+                <col />
+                <col style={{ width: "110px" }} />
+                <col style={{ width: "100px" }} />
+                <col style={{ width: "100px" }} />
+                <col style={{ width: "180px" }} />
+              </colgroup>
+              <thead>
                 <tr>
-                  <td
-                    colSpan={6}
-                    style={{ textAlign: "center", color: "#666" }}
-                  >
-                    {search || statusFilter !== "todos" ? "No se encontraron resultados." : "No hay presupuestos aún."}
-                  </td>
+                  <th>Código</th>
+                  <th>Cliente</th>
+                  <th>Fecha</th>
+                  <th className="text-center">Total</th>
+                  <th className="text-center">Estado</th>
+                  <th className="text-center">Acciones</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredPres.map((p) => (
+                  <tr key={p.id}>
+                    <td className="fw-medium">{p.codigo || "—"}</td>
+                    <td>{p.cliente}</td>
+                    <td>{p.fecha?.slice(0, 10)}</td>
+                    <td className="text-center text-nowrap">${p.total?.toFixed(2)}</td>
+                    <td className="text-center">
+                      <span className={`badge status-${p.status}`}>
+                        {p.status}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <div className="d-flex justify-content-center gap-2">
+                        <button
+                          className="btn-action btn-soft-info"
+                          onClick={() => navigate(`/presupuesto-it?id=${p.id}&view=true`)}
+                          title="Ver Presupuesto"
+                        >
+                          <i className="bi bi-eye"></i>
+                        </button>
+                        <button
+                          className="btn-action btn-soft-primary"
+                          onClick={() => onEditar(p.id)}
+                          disabled={busyId === p.id}
+                          title="Editar"
+                        >
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button
+                          className="btn-action btn-soft-success"
+                          disabled={
+                            busyId === p.id ||
+                            p.status === "aceptado" ||
+                            p.status === "anulado"
+                          }
+                          onClick={() => onAceptar(p.id, p.cliente)}
+                          title="Aceptar"
+                        >
+                          <i className="bi bi-check-lg"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredPres.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="text-center text-muted py-4"
+                    >
+                      {search || statusFilter !== "todos" ? "No se encontraron resultados." : "No hay presupuestos aún."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* === Órdenes === */}
       <div className="card">
-        <h2 className="title">Órdenes de trabajo</h2>
+        <h2 className="fs-5 mb-3">Órdenes de Trabajo</h2>
         {loadingOrd ? (
-          <p>Cargando…</p>
+          <p className="text-muted text-center py-4">Cargando órdenes...</p>
         ) : (
-          <table className="table">
-            <colgroup>
-              <col style={{ width: "100px" }} />
-              <col />
-              <col style={{ width: "110px" }} />
-              <col style={{ width: "100px" }} />
-              <col style={{ width: "90px" }} />
-              <col style={{ width: "90px" }} />
-              <col style={{ width: "90px" }} />
-              <col style={{ width: "80px" }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>Orden</th>
-                <th>Cliente</th>
-                <th>Estado</th>
-                <th>Pago</th>
-                <th className="right">Total</th>
-                <th className="right">Pagado</th>
-                <th className="right">Saldo</th>
-                <th className="right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrds.map((o) => (
-                <tr key={o.id}>
-                  <td>{o.codigo || o.id.slice(0, 8)}</td>
-                  <td>{o.cliente}</td>
-                  <td>
-                    <span className={`badge status-${o.status}`}>
-                      {o.status}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`badge pay-${o.payStatus}`}>
-                      {o.payStatus}
-                    </span>
-                  </td>
-                  <td className="right">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</td>
-                  <td className="right">${(o.pagado ?? 0).toFixed(2)}</td>
-                  <td className="right" style={{ color: (o.saldo ?? 0) > 0 ? 'red' : 'green', fontWeight: 'bold' }}>
-                    ${(o.saldo ?? 0).toFixed(2)}
-                  </td>
-                  <td className="right">
-                    <button
-                      className="btn btn-sm"
-                      onClick={() => navigate(`/orden/${o.id}`)}
-                    >
-                      Abrir
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredOrds.length === 0 && (
+          <div className="table-responsive">
+            <table className="table">
+              <colgroup>
+                <col style={{ width: "100px" }} />
+                <col />
+                <col style={{ width: "110px" }} />
+                <col style={{ width: "100px" }} />
+                <col style={{ width: "90px" }} />
+                <col style={{ width: "90px" }} />
+                <col style={{ width: "90px" }} />
+                <col style={{ width: "80px" }} />
+              </colgroup>
+              <thead>
                 <tr>
-                  <td
-                    colSpan={6}
-                    style={{ textAlign: "center", color: "#666" }}
-                  >
-                    {search ? "No se encontraron órdenes." : "No hay órdenes todavía."}
-                  </td>
+                  <th>Orden</th>
+                  <th>Cliente</th>
+                  <th className="text-center">Estado</th>
+                  <th className="text-center">Pago</th>
+                  <th className="text-center">Total</th>
+                  <th className="text-center">Pagado</th>
+                  <th className="text-center">Saldo</th>
+                  <th className="right"></th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredOrds.map((o) => (
+                  <tr key={o.id}>
+                    <td className="fw-medium">{o.codigo || o.id.slice(0, 8)}</td>
+                    <td>{o.cliente}</td>
+                    <td className="text-center">
+                      <span className={`badge status-${o.status}`}>
+                        {o.status}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span className={`badge pay-${o.payStatus}`}>
+                        {o.payStatus}
+                      </span>
+                    </td>
+                    <td className="text-center text-nowrap">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</td>
+                    <td className="text-center text-nowrap">${(o.pagado ?? 0).toFixed(2)}</td>
+                    <td className="text-center text-nowrap" style={{ color: (o.saldo ?? 0) > 0 ? 'var(--red-600, #dc2626)' : 'inherit', fontWeight: 'bold' }}>
+                      ${(o.saldo ?? 0).toFixed(2)}
+                    </td>
+                    <td className="right">
+                      <button
+                        className="btn btn-sm btn-soft-primary border-0"
+                        onClick={() => navigate(`/orden/${o.id}`)}
+                      >
+                        <i className="bi bi-folder2-open me-1"></i> Abrir
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredOrds.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="text-center text-muted py-4"
+                    >
+                      {search ? "No se encontraron órdenes." : "No hay órdenes todavía."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

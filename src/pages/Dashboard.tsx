@@ -51,62 +51,69 @@ export default function Dashboard() {
         })();
     }, []);
 
-    if (loading) return <div className="container">Cargando Dashboard…</div>;
+    if (loading) return <div className="container py-4">Cargando Dashboard…</div>;
 
     return (
-        <div className="container">
-            <h2 className="title" style={{ textAlign: 'left', marginBottom: 24 }}>Dashboard General</h2>
+        <div className="container py-5">
+            <h2 className="mb-4 fw-bold text-gradient d-inline-block">Dashboard General</h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 30 }}>
-                <div className="card" style={{ borderLeft: '4px solid #0d6efd' }}>
-                    <label style={{ color: 'var(--muted)', fontSize: 13, fontWeight: 600 }}>PRESUPUESTOS</label>
-                    <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{stats.totalPres}</div>
-                    <div style={{ color: '#027a48', fontSize: 12, marginTop: 4 }}>{stats.presAceptados} aceptados</div>
+            <div className="grid-stats">
+                <div className="card" style={{ borderTop: '4px solid var(--primary)' }}>
+                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block">PRESUPUESTOS</label>
+                    <div className="fs-1 fw-bold text-primary">{stats.totalPres}</div>
+                    <div className="text-success small mt-1 fw-semibold">
+                        <i className="bi bi-check-circle-fill me-1"></i>
+                        {stats.presAceptados} aceptados
+                    </div>
                 </div>
 
-                <div className="card" style={{ borderLeft: '4px solid #f59e0b' }}>
-                    <label style={{ color: 'var(--muted)', fontSize: 13, fontWeight: 600 }}>ÓRDENES ACTIVAS</label>
-                    <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{stats.ordsPendientes}</div>
-                    <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>{stats.ordsCompletadas} finalizadas</div>
+                <div className="card" style={{ borderTop: '4px solid var(--warning)' }}>
+                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block">ÓRDENES ACTIVAS</label>
+                    <div className="fs-1 fw-bold" style={{ color: 'var(--warning)' }}>{stats.ordsPendientes}</div>
+                    <div className="text-muted small mt-1">
+                        <i className="bi bi-tools me-1"></i>
+                        {stats.ordsCompletadas} finalizadas
+                    </div>
                 </div>
 
-                <div className="card" style={{ borderLeft: '4px solid #10b981' }}>
-                    <label style={{ color: 'var(--muted)', fontSize: 13, fontWeight: 600 }}>TOTAL RECAUDADO</label>
-                    <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8, color: '#027a48' }}>${stats.totalPagado.toFixed(2)}</div>
-                    <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>Efectivo / Otros</div>
+                <div className="card" style={{ borderTop: '4px solid var(--success)' }}>
+                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block">TOTAL RECAUDADO</label>
+                    <div className="fs-1 fw-bold text-success">${stats.totalPagado.toLocaleString()}</div>
+                    <div className="text-muted small mt-1">Efectivo / Otros</div>
                 </div>
 
-                <div className="card" style={{ borderLeft: '4px solid #ef4444' }}>
-                    <label style={{ color: 'var(--muted)', fontSize: 13, fontWeight: 600 }}>SALDO PENDIENTE</label>
-                    <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8, color: '#b42318' }}>${stats.saldoPendiente.toFixed(2)}</div>
-                    <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>Por cobrar</div>
+                <div className="card" style={{ borderTop: '4px solid var(--danger)' }}>
+                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block">SALDO PENDIENTE</label>
+                    <div className="fs-1 fw-bold text-danger">${stats.saldoPendiente.toLocaleString()}</div>
+                    <div className="text-muted small mt-1">Por cobrar</div>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div className="grid-cols-2">
                 <div className="card">
-                    <h3 style={{ marginTop: 0, fontSize: 16 }}>Rendimiento de Conversión</h3>
-                    <div style={{ height: 12, background: '#f2f4f7', borderRadius: 6, marginTop: 20, overflow: 'hidden', display: 'flex' }}>
+                    <h3 className="fs-5 mb-4 fw-bold">Rendimiento de Conversión</h3>
+                    <div style={{ height: 16, background: '#f1f3f4', borderRadius: 8, overflow: 'hidden', display: 'flex' }}>
                         <div style={{
                             width: `${(stats.presAceptados / (stats.totalPres || 1)) * 100}%`,
-                            background: '#0d6efd'
+                            background: 'var(--gradient-primary)',
+                            boxShadow: '0 0 10px rgba(67, 97, 238, 0.4)'
                         }} />
                     </div>
-                    <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 10 }}>
-                        El <strong>{((stats.presAceptados / (stats.totalPres || 1)) * 100).toFixed(1)}%</strong> de tus presupuestos son aceptados.
+                    <p className="text-muted small mt-3 mb-0">
+                        El <strong>{((stats.presAceptados / (stats.totalPres || 1)) * 100).toFixed(1)}%</strong> de tus presupuestos son aceptados satisfactoriamente.
                     </p>
                 </div>
 
                 <div className="card">
-                    <h3 style={{ marginTop: 0, fontSize: 16 }}>Estado de Reparaciones</h3>
-                    <div style={{ height: 12, background: '#f2f4f7', borderRadius: 6, marginTop: 20, overflow: 'hidden', display: 'flex' }}>
+                    <h3 className="fs-5 mb-4 fw-bold">Estado de Reparaciones</h3>
+                    <div style={{ height: 16, background: '#f1f3f4', borderRadius: 8, overflow: 'hidden', display: 'flex' }}>
                         <div style={{
                             width: `${(stats.ordsCompletadas / (stats.totalOrds || 1)) * 100}%`,
-                            background: '#10b981'
+                            background: 'linear-gradient(90deg, #2ec4b6, #00b4d8)'
                         }} />
                     </div>
-                    <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 10 }}>
-                        Has finalizado el <strong>{((stats.ordsCompletadas / (stats.totalOrds || 1)) * 100).toFixed(1)}%</strong> de tus trabajos.
+                    <p className="text-muted small mt-3 mb-0">
+                        Has completado exitosamente el <strong>{((stats.ordsCompletadas / (stats.totalOrds || 1)) * 100).toFixed(1)}%</strong> de los trabajos técnicos asignados.
                     </p>
                 </div>
             </div>

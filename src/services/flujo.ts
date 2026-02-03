@@ -188,3 +188,43 @@ export async function eliminarPago(pagoId: string, ordenId: string) {
     });
   });
 }
+
+/** Sincroniza una orden cuando el presupuesto original cambia */
+export async function sincronizarOrdenConPresupuesto(ordenId: string, presupuestoId: string) {
+  const ordenRef = doc(db, "ordenes", ordenId);
+  const presRef = doc(db, "presupuestos", presupuestoId);
+
+  await runTransaction(db, async (tx) => {
+    const oSnap = await tx.get(ordenRef);
+    const pSnap = await tx.get(presRef);
+
+    if (!oSnap.exists() || !pSnap.exists()) return;
+
+    const ord = oSnap.data() as Orden;
+    const pres = pSnap.data() as Presupuesto;
+
+    // 1. Recalcular Totales de la Orden
+    // El totalEstimado es el nuevo total del presupuesto
+    const totalEstimado = pres.total ?? 0;
+
+    // Sumar extras cargados en la orden (trabajos + repuestos extra)
+    const extraTrabajos = (ord.trabajos || []).reduce((acc: number, t: any) => acc + (Number(t.precio) || 0), 0);
+    const extraRepuestos = (ord.repuestos || []).reduce((acc: number, r: any) => acc + (Number(r.precio) || 0) * (Number(r.cantidad) || 0), 0);
+
+    const totalFinal = totalEstimado + extraTrabajos + extraRepuestos;
+    const pagado = ord.pagado ?? 0;
+    const nuevoSaldo = Math.max(0, Number((totalFinal - pagado).toFixed(2)));
+    const nuevoPayStatus = nuevoSaldo <= 0 ? (pagado > 0 ? 'pagado' : 'impago') : (pagado > 0 ? 'parcial' : 'impago');
+
+    // 2. Actualizar la Orden
+    tx.update(ordenRef, {
+      cliente: pres.cliente, // Por si cambió el nombre del cliente
+      itemsPresupuesto: (pres.items ?? []).map((it) => pruneDeep(it)),
+      totalEstimado,
+      totalFinal,
+      saldo: nuevoSaldo,
+      payStatus: nuevoPayStatus,
+      updatedAt: Date.now()
+    });
+  });
+}

@@ -23,209 +23,187 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
     [items]
   );
 
-  const COLS = [
-    "140px" /* Tipo */,
-    "300px" /* Descripción */,
-    "130px" /* Marca/Modelo */,
-    "160px" /* IMEI/Serie */,
-    "120px" /* Estado */,
-    "190px" /* Garantía */,
-    "80px" /* Cant. */,
-    "220px" /* P. Unit / Horas*Tarifa */,
-    "90px" /* Desc% */,
-    "120px" /* Total */,
-    "60px" /* Acciones */,
-  ];
-
   return (
-    <div className="table-responsive">
-      <table className="table items" style={{ tableLayout: "fixed" }}>
-        <colgroup>
-          {COLS.map((w, i) => (
-            <col key={i} style={{ width: w }} />
-          ))}
-        </colgroup>
+    <div className="items-container-vertical">
+      {items.map((it, idx) => (
+        <div key={it.id} className="item-card">
+          {/* Header del ítem */}
+          <div className="item-card-header">
+            <span className="badge bg-primary-soft text-primary">Ítem #{idx + 1}</span>
+            {!readOnly && (
+              <button
+                type="button"
+                className="btn-action btn-soft-danger"
+                onClick={() => remove(idx)}
+                title="Eliminar ítem"
+              >
+                <i className="bi bi-trash"></i>
+              </button>
+            )}
+          </div>
 
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>Descripción</th>
-            <th>Marca/Modelo</th>
-            <th>IMEI/Serie</th>
-            <th>Estado</th>
-            <th>Garantía</th>
-            <th>Cant.</th>
-            <th>P. Unit / Horas*Tarifa</th>
-            <th>Desc%</th>
-            <th>Total</th>
-            <th></th>
-          </tr>
-        </thead>
+          {/* Cuerpo del ítem (Grid de campos) */}
+          <div className="item-grid">
+            {/* Fila 1: Básicos */}
+            <div className="item-field">
+              <label>Tipo</label>
+              <select
+                {...register(`items.${idx}.tipo`)}
+                disabled={readOnly}
+                className="form-control"
+              >
+                <option value="Producto">Producto</option>
+                <option value="Servicio">Servicio</option>
+                <option value="Reparación">Reparación</option>
+              </select>
+            </div>
 
-        <tbody>
-          {items.map((it, idx) => (
-            <tr key={it.id}>
-              <td>
-                <select {...register(`items.${idx}.tipo`)} disabled={readOnly}>
-                  <option value="Producto">Producto</option>
-                  <option value="Servicio">Servicio</option>
-                  <option value="Reparación">Reparación</option>
-                </select>
-              </td>
+            <div className="item-field" style={{ gridColumn: 'span 2' }}>
+              <label>Descripción / Problema</label>
+              <input
+                {...register(`items.${idx}.descripcion`)}
+                disabled={readOnly}
+                placeholder="Ej: Cambio de pantalla, Disco sólido 480GB..."
+                className={`form-control ${(errors.items as any)?.[idx]?.descripcion ? "is-invalid" : ""}`}
+              />
+            </div>
 
-              <td>
+            {/* Fila 2: Especificaciones */}
+            <div className="item-field">
+              <label>Marca / Modelo</label>
+              <div className="d-flex gap-2">
                 <input
-                  {...register(`items.${idx}.descripcion`)}
+                  {...register(`items.${idx}.marca`)}
                   disabled={readOnly}
-                  className={(errors.items as any)?.[idx]?.descripcion ? "error" : ""}
+                  placeholder="Marca"
+                  className="form-control"
                 />
-              </td>
-
-              <td>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr",
-                    gap: 6,
-                  }}
-                >
-                  <input
-                    {...register(`items.${idx}.marca`)}
-                    disabled={readOnly}
-                    placeholder="Marca"
-                  />
-                  <input
-                    {...register(`items.${idx}.modelo`)}
-                    disabled={readOnly}
-                    placeholder="Modelo"
-                  />
-                </div>
-              </td>
-
-              <td>
                 <input
-                  {...register(`items.${idx}.imeiSerie`)}
+                  {...register(`items.${idx}.modelo`)}
                   disabled={readOnly}
+                  placeholder="Modelo"
+                  className="form-control"
                 />
-              </td>
+              </div>
+            </div>
 
-              <td>
-                <select
-                  {...register(`items.${idx}.estado`)}
-                  disabled={readOnly}
-                >
-                  <option value="">—</option>
-                  <option value="Nuevo">Nuevo</option>
-                  <option value="Usado">Usado</option>
-                  <option value="Reacondicionado">Reacondicionado</option>
-                </select>
-              </td>
+            <div className="item-field">
+              <label>IMEI / Número de Serie</label>
+              <input
+                {...register(`items.${idx}.imeiSerie`)}
+                disabled={readOnly}
+                placeholder="Identificación del dispositivo..."
+                className="form-control"
+              />
+            </div>
 
-              <td>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 6,
-                  }}
-                >
-                  <input
-                    type="number"
-                    min={0}
-                    disabled={readOnly}
-                    {...register(`items.${idx}.garantiaValor`, { valueAsNumber: true })}
-                  />
-                  <select
-                    {...register(`items.${idx}.garantiaUnidad`)}
-                    disabled={readOnly}
-                  >
-                    {UNIDADES.map((u) => (
-                      <option key={u.value} value={u.value}>
-                        {u.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </td>
+            <div className="item-field">
+              <label>Estado físico</label>
+              <select
+                {...register(`items.${idx}.estado`)}
+                disabled={readOnly}
+                className="form-control"
+              >
+                <option value="">—</option>
+                <option value="Nuevo">Nuevo</option>
+                <option value="Usado">Usado</option>
+                <option value="Reacondicionado">Reacondicionado</option>
+              </select>
+            </div>
 
-              <td>
-                <input
-                  type="number"
-                  min={1}
-                  disabled={readOnly}
-                  {...register(`items.${idx}.cantidad`, { valueAsNumber: true })}
-                />
-              </td>
-
-              <td>
-                {it.tipo !== "Producto" ? (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: 6,
-                    }}
-                  >
-                    <input
-                      type="number"
-                      placeholder="Horas"
-                      disabled={readOnly}
-                      {...register(`items.${idx}.horas`, { valueAsNumber: true })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Tarifa"
-                      disabled={readOnly}
-                      {...register(`items.${idx}.tarifaHora`, { valueAsNumber: true })}
-                    />
-                  </div>
-                ) : (
-                  <input
-                    type="number"
-                    disabled={readOnly}
-                    {...register(`items.${idx}.precioUnitario`, { valueAsNumber: true })}
-                  />
-                )}
-              </td>
-
-              <td>
+            {/* Fila 3: Garantía y Cantidad */}
+            <div className="item-field">
+              <label>Garantía</label>
+              <div className="d-flex gap-2">
                 <input
                   type="number"
                   min={0}
-                  max={100}
                   disabled={readOnly}
-                  {...register(`items.${idx}.descuentoPct`, { valueAsNumber: true })}
+                  {...register(`items.${idx}.garantiaValor`, { valueAsNumber: true })}
+                  className="form-control"
+                  style={{ width: '80px' }}
                 />
-              </td>
+                <select
+                  {...register(`items.${idx}.garantiaUnidad`)}
+                  disabled={readOnly}
+                  className="form-control"
+                >
+                  {UNIDADES.map((u) => (
+                    <option key={u.value} value={u.value}>
+                      {u.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-              <td style={{ textAlign: "right" }}>{lineTotal(it).toFixed(2)}</td>
+            <div className="item-field">
+              <label>Cantidad</label>
+              <input
+                type="number"
+                min={1}
+                disabled={readOnly}
+                {...register(`items.${idx}.cantidad`, { valueAsNumber: true })}
+                className="form-control"
+              />
+            </div>
 
-              <td className="right">
-                {!readOnly && (
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => remove(idx)}
-                    title="Eliminar"
-                  >
-                    🗑️
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+            {/* Fila 4: Precios */}
+            <div className="item-field">
+              <label>{it.tipo === "Producto" ? "Precio Unitario" : "Horas / Tarifa"}</label>
+              {it.tipo !== "Producto" ? (
+                <div className="d-flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Hr"
+                    disabled={readOnly}
+                    {...register(`items.${idx}.horas`, { valueAsNumber: true })}
+                    className="form-control"
+                  />
+                  <input
+                    type="number"
+                    placeholder="$$"
+                    disabled={readOnly}
+                    {...register(`items.${idx}.tarifaHora`, { valueAsNumber: true })}
+                    className="form-control"
+                  />
+                </div>
+              ) : (
+                <input
+                  type="number"
+                  disabled={readOnly}
+                  {...register(`items.${idx}.precioUnitario`, { valueAsNumber: true })}
+                  className="form-control"
+                />
+              )}
+            </div>
 
-        <tfoot>
-          <tr>
-            <td colSpan={9} className="right">
-              Subtotal
-            </td>
-            <td className="right">{total.toFixed(2)}</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
+            <div className="item-field">
+              <label>Descuento (%)</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                disabled={readOnly}
+                {...register(`items.${idx}.descuentoPct`, { valueAsNumber: true })}
+                className="form-control"
+              />
+            </div>
+          </div>
+
+          {/* Footer del ítem con el subtotal */}
+          <div className="item-card-footer">
+            <span className="text-muted small">Subtotal ítem:</span>
+            <span className="fs-5 fw-bold text-primary">${lineTotal(it).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          </div>
+        </div>
+      ))}
+
+      {/* Resumen total de la lista */}
+      <div className="d-flex justify-content-end align-items-center mt-3 p-3 bg-white rounded shadow-sm">
+        <span className="text-muted me-3">Subtotal de todos los ítems:</span>
+        <span className="fs-4 fw-bold text-gradient">${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+      </div>
     </div>
   );
 }

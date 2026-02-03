@@ -12,7 +12,7 @@ import {
   getPresupuesto,
   updatePresupuesto,
 } from "../services/presupuestos";
-import { aceptarPresupuesto } from "../services/flujo";
+import { aceptarPresupuesto, sincronizarOrdenConPresupuesto } from "../services/flujo";
 import { generarPresupuestoPDF, toDataURL } from "../lib/pdf";
 import { getSettings } from "../services/settings";
 import { toast } from "react-hot-toast";
@@ -49,6 +49,7 @@ export default function PresupuestoIT() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [codigo, setCodigo] = useState<string | undefined>(undefined);
+  const [currentOrdenId, setCurrentOrdenId] = useState<string | undefined>(undefined);
 
   const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm<any>({
     resolver: zodResolver(schema),
@@ -91,6 +92,7 @@ export default function PresupuestoIT() {
         items: p.items || []
       });
       setCodigo(p.codigo);
+      setCurrentOrdenId(p.ordenId);
     })();
   }, [editingId, reset]);
 
@@ -106,6 +108,11 @@ export default function PresupuestoIT() {
           fecha: new Date().toISOString(),
           ivaPct: 0,
         } as Partial<Presupuesto>);
+
+        if (currentOrdenId) {
+          await sincronizarOrdenConPresupuesto(currentOrdenId, editingId);
+        }
+
         toast.success("Presupuesto actualizado.");
       } else {
         const { id, codigo: newCodigo } = await crearPresupuesto({
@@ -200,76 +207,108 @@ export default function PresupuestoIT() {
   };
 
   return (
-    <>
-      <div className="toolbar print-hide">
-        {!isViewMode && (
-          <>
-            <button onClick={() => append({ id: crypto.randomUUID(), tipo: "Producto", descripcion: "", cantidad: 1, precioUnitario: 0 })} className="btn">
-              + Agregar ítem
-            </button>
-            <button onClick={handleSubmit(onSubmit, (err) => {
-              console.log("Validation Errors:", err);
-              toast.error("Revisá los errores en el formulario");
-            })} className="btn" disabled={saving}>
-              {saving ? "Guardando…" : "Guardar"}
-            </button>
-          </>
-        )}
-        <button onClick={() => navigate(-1)} className="btn">
-          ← Volver
-        </button>
-        <button onClick={handleDescargarPDF} className="btn">
-          Descargar PDF
-        </button>
-        <button
-          onClick={handleAceptar}
-          className="btn primary"
-          disabled={!editingId}
-        >
-          Aceptar → Orden
+    <div className="container py-5">
+      {/* Header de la Página */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="m-0 fw-bold text-gradient">
+          {isViewMode ? 'Vista de Presupuesto' : (editingId ? 'Editar Presupuesto' : 'Nuevo Presupuesto')}
+          {codigo && <span className="ms-2 text-muted small fw-normal">({codigo})</span>}
+        </h2>
+        <button onClick={() => navigate(-1)} className="btn btn-light">
+          <i className="bi bi-arrow-left me-1"></i> Volver
         </button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="card paper A4">
-        <h2 className="title">
-          Presupuesto IT{" "}
-          {codigo ? (
-            <small style={{ fontWeight: 400 }}>{`(${codigo})`}</small>
-          ) : null}
-        </h2>
+      <div className="row">
+        <div className="col-lg-9 mx-auto">
+          {/* El formulario estilo papel */}
+          <form onSubmit={handleSubmit(onSubmit)} className="paper-container mb-4 shadow-lg">
+            <div className="d-flex justify-content-between align-items-center mb-5">
+              <img src={logoUrl} alt="Sontech" width={200} />
+              <div className="text-end">
+                <h1 className="h3 mb-0 fw-bold text-primary">PRESUPUESTO</h1>
+                <p className="text-muted mb-0 fw-bold">{codigo || 'BORRADOR PENDIENTE'}</p>
+              </div>
+            </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            marginBottom: 12,
-          }}
-        >
-          <label>
-            Cliente:{" "}
-            <input
-              {...register("cliente")}
-              disabled={isViewMode}
-              className={errors.cliente ? "error" : ""}
-            />
-          </label>
-          {errors.cliente && <span style={{ color: "red", fontSize: "0.8rem" }}>{(errors.cliente as any).message}</span>}
+            <div className="row mb-5">
+              <div className="col-md-7">
+                <div className="bg-light p-3 rounded-3">
+                  <label className="small fw-bold text-muted mb-2 d-block text-uppercase">Datos del Cliente</label>
+                  <input
+                    {...register("cliente")}
+                    placeholder="Nombre completo del cliente..."
+                    disabled={isViewMode}
+                    className={`form-control form-control-lg border-0 bg-white ${errors.cliente ? "is-invalid" : ""}`}
+                  />
+                  {errors.cliente && <div className="invalid-feedback">{(errors.cliente as any).message}</div>}
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <label className="small fw-bold text-muted text-uppercase m-0">Detalle de Productos / Servicios</label>
+                {!isViewMode && (
+                  <button
+                    type="button"
+                    onClick={() => append({ id: crypto.randomUUID(), tipo: "Producto", descripcion: "", cantidad: 1, precioUnitario: 0 })}
+                    className="btn btn-soft-primary btn-sm"
+                  >
+                    <i className="bi bi-plus-circle me-1"></i> Agregar Ítem
+                  </button>
+                )}
+              </div>
+
+              <ItemsTableIT
+                items={items}
+                register={register}
+                remove={remove}
+                errors={errors}
+                readOnly={isViewMode}
+              />
+            </div>
+
+            <div className="d-flex justify-content-end mt-5 border-top pt-4">
+              <div className="text-end bg-light p-4 rounded-3" style={{ minWidth: '250px' }}>
+                <div className="text-muted small mb-1 fw-bold text-uppercase">Total Presupuesto</div>
+                <div className="fs-2 fw-bold text-primary">${t.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                <div className="text-muted x-small mt-1">IVA no incluido</div>
+              </div>
+            </div>
+          </form>
+
+          {/* Acciones Finales (FIJAS AL FONDO) */}
+          <div className="sticky-action-bar print-hide">
+            <button onClick={handleDescargarPDF} className="btn btn-soft-info">
+              <i className="bi bi-file-earmark-pdf me-1"></i> Descargar PDF
+            </button>
+
+            {editingId && (
+              <button
+                onClick={handleAceptar}
+                className="btn btn-soft-success"
+              >
+                <i className="bi bi-check2-circle me-1"></i> Aceptar Presupuesto
+              </button>
+            )}
+
+            {!isViewMode && (
+              <button
+                onClick={handleSubmit(onSubmit)}
+                className="btn btn-primary px-5"
+                disabled={saving}
+              >
+                {saving ? (
+                  <><span className="spinner-border spinner-border-sm me-2"></span>Gaurdando...</>
+                ) : (
+                  <><i className="bi bi-check-lg me-1"></i> Guardar Todo</>
+                )}
+              </button>
+            )}
+          </div>
         </div>
-
-        <ItemsTableIT
-          items={items}
-          register={register}
-          remove={remove}
-          errors={errors}
-          readOnly={isViewMode}
-        />
-
-        <div className="right" style={{ marginTop: 12 }}>
-          <div style={{ color: "#667085" }}>IVA no incluido</div>
-          <strong>Total: {t.total.toFixed(2)}</strong>
-        </div>
-      </form>
-    </>
+      </div>
+    </div>
   );
 }
