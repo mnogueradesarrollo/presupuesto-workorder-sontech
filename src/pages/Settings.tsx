@@ -41,73 +41,78 @@ export default function Settings() {
     if (loading) return <div className="container">Cargando…</div>;
 
     return (
-        <div className="container">
+        <div className="container py-4">
             <div className="card">
-                <h2 className="title">Configuración de la Empresa</h2>
-                <p style={{ color: "var(--muted)", textAlign: "center", marginBottom: 20 }}>
+                <h2 className="mb-2 fw-bold text-gradient">Configuración de la Empresa</h2>
+                <p className="text-muted mb-4">
                     Estos datos aparecerán en los presupuestos y órdenes de trabajo en PDF.
                 </p>
 
-                <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                        <div>
-                            <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>Nombre de la empresa</label>
+                <form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column gap-3">
+                    <div className="row g-3">
+                        <div className="col-md-6">
+                            <label className="small fw-bold text-muted text-uppercase mb-1 d-block">Nombre de la empresa</label>
                             <input
                                 {...register("name")}
-                                style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)" }}
+                                className="form-control"
                                 placeholder="Ej: Sontech Sistemas"
                             />
                         </div>
-                        <div>
-                            <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>Email de contacto</label>
+                        <div className="col-md-6">
+                            <label className="small fw-bold text-muted text-uppercase mb-1 d-block">Email de contacto</label>
                             <input
                                 {...register("email")}
-                                style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)" }}
+                                className="form-control"
                                 placeholder="ejemplo@correo.com"
                             />
                         </div>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                        <div>
-                            <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>Teléfono / WhatsApp</label>
+                    <div className="row g-3">
+                        <div className="col-md-6">
+                            <label className="small fw-bold text-muted text-uppercase mb-1 d-block">Teléfono / WhatsApp</label>
                             <input
                                 {...register("phone")}
-                                style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)" }}
+                                className="form-control"
                                 placeholder="11 1234 5678"
                             />
                         </div>
-                        <div>
-                            <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>Dirección</label>
+                        <div className="col-md-6">
+                            <label className="small fw-bold text-muted text-uppercase mb-1 d-block">Dirección</label>
                             <input
                                 {...register("address")}
-                                style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)" }}
+                                className="form-control"
                                 placeholder="Calle 123, Ciudad"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>URL del Logo (Opcional)</label>
+                        <label className="small fw-bold text-muted text-uppercase mb-1 d-block">URL del Logo (Opcional)</label>
                         <input
                             {...register("logoUrl")}
-                            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)" }}
+                            className="form-control"
                             placeholder="https://tu-sitio.com/logo.png"
                         />
                     </div>
 
                     <div>
-                        <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>Pie de página del PDF (Opcional)</label>
+                        <label className="small fw-bold text-muted text-uppercase mb-1 d-block">Pie de página del PDF (Opcional)</label>
                         <textarea
                             {...register("footerText")}
-                            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)", minHeight: 80 }}
+                            className="form-control"
+                            style={{ minHeight: 100 }}
                             placeholder="Gracias por confiar en nosotros..."
                         />
                     </div>
 
-                    <div className="right" style={{ marginTop: 10 }}>
-                        <button type="submit" className="btn primary" disabled={saving}>
-                            {saving ? "Guardando…" : "Guardar Configuración"}
+                    <div className="d-flex justify-content-end mt-3">
+                        <button type="submit" className="btn btn-primary px-4" disabled={saving}>
+                            {saving ? (
+                                <><span className="spinner-border spinner-border-sm me-2"></span>Guardando…</>
+                            ) : (
+                                "Guardar Configuración"
+                            )}
                         </button>
                     </div>
                 </form>

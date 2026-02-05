@@ -58,7 +58,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
               </select>
             </div>
 
-            <div className="item-field" style={{ gridColumn: 'span 2' }}>
+            <div className="item-field">
               <label>Descripción / Problema</label>
               <input
                 {...register(`items.${idx}.descripcion`)}

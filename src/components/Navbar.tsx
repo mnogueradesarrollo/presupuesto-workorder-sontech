@@ -22,62 +22,75 @@ export default function Navbar() {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <header className="nav-premium px-4 sticky-top py-2" style={{ zIndex: 1000 }}>
-      <div className="container-fluid d-flex align-items-center justify-content-between">
+    <header className="nav-premium sticky-top shadow-sm">
+      <div className="container-lg d-flex align-items-center justify-content-between h-100">
         {/* Brand */}
-        <Link to="/" className="brand">
-          <img src={logoUrl} alt="Logo" width={220} height="auto" style={{ objectFit: 'contain' }} />
+        <Link to="/" className="d-flex align-items-center">
+          <img src={logoUrl} alt="Sontech" className="premium-logo" />
         </Link>
 
         {user && (
           <>
             {/* Hamburger Button */}
             <button
-              className="navbar-toggler d-md-none"
+              className="btn btn-link link-dark d-md-none p-0 border-0"
               onClick={toggleMenu}
-              aria-label="Toggle navigation"
+              aria-label="Menu"
             >
-              <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-list'} fs-2`}></i>
+              <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-list'} fs-1`}></i>
             </button>
 
             {/* Links */}
-            <nav className={`links ms-auto d-flex align-items-center gap-2 ${isOpen ? 'show' : ''}`}>
+            <nav className={`nav-menu-drawer ${isOpen ? 'show' : ''}`}>
+              <div className="d-md-none d-flex justify-content-between align-items-center border-bottom pb-2 mb-3 w-100">
+                <span className="small text-muted fw-bold text-uppercase">Navegación</span>
+                <button className="btn btn-close btn-sm d-md-none" onClick={() => setIsOpen(false)}></button>
+              </div>
               <NavLink
                 to="/"
                 end
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) => `nav-link-premium ${isActive ? 'active' : ''}`}
               >
-                <i className="bi bi-speedometer2 me-1"></i> Dashboard
+                <i className="bi bi-speedometer2 me-2"></i> Dashboard
               </NavLink>
+
               <NavLink
                 to="/gestion"
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) => `nav-link-premium ${isActive ? 'active' : ''}`}
               >
-                <i className="bi bi-collection me-1"></i> Gestión
+                <i className="bi bi-collection me-2"></i> Gestión
               </NavLink>
+
               <NavLink
                 to="/settings"
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) => `nav-link-premium ${isActive ? 'active' : ''}`}
               >
-                <i className="bi bi-gear me-1"></i> Ajustes
+                <i className="bi bi-gear me-2"></i> Ajustes
               </NavLink>
+
               <NavLink
                 to="/presupuesto-it"
                 onClick={() => setIsOpen(false)}
-                className={({ isActive }) => `btn btn-primary d-flex align-items-center gap-1 mx-2 ${isActive ? 'active' : ''}`}
+                className={({ isActive }) => `btn btn-primary d-flex align-items-center gap-2 my-2 my-md-0 ms-md-2 ${isActive ? 'active' : ''}`}
               >
-                <i className="bi bi-plus-lg"></i> Nuevo Presupuesto
+                <i className="bi bi-plus-lg"></i> <span>Presupuesto</span>
               </NavLink>
-              <button
-                onClick={handleLogout}
-                className="btn btn-light d-flex align-items-center gap-1 text-danger border-0 bg-transparent shadow-none"
-              >
-                <i className="bi bi-box-arrow-right fs-5"></i> <span>Salir</span>
-              </button>
+
+              <div className="mt-auto mt-md-0 pt-3 pt-md-0 border-top border-md-0">
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-outline-danger d-flex align-items-center gap-2 border-0 bg-transparent shadow-none"
+                >
+                  <i className="bi bi-box-arrow-right"></i> <span>Salir</span>
+                </button>
+              </div>
             </nav>
+
+            {/* Backdrop for Mobile */}
+            {isOpen && <div className="nav-backdrop d-md-none" onClick={() => setIsOpen(false)}></div>}
           </>
         )}
       </div>

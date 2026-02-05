@@ -151,84 +151,134 @@ export default function Home() {
         {loadingPres ? (
           <p className="text-muted text-center py-4">Cargando presupuestos...</p>
         ) : (
-          <div className="table-responsive">
-            <table className="table">
-              <colgroup>
-                <col style={{ width: "110px" }} />
-                <col />
-                <col style={{ width: "110px" }} />
-                <col style={{ width: "100px" }} />
-                <col style={{ width: "100px" }} />
-                <col style={{ width: "180px" }} />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Cliente</th>
-                  <th>Fecha</th>
-                  <th className="text-center">Total</th>
-                  <th className="text-center">Estado</th>
-                  <th className="text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPres.map((p) => (
-                  <tr key={p.id}>
-                    <td className="fw-medium">{p.codigo || "—"}</td>
-                    <td>{p.cliente}</td>
-                    <td>{p.fecha?.slice(0, 10)}</td>
-                    <td className="text-center text-nowrap">${p.total?.toFixed(2)}</td>
-                    <td className="text-center">
-                      <span className={`badge status-${p.status}`}>
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      <div className="d-flex justify-content-center gap-2">
-                        <button
-                          className="btn-action btn-soft-info"
-                          onClick={() => navigate(`/presupuesto-it?id=${p.id}&view=true`)}
-                          title="Ver Presupuesto"
-                        >
-                          <i className="bi bi-eye"></i>
-                        </button>
-                        <button
-                          className="btn-action btn-soft-primary"
-                          onClick={() => onEditar(p.id)}
-                          disabled={busyId === p.id}
-                          title="Editar"
-                        >
-                          <i className="bi bi-pencil"></i>
-                        </button>
-                        <button
-                          className="btn-action btn-soft-success"
-                          disabled={
-                            busyId === p.id ||
-                            p.status === "aceptado" ||
-                            p.status === "anulado"
-                          }
-                          onClick={() => onAceptar(p.id, p.cliente)}
-                          title="Aceptar"
-                        >
-                          <i className="bi bi-check-lg"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredPres.length === 0 && (
+          <>
+            {/* Table View (Desktop) */}
+            <div className="table-responsive d-none d-md-block">
+              <table className="table">
+                <colgroup>
+                  <col style={{ width: "110px" }} />
+                  <col />
+                  <col style={{ width: "110px" }} />
+                  <col style={{ width: "100px" }} />
+                  <col style={{ width: "100px" }} />
+                  <col style={{ width: "180px" }} />
+                </colgroup>
+                <thead>
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="text-center text-muted py-4"
-                    >
-                      {search || statusFilter !== "todos" ? "No se encontraron resultados." : "No hay presupuestos aún."}
-                    </td>
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th className="text-center">Total</th>
+                    <th className="text-center">Estado</th>
+                    <th className="text-center">Acciones</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredPres.map((p) => (
+                    <tr key={p.id}>
+                      <td className="fw-medium">{p.codigo || "—"}</td>
+                      <td>{p.cliente}</td>
+                      <td>{p.fecha?.slice(0, 10)}</td>
+                      <td className="text-center text-nowrap">${p.total?.toFixed(2)}</td>
+                      <td className="text-center">
+                        <span className={`badge status-${p.status}`}>
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <div className="d-flex justify-content-center gap-2">
+                          <button
+                            className="btn-action btn-soft-info"
+                            onClick={() => navigate(`/presupuesto-it?id=${p.id}&view=true`)}
+                            title="Ver Presupuesto"
+                          >
+                            <i className="bi bi-eye"></i>
+                          </button>
+                          <button
+                            className="btn-action btn-soft-primary"
+                            onClick={() => onEditar(p.id)}
+                            disabled={busyId === p.id}
+                            title="Editar"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            className="btn-action btn-soft-success"
+                            disabled={
+                              busyId === p.id ||
+                              p.status === "aceptado" ||
+                              p.status === "anulado"
+                            }
+                            onClick={() => onAceptar(p.id, p.cliente)}
+                            title="Aceptar"
+                          >
+                            <i className="bi bi-check-lg"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Card View (Mobile) */}
+            <div className="d-md-none">
+              <div className="row g-3">
+                {filteredPres.map((p) => (
+                  <div key={p.id} className="col-12">
+                    <div className="card border p-3 border-start border-4 border-primary">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <span className="x-small fw-bold text-muted text-uppercase d-block">{p.codigo || 'BORRADOR'}</span>
+                          <span className="fw-bold d-block">{p.cliente}</span>
+                          <span className="text-muted small">{p.fecha?.slice(0, 10)}</span>
+                        </div>
+                        <span className={`badge status-${p.status}`}>
+                          {p.status}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between align-items-center mt-3">
+                        <div className="fs-5 fw-bold text-primary">${p.total?.toFixed(2)}</div>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm btn-soft-info"
+                            onClick={() => navigate(`/presupuesto-it?id=${p.id}&view=true`)}
+                          >
+                            <i className="bi bi-eye"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-soft-primary"
+                            onClick={() => onEditar(p.id)}
+                            disabled={busyId === p.id}
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-soft-success"
+                            disabled={
+                              busyId === p.id ||
+                              p.status === "aceptado" ||
+                              p.status === "anulado"
+                            }
+                            onClick={() => onAceptar(p.id, p.cliente)}
+                          >
+                            <i className="bi bi-check-lg"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {filteredPres.length === 0 && (
+              <p className="text-center text-muted py-4">
+                {search || statusFilter !== "todos" ? "No se encontraron resultados." : "No hay presupuestos aún."}
+              </p>
+            )}
+          </>
         )}
       </div>
 
@@ -238,73 +288,120 @@ export default function Home() {
         {loadingOrd ? (
           <p className="text-muted text-center py-4">Cargando órdenes...</p>
         ) : (
-          <div className="table-responsive">
-            <table className="table">
-              <colgroup>
-                <col style={{ width: "100px" }} />
-                <col />
-                <col style={{ width: "110px" }} />
-                <col style={{ width: "100px" }} />
-                <col style={{ width: "90px" }} />
-                <col style={{ width: "90px" }} />
-                <col style={{ width: "90px" }} />
-                <col style={{ width: "80px" }} />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Orden</th>
-                  <th>Cliente</th>
-                  <th className="text-center">Estado</th>
-                  <th className="text-center">Pago</th>
-                  <th className="text-center">Total</th>
-                  <th className="text-center">Pagado</th>
-                  <th className="text-center">Saldo</th>
-                  <th className="right"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrds.map((o) => (
-                  <tr key={o.id}>
-                    <td className="fw-medium">{o.codigo || o.id.slice(0, 8)}</td>
-                    <td>{o.cliente}</td>
-                    <td className="text-center">
-                      <span className={`badge status-${o.status}`}>
-                        {o.status}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      <span className={`badge pay-${o.payStatus}`}>
-                        {o.payStatus}
-                      </span>
-                    </td>
-                    <td className="text-center text-nowrap">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</td>
-                    <td className="text-center text-nowrap">${(o.pagado ?? 0).toFixed(2)}</td>
-                    <td className="text-center text-nowrap" style={{ color: (o.saldo ?? 0) > 0 ? 'var(--red-600, #dc2626)' : 'inherit', fontWeight: 'bold' }}>
-                      ${(o.saldo ?? 0).toFixed(2)}
-                    </td>
-                    <td className="right">
-                      <button
-                        className="btn btn-sm btn-soft-primary border-0"
-                        onClick={() => navigate(`/orden/${o.id}`)}
-                      >
-                        <i className="bi bi-folder2-open me-1"></i> Abrir
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredOrds.length === 0 && (
+          <>
+            {/* Table View (Desktop) */}
+            <div className="table-responsive d-none d-md-block">
+              <table className="table">
+                <colgroup>
+                  <col style={{ width: "100px" }} />
+                  <col />
+                  <col style={{ width: "110px" }} />
+                  <col style={{ width: "100px" }} />
+                  <col style={{ width: "90px" }} />
+                  <col style={{ width: "90px" }} />
+                  <col style={{ width: "90px" }} />
+                  <col style={{ width: "80px" }} />
+                </colgroup>
+                <thead>
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="text-center text-muted py-4"
-                    >
-                      {search ? "No se encontraron órdenes." : "No hay órdenes todavía."}
-                    </td>
+                    <th>Orden</th>
+                    <th>Cliente</th>
+                    <th className="text-center">Estado</th>
+                    <th className="text-center">Pago</th>
+                    <th className="text-center">Total</th>
+                    <th className="text-center">Pagado</th>
+                    <th className="text-center">Saldo</th>
+                    <th className="right"></th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredOrds.map((o) => (
+                    <tr key={o.id}>
+                      <td className="fw-medium">{o.codigo || o.id.slice(0, 8)}</td>
+                      <td>{o.cliente}</td>
+                      <td className="text-center">
+                        <span className={`badge status-${o.status}`}>
+                          {o.status}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <span className={`badge pay-${o.payStatus}`}>
+                          {o.payStatus}
+                        </span>
+                      </td>
+                      <td className="text-center text-nowrap">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</td>
+                      <td className="text-center text-nowrap">${(o.pagado ?? 0).toFixed(2)}</td>
+                      <td className="text-center text-nowrap" style={{ color: (o.saldo ?? 0) > 0 ? 'var(--red-600, #dc2626)' : 'inherit', fontWeight: 'bold' }}>
+                        ${(o.saldo ?? 0).toFixed(2)}
+                      </td>
+                      <td className="right">
+                        <button
+                          className="btn btn-sm btn-soft-primary border-0"
+                          onClick={() => navigate(`/orden/${o.id}`)}
+                        >
+                          <i className="bi bi-folder2-open me-1"></i> Abrir
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Card View (Mobile) */}
+            <div className="d-md-none">
+              <div className="row g-3">
+                {filteredOrds.map((o) => (
+                  <div key={o.id} className="col-12">
+                    <div className="card border p-3 border-start border-4 border-warning">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <span className="x-small fw-bold text-muted text-uppercase d-block">OT-{o.codigo || o.id.slice(0, 8)}</span>
+                          <span className="fw-bold d-block">{o.cliente}</span>
+                        </div>
+                        <div className="d-flex flex-column align-items-end gap-1">
+                          <span className={`badge status-${o.status}`}>
+                            {o.status}
+                          </span>
+                          <span className={`badge pay-${o.payStatus} x-small`}>
+                            {o.payStatus}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="row g-2 my-2 py-2 border-top border-bottom">
+                        <div className="col-4 text-center">
+                          <span className="x-small text-muted d-block text-uppercase">Total</span>
+                          <span className="small fw-bold">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</span>
+                        </div>
+                        <div className="col-4 text-center border-start border-end">
+                          <span className="x-small text-muted d-block text-uppercase">Pagado</span>
+                          <span className="small fw-bold text-success">${(o.pagado ?? 0).toFixed(2)}</span>
+                        </div>
+                        <div className="col-4 text-center">
+                          <span className="x-small text-muted d-block text-uppercase">Saldo</span>
+                          <span className="small fw-bold text-danger">${(o.saldo ?? 0).toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <div className="d-flex justify-content-end mt-2">
+                        <button
+                          className="btn btn-primary btn-sm w-100"
+                          onClick={() => navigate(`/orden/${o.id}`)}
+                        >
+                          <i className="bi bi-folder2-open me-2"></i> Abrir Orden
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {filteredOrds.length === 0 && (
+              <p className="text-center text-muted py-4">
+                {search ? "No se encontraron órdenes." : "No hay órdenes todavía."}
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>
