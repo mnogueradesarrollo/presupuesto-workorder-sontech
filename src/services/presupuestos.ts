@@ -17,11 +17,19 @@ import type { Presupuesto } from "../types/presupuesto";
 
 const COL = "presupuestos";
 
-/** Elimina propiedades con valor undefined (Firestore no acepta undefined) */
-function pruneUndefined<T extends Record<string, any>>(obj: T): T {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, v]) => v !== undefined)
-  ) as T;
+/** Elimina propiedades con valor undefined (Firestore no acepta undefined) de forma recursiva */
+function pruneUndefined(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(pruneUndefined);
+  }
+  if (obj !== null && typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, pruneUndefined(v)])
+    );
+  }
+  return obj;
 }
 
 // ===== Numeración por año: counters/presupuestos-YYYY {seq:number}

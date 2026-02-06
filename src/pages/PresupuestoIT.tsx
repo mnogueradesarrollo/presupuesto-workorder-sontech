@@ -136,6 +136,11 @@ export default function PresupuestoIT() {
     }
   };
 
+  const onInvalid = (errors: any) => {
+    console.log("Validation Errors:", errors);
+    toast.error("Por favor, revisa los campos obligatorios.");
+  };
+
   // Descargar PDF (usa código si existe)
   const handleDescargarPDF = async () => {
     const itemsPdf = items.map((it) => {
@@ -295,12 +300,12 @@ export default function PresupuestoIT() {
 
             {!isViewMode && (
               <button
-                onClick={handleSubmit(onSubmit)}
+                onClick={handleSubmit(onSubmit, onInvalid)}
                 className="btn btn-primary px-5"
                 disabled={saving}
               >
                 {saving ? (
-                  <><span className="spinner-border spinner-border-sm me-2"></span>Gaurdando...</>
+                  <><span className="spinner-border spinner-border-sm me-2"></span>Guardando...</>
                 ) : (
                   <><i className="bi bi-check-lg me-1"></i> Guardar Todo</>
                 )}

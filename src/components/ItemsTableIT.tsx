@@ -144,7 +144,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                 min={1}
                 disabled={readOnly}
                 {...register(`items.${idx}.cantidad`, { valueAsNumber: true })}
-                className="form-control"
+                className={`form-control ${(errors.items as any)?.[idx]?.cantidad ? "is-invalid" : ""}`}
               />
             </div>
 
