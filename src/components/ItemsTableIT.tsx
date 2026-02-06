@@ -30,6 +30,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
           {/* Header del ítem */}
           <div className="item-card-header">
             <span className="badge bg-primary-soft text-primary">Ítem #{idx + 1}</span>
+            <input type="hidden" {...register(`items.${idx}.id`)} />
             {!readOnly && (
               <button
                 type="button"
@@ -66,6 +67,9 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                 placeholder="Ej: Cambio de pantalla, Disco sólido 480GB..."
                 className={`form-control ${(errors.items as any)?.[idx]?.descripcion ? "is-invalid" : ""}`}
               />
+              {(errors.items as any)?.[idx]?.descripcion && (
+                <div className="invalid-feedback">{(errors.items as any)?.[idx]?.descripcion.message}</div>
+              )}
             </div>
 
             {/* Fila 2: Especificaciones */}
