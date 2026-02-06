@@ -180,7 +180,7 @@ export default function PresupuestoIT() {
       sub: biz?.name || "Informática y Celulares",
       address: biz?.address || "Mendoza 4459, Paso del Rey",
       phone: biz?.phone || "11 3458 1490 (Whatsapp)",
-      email: biz?.email || "sontech.sistemas@gmail.com",
+      email: biz?.email || "ventas@sontech.com.ar",
       footerText: biz?.footerText,
       codigo, // << acá va el código para imprimirse en el título del PDF
     });
