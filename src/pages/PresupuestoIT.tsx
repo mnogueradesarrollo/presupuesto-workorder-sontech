@@ -153,29 +153,6 @@ export default function PresupuestoIT() {
 
   // Descargar PDF (usa código si existe)
   const handleDescargarPDF = async () => {
-    const itemsPdf = items.map((it) => {
-      const unit =
-        it.horas && it.tarifaHora
-          ? it.horas * (it.tarifaHora || 0)
-          : it.precioUnitario;
-      const desc = [
-        it.descripcion,
-        it.marca ? `Marca: ${it.marca}` : "",
-        it.modelo ? `Modelo: ${it.modelo}` : "",
-        it.imeiSerie ? `IMEI/Serie: ${it.imeiSerie}` : "",
-        it.garantiaValor && it.garantiaUnidad
-          ? `Garantía: ${it.garantiaValor} ${it.garantiaUnidad}`
-          : "",
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      return {
-        descripcion: desc || "-",
-        cantidad: it.cantidad || 1,
-        precioUnitario: unit,
-      };
-    });
-
     const d = new Date();
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -188,7 +165,31 @@ export default function PresupuestoIT() {
     const doc = await generarPresupuestoPDF({
       cliente: cliente || "Cliente",
       fecha: `${yyyy}-${mm}-${dd}`,
-      items: itemsPdf,
+      items: items.map((it) => {
+        const unit =
+          it.horas && it.tarifaHora
+            ? it.horas * (it.tarifaHora || 0)
+            : it.precioUnitario;
+        const descText = [
+          it.descripcion,
+          it.marca ? `Marca: ${it.marca}` : "",
+          it.modelo ? `Modelo: ${it.modelo}` : "",
+          it.imeiSerie ? `IMEI/Serie: ${it.imeiSerie}` : "",
+          it.garantiaValor && it.garantiaUnidad
+            ? `Garantía: ${it.garantiaValor} ${it.garantiaUnidad}`
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        return {
+          descripcion: descText || "-",
+          cantidad: it.cantidad || 1,
+          precioUnitario: unit,
+          descuentoPct: it.descuentoPct,
+        };
+      }),
+      subtotal: t.sub,
+      bonificacionPct: undefined, // Se puede expandir si se agrega el campo al UI
       total: t.total,
       moneda: "ARS",
       logoDataUrl: logoDataUrl ?? undefined,

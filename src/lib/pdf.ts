@@ -6,6 +6,7 @@ export type Item = {
   descripcion: string;
   cantidad: number;
   precioUnitario: number;
+  descuentoPct?: number;
 };
 
 export type PresupuestoPDF = {
@@ -15,6 +16,8 @@ export type PresupuestoPDF = {
   fecha: string; // yyyy-mm-dd
   notas?: string;
   items: Item[];
+  subtotal?: number;
+  bonificacionPct?: number;
   total: number;
   moneda?: "ARS" | "USD";
 
@@ -136,21 +139,53 @@ export async function generarPresupuestoPDF(p: PresupuestoPDF) {
 
   // ==== Tabla ====
   const currency = p.moneda ?? "ARS";
+  const hasAnyDiscount = p.items.some(it => it.descuentoPct && it.descuentoPct > 0);
+
+  const head = [["Descripción", "Cant.", "P. Unitario"]];
+  if (hasAnyDiscount) head[0].push("Desc.");
+  head[0].push("Subtotal");
+
   const body: RowInput[] = (
     p.items.length
       ? p.items
       : [{ descripcion: "(sin ítems)", cantidad: 0, precioUnitario: 0 }]
-  ).map((it) => [
-    it.descripcion || "-",
-    String(it.cantidad),
-    fmtMoney(it.precioUnitario, currency),
-    fmtMoney(it.cantidad * it.precioUnitario, currency),
-  ]);
+  ).map((it) => {
+    const unitPriceRecalculated = it.precioUnitario;
+    const row = [
+      it.descripcion || "-",
+      String(it.cantidad),
+      fmtMoney(unitPriceRecalculated, currency),
+    ];
+
+    if (hasAnyDiscount) {
+      row.push(it.descuentoPct ? `${it.descuentoPct}%` : "-");
+    }
+
+    const priceAfterDesc = it.descuentoPct
+      ? unitPriceRecalculated * (1 - it.descuentoPct / 100)
+      : unitPriceRecalculated;
+
+    row.push(fmtMoney(it.cantidad * priceAfterDesc, currency));
+    return row;
+  });
+
+  const colStyles: any = {
+    0: { halign: "left" },
+    1: { halign: "center", cellWidth: 50 },
+    2: { halign: "right", cellWidth: 90 },
+  };
+
+  if (hasAnyDiscount) {
+    colStyles[3] = { halign: "center", cellWidth: 50 };
+    colStyles[4] = { halign: "right", cellWidth: 90 };
+  } else {
+    colStyles[3] = { halign: "right", cellWidth: 90 };
+  }
 
   autoTable(doc, {
     theme: "grid",
     startY: topInfoY + 20,
-    head: [["Descripción", "Cant.", "P. Unitario", "Subtotal"]],
+    head,
     body,
     styles: {
       font: "helvetica",
@@ -163,12 +198,7 @@ export async function generarPresupuestoPDF(p: PresupuestoPDF) {
     headStyles: { fillColor: [235, 235, 235], textColor: 20, lineWidth: 0.2 },
     bodyStyles: { lineWidth: 0.15 },
     alternateRowStyles: { fillColor: [250, 250, 250] },
-    columnStyles: {
-      0: { halign: "left", cellWidth: W - M * 2 - (70 + 110 + 110) },
-      1: { halign: "center", cellWidth: 70 },
-      2: { halign: "right", cellWidth: 110 },
-      3: { halign: "right", cellWidth: 110 },
-    },
+    columnStyles: colStyles,
     margin: { left: M, right: M },
     didDrawPage: () => {
       doc.setFontSize(9);
@@ -186,19 +216,35 @@ export async function generarPresupuestoPDF(p: PresupuestoPDF) {
   const boxX = W - M - boxW;
   const boxY = afterTableY;
 
+  const showGlobalDiscount = p.bonificacionPct && p.bonificacionPct > 0;
+  const boxH = showGlobalDiscount ? 64 : 44;
+
   doc.setDrawColor(0);
   doc.setFillColor(245, 245, 245);
-  doc.roundedRect(boxX, boxY, boxW, 44, 4, 4, "FD");
+  doc.roundedRect(boxX, boxY, boxW, boxH, 4, 4, "FD");
+
+  let textY = boxY + 26;
+
+  if (showGlobalDiscount && p.subtotal != null) {
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Subtotal", boxX + 12, textY - 10);
+    doc.text(fmtMoney(p.subtotal, currency), boxX + boxW - 12, textY - 10, { align: "right" });
+
+    doc.text(`Bonificación (${p.bonificacionPct}%)`, boxX + 12, textY + 4);
+    const bonifAmt = (p.subtotal * (p.bonificacionPct || 0)) / 100;
+    doc.text(`- ${fmtMoney(bonifAmt, currency)}`, boxX + boxW - 12, textY + 4, { align: "right" });
+
+    textY += 22;
+  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
-  doc.text("Total", boxX + 12, boxY + 26);
+  doc.text("Total", boxX + 12, textY);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text(fmtMoney(p.total, currency), boxX + boxW - 12, boxY + 26, {
-    align: "right",
-  });
+  doc.text(fmtMoney(p.total, currency), boxX + boxW - 12, textY, { align: "right" });
 
   if (p.notas?.trim()) {
     const y2 = boxY + 60;
