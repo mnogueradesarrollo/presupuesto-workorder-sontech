@@ -228,7 +228,7 @@ export default function PresupuestoIT() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="m-0 fw-bold text-gradient">
           {isViewMode ? 'Vista de Presupuesto' : (editingId ? 'Editar Presupuesto' : 'Nuevo Presupuesto')}
-          {codigo && <span className="ms-2 text-muted small fw-normal">({codigo})</span>}
+          {codigo && <span className="ms-2 text-muted small fw-normal font-mono">({codigo})</span>}
         </h2>
         <button onClick={() => navigate(-1)} className="btn btn-light">
           <i className="bi bi-arrow-left me-1"></i> Volver
@@ -238,24 +238,24 @@ export default function PresupuestoIT() {
       <div className="row">
         <div className="col-lg-9 mx-auto">
           {/* El formulario estilo papel */}
-          <form onSubmit={handleSubmit(onSubmit)} className="paper-container mb-4 shadow-lg">
+          <form onSubmit={handleSubmit(onSubmit)} className="paper-container mb-4 border shadow-sm">
             <div className="d-flex justify-content-between align-items-center mb-5">
-              <img src={logoUrl} alt="Sontech" width={200} />
+              <img src={logoUrl} alt="Sontech" width={180} />
               <div className="text-end">
                 <h1 className="h3 mb-0 fw-bold text-primary">PRESUPUESTO</h1>
-                <p className="text-muted mb-0 fw-bold">{codigo || 'BORRADOR PENDIENTE'}</p>
+                <p className="text-muted mb-0 fw-bold font-mono">{codigo || 'BORRADOR PENDIENTE'}</p>
               </div>
             </div>
 
             <div className="row mb-5">
               <div className="col-md-7">
-                <div className="bg-light p-3 rounded-3">
+                <div className="bg-light p-3 border rounded">
                   <label className="small fw-bold text-muted mb-2 d-block text-uppercase">Datos del Cliente</label>
                   <input
                     {...register("cliente")}
                     placeholder="Nombre completo del cliente..."
                     disabled={isViewMode}
-                    className={`form-control form-control-lg border-0 bg-white ${errors.cliente ? "is-invalid" : ""}`}
+                    className={`form-control form-control-lg border-0 bg-white shadow-none ${errors.cliente ? "is-invalid" : ""}`}
                   />
                   {errors.cliente && <div className="invalid-feedback">{(errors.cliente as any).message}</div>}
                 </div>
@@ -286,9 +286,9 @@ export default function PresupuestoIT() {
             </div>
 
             <div className="d-flex justify-content-end mt-5 border-top pt-4">
-              <div className="text-end bg-light p-4 rounded-3" style={{ minWidth: '250px' }}>
+              <div className="text-end bg-light p-4 border rounded" style={{ minWidth: '250px' }}>
                 <div className="text-muted small mb-1 fw-bold text-uppercase">Total Presupuesto</div>
-                <div className="fs-2 fw-bold text-primary">${t.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                <div className="fs-2 fw-bold text-primary font-mono">${t.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                 <div className="text-muted x-small mt-1">IVA no incluido</div>
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function PresupuestoIT() {
 
           {/* Acciones Finales (FIJAS AL FONDO) */}
           <div className="sticky-action-bar print-hide">
-            <button onClick={handleDescargarPDF} className="btn btn-soft-info">
+            <button onClick={handleDescargarPDF} className="btn btn-soft-info" type="button">
               <i className="bi bi-file-earmark-pdf me-1"></i> Descargar PDF
             </button>
 
@@ -304,6 +304,7 @@ export default function PresupuestoIT() {
               <button
                 onClick={handleAceptar}
                 className="btn btn-soft-success"
+                type="button"
               >
                 <i className="bi bi-check2-circle me-1"></i> Aceptar Presupuesto
               </button>
@@ -314,6 +315,7 @@ export default function PresupuestoIT() {
                 onClick={handleSubmit(onSubmit, onInvalid)}
                 className="btn btn-primary px-5"
                 disabled={saving}
+                type="submit"
               >
                 {saving ? (
                   <><span className="spinner-border spinner-border-sm me-2"></span>Guardando...</>

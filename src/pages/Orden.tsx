@@ -240,7 +240,7 @@ export default function OrdenPage() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="m-0 fw-bold text-gradient">
           Orden de Trabajo
-          <span className="ms-2 text-muted small fw-normal">({orden.codigo || id?.slice(0, 8)})</span>
+          <span className="ms-2 text-muted small fw-normal font-mono">({orden.codigo || id?.slice(0, 8)})</span>
         </h2>
         <button onClick={() => navigate(-1)} className="btn btn-light">
           <i className="bi bi-arrow-left me-1"></i> Volver
@@ -258,42 +258,42 @@ export default function OrdenPage() {
                   {orden.status.replace('_', ' ')}
                 </span>
                 <h1 className="h4 mb-0 fw-bold text-primary">ORDEN DE TRABAJO</h1>
-                <p className="text-muted small mb-0 fw-bold">OT-{orden.codigo || id?.slice(0, 8)}</p>
+                <p className="text-muted small mb-0 fw-bold font-mono">OT-{orden.codigo || id?.slice(0, 8)}</p>
               </div>
             </div>
 
             {/* Info Cliente & Equipo */}
             <div className="row mb-5 g-4">
               <div className="col-md-6">
-                <div className="bg-light p-3 rounded-3 h-100 border-start border-primary border-4">
+                <div className="bg-light p-3 border rounded h-100 border-start border-primary border-3">
                   <label className="x-small fw-bold text-muted mb-2 d-block text-uppercase">Información del Cliente</label>
                   <div className="fs-5 fw-bold mb-1">{orden.cliente}</div>
-                  <div className="text-muted small">ID de seguimiento: {id?.slice(0, 12)}</div>
+                  <div className="text-muted small font-mono">ID: {id?.slice(0, 12)}</div>
                 </div>
               </div>
               <div className="col-md-6">
-                <div className="bg-light p-3 rounded-3 h-100">
+                <div className="bg-light p-3 border rounded h-100">
                   <label className="x-small fw-bold text-muted mb-2 d-block text-uppercase">Equipo en Servicio</label>
                   <div className="fw-bold">{orden.equipo?.marca} {orden.equipo?.modelo}</div>
-                  <div className="text-muted small">SN/IMEI: {orden.equipo?.imeiSerie || 'N/A'}</div>
+                  <div className="text-muted small font-mono">SN/IMEI: {orden.equipo?.imeiSerie || 'N/A'}</div>
                 </div>
               </div>
             </div>
 
             {/* Resumen Financiero Rápido */}
-            <div className="info-box-premium mb-5">
+            <div className="info-box-premium mb-5 border">
               <div className="stats-grid-compact">
                 <div className="stat-item">
                   <label>Total Final</label>
-                  <div className="value">${(orden.totalFinal ?? orden.totalEstimado ?? 0).toLocaleString()}</div>
+                  <div className="value font-mono">${(orden.totalFinal ?? orden.totalEstimado ?? 0).toLocaleString()}</div>
                 </div>
                 <div className="stat-item">
                   <label>Pagado</label>
-                  <div className="value text-success">${(orden.pagado ?? 0).toLocaleString()}</div>
+                  <div className="value text-success font-mono">${(orden.pagado ?? 0).toLocaleString()}</div>
                 </div>
                 <div className="stat-item">
                   <label>Saldo Pendiente</label>
-                  <div className={`value ${(orden.saldo ?? 0) > 0 ? 'balance-negative' : 'balance-positive'}`}>
+                  <div className={`value font-mono ${(orden.saldo ?? 0) > 0 ? 'balance-negative' : 'balance-positive'}`}>
                     ${(orden.saldo ?? 0).toLocaleString()}
                   </div>
                 </div>
@@ -356,11 +356,11 @@ export default function OrdenPage() {
                       </div>
                       <div className="col-md-2">
                         <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Horas</label>
-                        <input type="number" {...register(`trabajos.${index}.horas`)} className="form-control form-control-sm" />
+                        <input type="number" {...register(`trabajos.${index}.horas`)} className="form-control form-control-sm font-mono" />
                       </div>
                       <div className="col-md-2">
                         <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Precio</label>
-                        <input type="number" {...register(`trabajos.${index}.precio`)} className="form-control form-control-sm" />
+                        <input type="number" {...register(`trabajos.${index}.precio`)} className="form-control form-control-sm font-mono" />
                       </div>
                       <div className="col-md-1 d-flex align-items-end">
                         <button type="button" onClick={() => removeTrabajo(index)} className="btn-action btn-soft-danger ms-auto">
@@ -397,11 +397,11 @@ export default function OrdenPage() {
                       </div>
                       <div className="col-md-2">
                         <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Cant.</label>
-                        <input type="number" {...register(`repuestos.${index}.cantidad`)} className="form-control form-control-sm" />
+                        <input type="number" {...register(`repuestos.${index}.cantidad`)} className="form-control form-control-sm font-mono" />
                       </div>
                       <div className="col-md-2">
                         <label className="x-small fw-bold text-muted text-uppercase d-block mb-1">Precio Unit.</label>
-                        <input type="number" {...register(`repuestos.${index}.precio`)} className="form-control form-control-sm" />
+                        <input type="number" {...register(`repuestos.${index}.precio`)} className="form-control form-control-sm font-mono" />
                       </div>
                       <div className="col-md-1 d-flex align-items-end">
                         <button type="button" onClick={() => removeRepuesto(index)} className="btn-action btn-soft-danger ms-auto">
@@ -418,8 +418,8 @@ export default function OrdenPage() {
             {/* Historial de Pagos */}
             <div className="mb-4">
               <h3 className="h6 fw-bold text-uppercase mb-3">Historial de Pagos</h3>
-              <div className="table-responsive bg-light rounded-3 p-2">
-                <table className="table table-sm table-borderless m-0">
+              <div className="table-responsive bg-light p-2">
+                <table className="table table-sm table-borderless m-0 bg-transparent">
                   <thead className="x-small text-muted text-uppercase">
                     <tr>
                       <th>Fecha</th>
@@ -431,9 +431,9 @@ export default function OrdenPage() {
                   <tbody className="small">
                     {pagos.map((p) => (
                       <tr key={p.id}>
-                        <td>{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td className="font-mono text-muted">{new Date(p.createdAt).toLocaleDateString()}</td>
                         <td><span className="badge bg-white text-dark border">{p.metodo}</span></td>
-                        <td className="text-end fw-bold">${p.monto.toLocaleString()}</td>
+                        <td className="text-end fw-bold font-mono">${p.monto.toLocaleString()}</td>
                         <td className="text-end">
                           <button type="button" onClick={() => handleEliminarPago(p.id)} className="btn-action btn-soft-danger btn-xs ms-auto" style={{ width: 24, height: 24 }}>
                             <i className="bi bi-x"></i>
@@ -449,14 +449,14 @@ export default function OrdenPage() {
 
             {/* Referencia Presupuesto Original */}
             {orden.itemsPresupuesto && orden.itemsPresupuesto.length > 0 && (
-              <div className="info-box-premium mt-5">
+              <div className="info-box-premium mt-5 border">
                 <label className="x-small fw-bold text-muted text-uppercase d-block mb-2">Base del Presupuesto Original</label>
                 <div className="row row-cols-1 row-cols-md-2 g-2">
                   {orden.itemsPresupuesto.map((it, idx) => (
                     <div key={idx} className="col">
-                      <div className="small bg-white p-2 rounded border-start border-2 border-info d-flex justify-content-between">
+                      <div className="small bg-white p-2 border rounded border-start border-2 border-info d-flex justify-content-between">
                         <span className="text-truncate" style={{ maxWidth: '70%' }}>{it.descripcion}</span>
-                        <span className="fw-bold">${(it.precioUnitario ?? (it.horas! * it.tarifaHora!)).toLocaleString()}</span>
+                        <span className="fw-bold font-mono">${(it.precioUnitario ?? (it.horas! * it.tarifaHora!)).toLocaleString()}</span>
                       </div>
                     </div>
                   ))}

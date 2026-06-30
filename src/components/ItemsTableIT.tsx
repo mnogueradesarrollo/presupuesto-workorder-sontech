@@ -97,7 +97,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                 {...register(`items.${idx}.imeiSerie`)}
                 disabled={readOnly}
                 placeholder="Identificación del dispositivo..."
-                className="form-control"
+                className="form-control font-mono"
               />
             </div>
 
@@ -124,7 +124,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                   min={0}
                   disabled={readOnly}
                   {...register(`items.${idx}.garantiaValor`, { valueAsNumber: true })}
-                  className="form-control"
+                  className="form-control font-mono"
                   style={{ width: '80px' }}
                 />
                 <select
@@ -148,7 +148,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                 min={1}
                 disabled={readOnly}
                 {...register(`items.${idx}.cantidad`, { valueAsNumber: true })}
-                className={`form-control ${(errors.items as any)?.[idx]?.cantidad ? "is-invalid" : ""}`}
+                className={`form-control font-mono ${(errors.items as any)?.[idx]?.cantidad ? "is-invalid" : ""}`}
               />
             </div>
 
@@ -162,14 +162,14 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                     placeholder="Hr"
                     disabled={readOnly}
                     {...register(`items.${idx}.horas`, { valueAsNumber: true })}
-                    className="form-control"
+                    className="form-control font-mono"
                   />
                   <input
                     type="number"
                     placeholder="$$"
                     disabled={readOnly}
                     {...register(`items.${idx}.tarifaHora`, { valueAsNumber: true })}
-                    className="form-control"
+                    className="form-control font-mono"
                   />
                 </div>
               ) : (
@@ -177,7 +177,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                   type="number"
                   disabled={readOnly}
                   {...register(`items.${idx}.precioUnitario`, { valueAsNumber: true })}
-                  className="form-control"
+                  className="form-control font-mono"
                 />
               )}
             </div>
@@ -190,7 +190,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                 max={100}
                 disabled={readOnly}
                 {...register(`items.${idx}.descuentoPct`, { valueAsNumber: true })}
-                className="form-control"
+                className="form-control font-mono"
               />
             </div>
           </div>
@@ -198,15 +198,15 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
           {/* Footer del ítem con el subtotal */}
           <div className="item-card-footer">
             <span className="text-muted small">Subtotal ítem:</span>
-            <span className="fs-5 fw-bold text-primary">${lineTotal(it).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span className="fs-5 fw-bold text-primary font-mono">${lineTotal(it).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
         </div>
       ))}
 
       {/* Resumen total de la lista */}
-      <div className="d-flex justify-content-end align-items-center mt-3 p-3 bg-white rounded shadow-sm">
+      <div className="d-flex justify-content-end align-items-center mt-3 p-3 bg-white border rounded">
         <span className="text-muted me-3">Subtotal de todos los ítems:</span>
-        <span className="fs-4 fw-bold text-gradient">${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+        <span className="fs-4 fw-bold text-gradient font-mono">${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
       </div>
     </div>
   );

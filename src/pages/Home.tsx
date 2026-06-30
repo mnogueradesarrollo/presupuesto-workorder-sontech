@@ -176,10 +176,10 @@ export default function Home() {
                 <tbody>
                   {filteredPres.map((p) => (
                     <tr key={p.id}>
-                      <td className="fw-medium">{p.codigo || "—"}</td>
+                      <td className="fw-medium font-mono">{p.codigo || "—"}</td>
                       <td>{p.cliente}</td>
-                      <td>{p.fecha?.slice(0, 10)}</td>
-                      <td className="text-center text-nowrap">${p.total?.toFixed(2)}</td>
+                      <td className="font-mono text-muted">{p.fecha?.slice(0, 10)}</td>
+                      <td className="text-center text-nowrap font-mono">${p.total?.toFixed(2)}</td>
                       <td className="text-center">
                         <span className={`badge status-${p.status}`}>
                           {p.status}
@@ -227,19 +227,19 @@ export default function Home() {
               <div className="row g-3">
                 {filteredPres.map((p) => (
                   <div key={p.id} className="col-12">
-                    <div className="card border p-3 border-start border-4 border-primary">
+                    <div className="card p-3" style={{ borderLeft: '4px solid var(--tech-accent)' }}>
                       <div className="d-flex justify-content-between align-items-start mb-2">
                         <div>
-                          <span className="x-small fw-bold text-muted text-uppercase d-block">{p.codigo || 'BORRADOR'}</span>
+                          <span className="x-small fw-bold text-muted text-uppercase d-block font-mono">{p.codigo || 'BORRADOR'}</span>
                           <span className="fw-bold d-block">{p.cliente}</span>
-                          <span className="text-muted small">{p.fecha?.slice(0, 10)}</span>
+                          <span className="text-muted small font-mono">{p.fecha?.slice(0, 10)}</span>
                         </div>
                         <span className={`badge status-${p.status}`}>
                           {p.status}
                         </span>
                       </div>
                       <div className="d-flex justify-content-between align-items-center mt-3">
-                        <div className="fs-5 fw-bold text-primary">${p.total?.toFixed(2)}</div>
+                        <div className="fs-5 fw-bold text-primary font-mono">${p.total?.toFixed(2)}</div>
                         <div className="d-flex gap-2">
                           <button
                             className="btn btn-sm btn-soft-info"
@@ -317,7 +317,7 @@ export default function Home() {
                 <tbody>
                   {filteredOrds.map((o) => (
                     <tr key={o.id}>
-                      <td className="fw-medium">{o.codigo || o.id.slice(0, 8)}</td>
+                      <td className="fw-medium font-mono">{o.codigo || o.id.slice(0, 8)}</td>
                       <td>{o.cliente}</td>
                       <td className="text-center">
                         <span className={`badge status-${o.status}`}>
@@ -329,9 +329,9 @@ export default function Home() {
                           {o.payStatus}
                         </span>
                       </td>
-                      <td className="text-center text-nowrap">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</td>
-                      <td className="text-center text-nowrap">${(o.pagado ?? 0).toFixed(2)}</td>
-                      <td className="text-center text-nowrap" style={{ color: (o.saldo ?? 0) > 0 ? 'var(--red-600, #dc2626)' : 'inherit', fontWeight: 'bold' }}>
+                      <td className="text-center text-nowrap font-mono">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</td>
+                      <td className="text-center text-nowrap font-mono">${(o.pagado ?? 0).toFixed(2)}</td>
+                      <td className="text-center text-nowrap font-mono" style={{ color: (o.saldo ?? 0) > 0 ? 'var(--danger)' : 'inherit', fontWeight: 'bold' }}>
                         ${(o.saldo ?? 0).toFixed(2)}
                       </td>
                       <td className="right">
@@ -353,10 +353,10 @@ export default function Home() {
               <div className="row g-3">
                 {filteredOrds.map((o) => (
                   <div key={o.id} className="col-12">
-                    <div className="card border p-3 border-start border-4 border-warning">
+                    <div className="card p-3" style={{ borderLeft: '4px solid var(--warning)' }}>
                       <div className="d-flex justify-content-between align-items-start mb-2">
                         <div>
-                          <span className="x-small fw-bold text-muted text-uppercase d-block">OT-{o.codigo || o.id.slice(0, 8)}</span>
+                          <span className="x-small fw-bold text-muted text-uppercase d-block font-mono">OT-{o.codigo || o.id.slice(0, 8)}</span>
                           <span className="fw-bold d-block">{o.cliente}</span>
                         </div>
                         <div className="d-flex flex-column align-items-end gap-1">
@@ -371,15 +371,15 @@ export default function Home() {
                       <div className="row g-2 my-2 py-2 border-top border-bottom">
                         <div className="col-4 text-center">
                           <span className="x-small text-muted d-block text-uppercase">Total</span>
-                          <span className="small fw-bold">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</span>
+                          <span className="small fw-bold font-mono">${(o.totalFinal ?? o.totalEstimado ?? 0).toFixed(2)}</span>
                         </div>
                         <div className="col-4 text-center border-start border-end">
                           <span className="x-small text-muted d-block text-uppercase">Pagado</span>
-                          <span className="small fw-bold text-success">${(o.pagado ?? 0).toFixed(2)}</span>
+                          <span className="small fw-bold text-success font-mono">${(o.pagado ?? 0).toFixed(2)}</span>
                         </div>
                         <div className="col-4 text-center">
                           <span className="x-small text-muted d-block text-uppercase">Saldo</span>
-                          <span className="small fw-bold text-danger">${(o.saldo ?? 0).toFixed(2)}</span>
+                          <span className="small fw-bold text-danger font-mono">${(o.saldo ?? 0).toFixed(2)}</span>
                         </div>
                       </div>
                       <div className="d-flex justify-content-end mt-2">

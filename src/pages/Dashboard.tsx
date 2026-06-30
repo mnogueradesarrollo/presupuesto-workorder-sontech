@@ -58,33 +58,33 @@ export default function Dashboard() {
             <h2 className="mb-4 fw-bold text-gradient d-inline-block">Dashboard General</h2>
 
             <div className="grid-stats">
-                <div className="card" style={{ borderTop: '4px solid var(--primary)' }}>
+                <div className="card" style={{ borderTop: '3px solid var(--tech-accent)' }}>
                     <label className="text-uppercase small fw-bold text-muted mb-2 d-block">PRESUPUESTOS</label>
-                    <div className="fs-1 fw-bold text-primary">{stats.totalPres}</div>
+                    <div className="fs-1 fw-bold text-primary font-mono">{stats.totalPres}</div>
                     <div className="text-success small mt-1 fw-semibold">
                         <i className="bi bi-check-circle-fill me-1"></i>
-                        {stats.presAceptados} aceptados
+                        <span className="font-mono">{stats.presAceptados}</span> aceptados
                     </div>
                 </div>
 
-                <div className="card" style={{ borderTop: '4px solid var(--warning)' }}>
+                <div className="card" style={{ borderTop: '3px solid var(--warning)' }}>
                     <label className="text-uppercase small fw-bold text-muted mb-2 d-block">ÓRDENES ACTIVAS</label>
-                    <div className="fs-1 fw-bold" style={{ color: 'var(--warning)' }}>{stats.ordsPendientes}</div>
+                    <div className="fs-1 fw-bold font-mono text-warning">{stats.ordsPendientes}</div>
                     <div className="text-muted small mt-1">
                         <i className="bi bi-tools me-1"></i>
-                        {stats.ordsCompletadas} finalizadas
+                        <span className="font-mono">{stats.ordsCompletadas}</span> finalizadas
                     </div>
                 </div>
 
-                <div className="card" style={{ borderTop: '4px solid var(--success)' }}>
+                <div className="card" style={{ borderTop: '3px solid var(--success)' }}>
                     <label className="text-uppercase small fw-bold text-muted mb-2 d-block">TOTAL RECAUDADO</label>
-                    <div className="fs-1 fw-bold text-success">${stats.totalPagado.toLocaleString()}</div>
+                    <div className="fs-1 fw-bold text-success font-mono">${stats.totalPagado.toLocaleString()}</div>
                     <div className="text-muted small mt-1">Efectivo / Otros</div>
                 </div>
 
-                <div className="card" style={{ borderTop: '4px solid var(--danger)' }}>
+                <div className="card" style={{ borderTop: '3px solid var(--danger)' }}>
                     <label className="text-uppercase small fw-bold text-muted mb-2 d-block">SALDO PENDIENTE</label>
-                    <div className="fs-1 fw-bold text-danger">${stats.saldoPendiente.toLocaleString()}</div>
+                    <div className="fs-1 fw-bold text-danger font-mono">${stats.saldoPendiente.toLocaleString()}</div>
                     <div className="text-muted small mt-1">Por cobrar</div>
                 </div>
             </div>
@@ -92,28 +92,27 @@ export default function Dashboard() {
             <div className="grid-cols-2">
                 <div className="card">
                     <h3 className="fs-5 mb-4 fw-bold">Rendimiento de Conversión</h3>
-                    <div style={{ height: 16, background: '#f1f3f4', borderRadius: 8, overflow: 'hidden', display: 'flex' }}>
+                    <div style={{ height: 8, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
                         <div style={{
                             width: `${(stats.presAceptados / (stats.totalPres || 1)) * 100}%`,
                             background: 'var(--gradient-primary)',
-                            boxShadow: '0 0 10px rgba(67, 97, 238, 0.4)'
                         }} />
                     </div>
                     <p className="text-muted small mt-3 mb-0">
-                        El <strong>{((stats.presAceptados / (stats.totalPres || 1)) * 100).toFixed(1)}%</strong> de tus presupuestos son aceptados satisfactoriamente.
+                        El <strong className="font-mono">{((stats.presAceptados / (stats.totalPres || 1)) * 100).toFixed(1)}%</strong> de tus presupuestos son aceptados satisfactoriamente.
                     </p>
                 </div>
 
                 <div className="card">
                     <h3 className="fs-5 mb-4 fw-bold">Estado de Reparaciones</h3>
-                    <div style={{ height: 16, background: '#f1f3f4', borderRadius: 8, overflow: 'hidden', display: 'flex' }}>
+                    <div style={{ height: 8, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
                         <div style={{
                             width: `${(stats.ordsCompletadas / (stats.totalOrds || 1)) * 100}%`,
-                            background: 'linear-gradient(90deg, #2ec4b6, #00b4d8)'
+                            background: 'var(--success)'
                         }} />
                     </div>
                     <p className="text-muted small mt-3 mb-0">
-                        Has completado exitosamente el <strong>{((stats.ordsCompletadas / (stats.totalOrds || 1)) * 100).toFixed(1)}%</strong> de los trabajos técnicos asignados.
+                        Has completado exitosamente el <strong className="font-mono">{((stats.ordsCompletadas / (stats.totalOrds || 1)) * 100).toFixed(1)}%</strong> de los trabajos técnicos asignados.
                     </p>
                 </div>
             </div>
