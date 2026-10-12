@@ -335,12 +335,24 @@ export default function Home() {
                         ${(o.saldo ?? 0).toFixed(2)}
                       </td>
                       <td className="right">
-                        <button
-                          className="btn btn-sm btn-soft-primary border-0"
-                          onClick={() => navigate(`/orden/${o.id}`)}
-                        >
-                          <i className="bi bi-folder2-open me-1"></i> Abrir
-                        </button>
+                        <div className="d-flex justify-content-end gap-1">
+                          <button
+                            className="btn btn-sm btn-soft-primary border-0"
+                            onClick={() => navigate(`/orden/${o.id}`)}
+                            title="Abrir Ficha de Orden"
+                          >
+                            <i className="bi bi-folder2-open me-1"></i> Abrir
+                          </button>
+                          <a
+                            href={`/seguimiento/${o.codigo || o.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-sm btn-soft-info border-0"
+                            title="Ver Portal de Seguimiento del Cliente"
+                          >
+                            <i className="bi bi-eye"></i>
+                          </a>
+                        </div>
                       </td>
                     </tr>
                   ))}

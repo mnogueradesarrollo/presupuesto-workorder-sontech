@@ -736,3 +736,28 @@ h1, h2, h3, h4, h5, h6, .font-display {
     transform: translateY(0);
   }
 }
+
+/* ===== Utilidades Laboratorio & POS ===== */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+  transform: translateY(-2px);
+}
+
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ring-4 {
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.25);
+}

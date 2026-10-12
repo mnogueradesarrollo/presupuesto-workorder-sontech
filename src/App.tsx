@@ -6,6 +6,16 @@ import OrdenPage from "./pages/Orden";
 import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import Clientes from "./pages/Clientes";
+import Proveedores from "./pages/Proveedores";
+import Productos from "./pages/Productos";
+import Ventas from "./pages/Ventas";
+import Equipos from "./pages/Equipos";
+import Abonos from "./pages/Abonos";
+import ConsumiblesScrap from "./pages/ConsumiblesScrap";
+import BaseConocimiento from "./pages/BaseConocimiento";
+import VisitasTecnicas from "./pages/VisitasTecnicas";
+import TrackingPublico from "./pages/TrackingPublico";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
@@ -20,8 +30,11 @@ export default function App() {
         <Navbar />
         <main className="container-fluid p-0">
           <Routes>
+            {/* Rutas Públicas */}
             <Route path="/login" element={<Login />} />
+            <Route path="/seguimiento/:codigo" element={<TrackingPublico />} />
 
+            {/* Dashboard & Gestión Principal */}
             <Route path="/" element={
               <ProtectedRoute>
                 <div className="container py-4">
@@ -51,6 +64,62 @@ export default function App() {
                 <div className="container py-4">
                   <OrdenPage />
                 </div>
+              </ProtectedRoute>
+            } />
+
+            {/* Directorios & Comercial */}
+            <Route path="/clientes" element={
+              <ProtectedRoute>
+                <Clientes />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/proveedores" element={
+              <ProtectedRoute>
+                <Proveedores />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/productos" element={
+              <ProtectedRoute>
+                <Productos />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/ventas" element={
+              <ProtectedRoute>
+                <Ventas />
+              </ProtectedRoute>
+            } />
+
+            {/* Laboratorio & CMDB */}
+            <Route path="/equipos" element={
+              <ProtectedRoute>
+                <Equipos />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/scrap" element={
+              <ProtectedRoute>
+                <ConsumiblesScrap />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/kb" element={
+              <ProtectedRoute>
+                <BaseConocimiento />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/visitas" element={
+              <ProtectedRoute>
+                <VisitasTecnicas />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/abonos" element={
+              <ProtectedRoute>
+                <Abonos />
               </ProtectedRoute>
             } />
 

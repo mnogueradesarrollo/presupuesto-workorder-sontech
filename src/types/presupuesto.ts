@@ -12,6 +12,7 @@ export type Aceptacion = {
 
 export type ItemPresupuesto = {
   id: string;
+  productoId?: string;
   tipo: "Producto" | "Servicio" | "Reparación";
   descripcion: string;
   cantidad: number;
@@ -22,9 +23,9 @@ export type ItemPresupuesto = {
   modelo?: string;
   imeiSerie?: string;
   estado?: "Nuevo" | "Usado" | "Reacondicionado";
-  garantiaMeses?: number; // puedes seguir usándolo si querés
-  garantiaValor?: number; // NUEVO
-  garantiaUnidad?: GarantiaUnidad; // NUEVO
+  garantiaMeses?: number;
+  garantiaValor?: number;
+  garantiaUnidad?: GarantiaUnidad;
   nota?: string;
 
   horas?: number;
@@ -34,12 +35,15 @@ export type ItemPresupuesto = {
 export type Presupuesto = {
   id: string;
   cliente: string;
+  clienteId?: string;
+  clienteTelefono?: string;
+  clienteEmail?: string;
   fecha: string; // ISO
   moneda?: Currency;
   items: ItemPresupuesto[];
-  anio?: number; // NUEVO
-  numero?: number; // NUEVO (incremental por año)
-  codigo?: string; // NUEVO "P-YYYY-0001"
+  anio?: number;
+  numero?: number;
+  codigo?: string; // "P-YYYY-0001"
   ivaPct?: number;
   recargoTarjetaPct?: number;
   bonificacionPct?: number;

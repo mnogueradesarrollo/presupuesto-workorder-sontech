@@ -13,6 +13,10 @@ import {
   updatePresupuesto,
 } from "../services/presupuestos";
 import { aceptarPresupuesto, sincronizarOrdenConPresupuesto } from "../services/flujo";
+import { listClientes } from "../services/clientes";
+import { listProductos } from "../services/productos";
+import type { Cliente } from "../types/cliente";
+import type { Producto } from "../types/producto";
 import { generarPresupuestoPDF, toDataURL } from "../lib/pdf";
 import { getSettings } from "../services/settings";
 import { toast } from "react-hot-toast";
@@ -25,6 +29,7 @@ const schema = z.object({
   cliente: z.string().min(1, "El cliente es obligatorio"),
   items: z.array(z.object({
     id: z.string(),
+    productoId: z.string().optional(),
     tipo: z.enum(["Producto", "Servicio", "Reparación"]),
     descripcion: z.string().min(1, "La descripción es necesaria"),
     cantidad: z.coerce.number().min(1, "La cantidad debe ser al menos 1"),
@@ -41,26 +46,39 @@ const schema = z.object({
   })).min(1, "Debe haber al menos un ítem"),
 });
 
-
 export default function PresupuestoIT() {
   const [params] = useSearchParams();
   const editingId = params.get("id");
   const isViewMode = params.get("view") === "true";
+  const paramCliente = params.get("cliente");
+  const paramMarca = params.get("marca");
+  const paramModelo = params.get("modelo");
+  const paramSerie = params.get("serie");
+
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [codigo, setCodigo] = useState<string | undefined>(undefined);
   const [currentOrdenId, setCurrentOrdenId] = useState<string | undefined>(undefined);
 
-  const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm<any>({
+  // Catálogos auxiliares
+  const [clientesDb, setClientesDb] = useState<Cliente[]>([]);
+  const [productosDb, setProductosDb] = useState<Producto[]>([]);
+  const [modalProdPicker, setModalProdPicker] = useState(false);
+  const [searchPicker, setSearchPicker] = useState("");
+
+  const { register, control, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm<any>({
     resolver: zodResolver(schema),
     defaultValues: {
-      cliente: "",
+      cliente: paramCliente || "",
       items: [{
         id: crypto.randomUUID(),
-        tipo: "Producto",
-        descripcion: "",
+        tipo: paramMarca || paramModelo ? "Reparación" : "Producto",
+        descripcion: paramMarca || paramModelo ? `Reparación y diagnóstico de ${paramMarca || ''} ${paramModelo || ''}`.trim() : "",
         cantidad: 1,
         precioUnitario: 0,
+        marca: paramMarca || undefined,
+        modelo: paramModelo || undefined,
+        imeiSerie: paramSerie || undefined,
       }]
     }
   });
@@ -73,13 +91,29 @@ export default function PresupuestoIT() {
   const items = watch("items") as ItemPresupuesto[];
   const cliente = watch("cliente");
 
-  // SIN IVA por ahora
+  // Totales
   const t = totals({
     items,
     ivaPct: 0,
     recargoTarjetaPct: undefined,
     bonificacionPct: undefined,
   });
+
+  // Cargar clientes y productos
+  useEffect(() => {
+    (async () => {
+      try {
+        const [clis, prods] = await Promise.all([
+          listClientes(200),
+          listProductos(200),
+        ]);
+        setClientesDb(clis);
+        setProductosDb(prods);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
 
   // Cargar si es edición
   useEffect(() => {
@@ -96,8 +130,28 @@ export default function PresupuestoIT() {
     })();
   }, [editingId, reset]);
 
+  // Selección de cliente desde datalist
+  const handleClienteSelect = (selectedName: string) => {
+    setValue("cliente", selectedName);
+  };
+
+  // Agregar producto desde catálogo
+  const handleAddFromCatalog = (prod: Producto) => {
+    append({
+      id: crypto.randomUUID(),
+      productoId: prod.id,
+      tipo: prod.tipo === "repuesto" ? "Reparación" : prod.tipo === "servicio" ? "Servicio" : "Producto",
+      descripcion: prod.nombre,
+      cantidad: 1,
+      precioUnitario: prod.precioVenta,
+      garantiaValor: prod.garantiaMesesCliente || 3,
+      garantiaUnidad: "meses",
+    });
+    setModalProdPicker(false);
+    toast.success(`"${prod.nombre}" agregado al presupuesto`);
+  };
+
   const onSubmit = async (data: any) => {
-    console.log("Submitting Data:", data);
     setSaving(true);
     try {
       if (editingId) {
@@ -137,7 +191,6 @@ export default function PresupuestoIT() {
   };
 
   const onInvalid = (errors: any) => {
-    console.log("Validation Errors:", errors);
     if (errors.cliente) {
       toast.error("El nombre del cliente es obligatorio.");
     } else if (errors.items) {
@@ -151,14 +204,13 @@ export default function PresupuestoIT() {
     }
   };
 
-  // Descargar PDF (usa código si existe)
+  // Descargar PDF
   const handleDescargarPDF = async () => {
     const d = new Date();
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
 
-    // Intentar obtener ajustes del negocio
     const biz = await getSettings();
     const logoDataUrl = biz?.logoUrl ? await toDataURL(biz.logoUrl) : await toDataURL(logoUrl);
 
@@ -189,7 +241,7 @@ export default function PresupuestoIT() {
         };
       }),
       subtotal: t.sub,
-      bonificacionPct: undefined, // Se puede expandir si se agrega el campo al UI
+      bonificacionPct: undefined,
       total: t.total,
       moneda: "ARS",
       logoDataUrl: logoDataUrl ?? undefined,
@@ -198,7 +250,7 @@ export default function PresupuestoIT() {
       phone: biz?.phone || "11 3458 1490 (Whatsapp)",
       email: biz?.email || "ventas@sontech.com.ar",
       footerText: biz?.footerText,
-      codigo, // << acá va el código para imprimirse en el título del PDF
+      codigo,
     });
 
     const fname = codigo
@@ -207,7 +259,7 @@ export default function PresupuestoIT() {
     doc.save(fname);
   };
 
-  // Aceptar → crear Orden (mejor hacerlo desde Home, pero lo dejo por si lo usás)
+  // Aceptar → crear Orden
   const handleAceptar = async () => {
     if (!editingId) {
       toast.error("Guardá el presupuesto primero.");
@@ -222,9 +274,18 @@ export default function PresupuestoIT() {
     navigate(`/orden/${ordenId}`);
   };
 
+  const prodsFiltradosPicker = productosDb.filter((p) => {
+    const q = searchPicker.toLowerCase();
+    return (
+      p.nombre.toLowerCase().includes(q) ||
+      p.codigo.toLowerCase().includes(q) ||
+      p.categoriaNombre.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="container py-5">
-      {/* Header de la Página */}
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="m-0 fw-bold text-gradient">
           {isViewMode ? 'Vista de Presupuesto' : (editingId ? 'Editar Presupuesto' : 'Nuevo Presupuesto')}
@@ -236,7 +297,7 @@ export default function PresupuestoIT() {
       </div>
 
       <div className="row">
-        <div className="col-lg-9 mx-auto">
+        <div className="col-lg-10 mx-auto">
           {/* El formulario estilo papel */}
           <form onSubmit={handleSubmit(onSubmit)} className="paper-container mb-4 border shadow-sm">
             <div className="d-flex justify-content-between align-items-center mb-5">
@@ -250,13 +311,25 @@ export default function PresupuestoIT() {
             <div className="row mb-5">
               <div className="col-md-7">
                 <div className="bg-light p-3 border rounded">
-                  <label className="small fw-bold text-muted mb-2 d-block text-uppercase">Datos del Cliente</label>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <label className="small fw-bold text-muted text-uppercase m-0">Datos del Cliente</label>
+                    <span className="small text-muted">Escribe o selecciona de la lista</span>
+                  </div>
                   <input
                     {...register("cliente")}
-                    placeholder="Nombre completo del cliente..."
+                    list="clientesDatalist"
+                    placeholder="Nombre completo o empresa del cliente..."
                     disabled={isViewMode}
                     className={`form-control form-control-lg border-0 bg-white shadow-none ${errors.cliente ? "is-invalid" : ""}`}
+                    onChange={(e) => handleClienteSelect(e.target.value)}
                   />
+                  <datalist id="clientesDatalist">
+                    {clientesDb.map((c) => (
+                      <option key={c.id} value={c.nombre}>
+                        {c.nombre} {c.telefono ? `(${c.telefono})` : ''}
+                      </option>
+                    ))}
+                  </datalist>
                   {errors.cliente && <div className="invalid-feedback">{(errors.cliente as any).message}</div>}
                 </div>
               </div>
@@ -266,13 +339,24 @@ export default function PresupuestoIT() {
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <label className="small fw-bold text-muted text-uppercase m-0">Detalle de Productos / Servicios</label>
                 {!isViewMode && (
-                  <button
-                    type="button"
-                    onClick={() => append({ id: crypto.randomUUID(), tipo: "Producto", descripcion: "", cantidad: 1, precioUnitario: 0 })}
-                    className="btn btn-soft-primary btn-sm"
-                  >
-                    <i className="bi bi-plus-circle me-1"></i> Agregar Ítem
-                  </button>
+                  <div className="d-flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setModalProdPicker(true)}
+                      className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                    >
+                      <i className="bi bi-box-seam"></i>
+                      <span>Desde Catálogo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => append({ id: crypto.randomUUID(), tipo: "Producto", descripcion: "", cantidad: 1, precioUnitario: 0 })}
+                      className="btn btn-soft-primary btn-sm d-flex align-items-center gap-1"
+                    >
+                      <i className="bi bi-plus-circle"></i>
+                      <span>Ítem Manual</span>
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -306,7 +390,7 @@ export default function PresupuestoIT() {
                 className="btn btn-soft-success"
                 type="button"
               >
-                <i className="bi bi-check2-circle me-1"></i> Aceptar Presupuesto
+                <i className="bi bi-check2-circle me-1"></i> Aceptar Presupuesto → Generar OT
               </button>
             )}
 
@@ -327,6 +411,73 @@ export default function PresupuestoIT() {
           </div>
         </div>
       </div>
+
+      {/* Modal Selector de Productos desde Catálogo */}
+      {modalProdPicker && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-content border-0 shadow-lg">
+              <div className="modal-header bg-light">
+                <h5 className="modal-title fw-bold">Seleccionar del Catálogo de Productos y Repuestos</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setModalProdPicker(false)}
+                ></button>
+              </div>
+              <div className="modal-body p-4">
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Buscar producto por nombre o código..."
+                    value={searchPicker}
+                    onChange={(e) => setSearchPicker(e.target.value)}
+                  />
+                </div>
+                <div className="list-group" style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                  {prodsFiltradosPicker.length === 0 ? (
+                    <div className="text-center py-4 text-muted small">No se encontraron productos coincidentes.</div>
+                  ) : (
+                    prodsFiltradosPicker.map((p) => (
+                      <div
+                        key={p.id}
+                        className="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 cursor-pointer"
+                        onClick={() => handleAddFromCatalog(p)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div>
+                          <div className="fw-bold text-dark">{p.nombre}</div>
+                          <div className="small text-muted font-mono">
+                            SKU: {p.codigo} | Categoría: {p.categoriaNombre} | Stock: {p.stock}
+                          </div>
+                        </div>
+                        <div className="text-end">
+                          <div className="fw-bold font-mono text-primary fs-6">
+                            ${p.precioVenta.toLocaleString('es-AR')}
+                          </div>
+                          <span className="badge bg-light text-primary border small">
+                            + Agregar
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              <div className="modal-footer bg-light">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setModalProdPicker(false)}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

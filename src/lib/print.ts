@@ -45,3 +45,31 @@ export async function printElement(el: HTMLElement, opts?: { pageStyle?: string;
   iframe.contentWindow!.print();
   setTimeout(() => document.body.removeChild(iframe), 1000);
 }
+
+export function printDocumentHtml(html: string, title?: string) {
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument!;
+  doc.open();
+  doc.write(`
+    <html>
+      <head>
+        <title>${title ?? 'Comprobante'}</title>
+      </head>
+      <body>${html}</body>
+    </html>
+  `);
+  doc.close();
+
+  iframe.contentWindow!.focus();
+  iframe.contentWindow!.print();
+  setTimeout(() => document.body.removeChild(iframe), 1000);
+}
+

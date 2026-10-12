@@ -1,26 +1,10 @@
 // src/services/flujo.ts
 import { db } from "../lib/firebase";
-import { collection, doc, runTransaction, updateDoc, getDoc, setDoc, where, query, getDocs } from "firebase/firestore";
+import { collection, doc, runTransaction, updateDoc, getDoc, setDoc, where, query, getDocs, limit } from "firebase/firestore";
 import type { Presupuesto, Aceptacion } from "../types/presupuesto";
 import type { Orden } from "../types/orden";
 import type { Pago } from "../types/pago";
-
-/** Quita recursivamente todas las props con valor undefined (objetos y arrays) */
-function pruneDeep<T>(val: T): T {
-  if (Array.isArray(val)) {
-    return val.map((v) => pruneDeep(v)).filter((v) => v !== undefined) as any;
-  }
-  if (val !== null && typeof val === "object") {
-    const out: any = {};
-    Object.entries(val as any).forEach(([k, v]) => {
-      if (v === undefined) return;
-      const pv = pruneDeep(v as any);
-      if (pv !== undefined) out[k] = pv;
-    });
-    return out;
-  }
-  return val;
-}
+import { pruneDeep, generateToken } from "../lib/utils";
 
 /** Numeración de órdenes por año */
 async function nextNumeroOrden(anio: number): Promise<number> {
@@ -58,6 +42,7 @@ export async function aceptarPresupuesto(
   const anio = new Date().getFullYear();
   const numero = await nextNumeroOrden(anio);
   const codigo = codigoOrden(anio, numero);
+  const tokenTracking = generateToken(12);
 
   await runTransaction(db, async (tx) => {
     const pSnap = await tx.get(presRef);
@@ -79,6 +64,9 @@ export async function aceptarPresupuesto(
       id: ordenRef.id,
       presupuestoId,
       cliente: p.cliente,
+      clienteId: p.clienteId,
+      clienteTelefono: p.clienteTelefono,
+      clienteEmail: p.clienteEmail,
       equipo: Object.keys(eq).length ? eq : ({} as any),
       trabajos: [],
       repuestos: [],
@@ -86,6 +74,7 @@ export async function aceptarPresupuesto(
       moneda: p.moneda ?? "ARS",
       status: "pendiente",
       payStatus: "impago",
+      tokenTracking,
       createdAt: Date.now(),
       totalEstimado: p.total ?? 0,
       saldo: p.total ?? 0,
@@ -113,6 +102,90 @@ export async function aceptarPresupuesto(
   return ordenRef.id;
 }
 
+/**
+ * Crea una orden directa (Check-in rápido en taller sin presupuesto previo obligatorio)
+ */
+export async function crearOrdenDirecta(
+  data: Partial<Orden> & { cliente: string }
+): Promise<{ id: string; codigo: string; tokenTracking: string }> {
+  const anio = new Date().getFullYear();
+  const numero = await nextNumeroOrden(anio);
+  const codigo = codigoOrden(anio, numero);
+  const tokenTracking = generateToken(12);
+  const ordenRef = doc(collection(db, "ordenes"));
+
+  const nuevaOrden: Orden = {
+    id: ordenRef.id,
+    presupuestoId: data.presupuestoId || '',
+    cliente: data.cliente,
+    clienteId: data.clienteId,
+    clienteTelefono: data.clienteTelefono,
+    clienteEmail: data.clienteEmail,
+    equipo: data.equipo || {},
+    equipoId: data.equipoId,
+    checkin: data.checkin,
+    qaEntrada: data.qaEntrada,
+    qaSalida: data.qaSalida,
+    bitacora: data.bitacora || [],
+    diagnostico: data.diagnostico || '',
+    trabajos: data.trabajos || [],
+    repuestos: data.repuestos || [],
+    itemsPresupuesto: data.itemsPresupuesto || [],
+    moneda: data.moneda || 'ARS',
+    status: data.status || 'pendiente',
+    payStatus: data.payStatus || 'impago',
+    esGarantiaRMA: data.esGarantiaRMA || false,
+    ordenOrigenId: data.ordenOrigenId,
+    ordenOrigenCodigo: data.ordenOrigenCodigo,
+    tecnicoAsignado: data.tecnicoAsignado,
+    esTercerizado: data.esTercerizado || false,
+    proveedorTercerizadoNombre: data.proveedorTercerizadoNombre,
+    visitaTecnica: data.visitaTecnica,
+    totalEstimado: data.totalEstimado || 0,
+    totalFinal: data.totalFinal || 0,
+    saldo: data.saldo ?? (data.totalFinal || data.totalEstimado || 0),
+    pagado: data.pagado || 0,
+    tokenTracking,
+    codigo,
+    anio,
+    numero,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+
+  await setDoc(ordenRef, pruneDeep(nuevaOrden));
+  return { id: ordenRef.id, codigo, tokenTracking };
+}
+
+/** Buscar orden para portal público (por código o por token) */
+export async function getOrdenPublica(codigoOToken: string): Promise<Orden | null> {
+  const clean = codigoOToken.trim();
+  if (!clean) return null;
+
+  // 1. Probar por token
+  const qToken = query(collection(db, "ordenes"), where("tokenTracking", "==", clean), limit(1));
+  const snapToken = await getDocs(qToken);
+  if (!snapToken.empty) {
+    return { ...snapToken.docs[0].data(), id: snapToken.docs[0].id } as Orden;
+  }
+
+  // 2. Probar por código (ej: OT-2026-0001 mayúsculas)
+  const qCod = query(collection(db, "ordenes"), where("codigo", "==", clean.toUpperCase()), limit(1));
+  const snapCod = await getDocs(qCod);
+  if (!snapCod.empty) {
+    return { ...snapCod.docs[0].data(), id: snapCod.docs[0].id } as Orden;
+  }
+
+  // 3. Probar por ID directo si es que pasaron el id
+  const docRef = doc(db, "ordenes", clean);
+  const snapDoc = await getDoc(docRef);
+  if (snapDoc.exists()) {
+    return { ...snapDoc.data(), id: snapDoc.id } as Orden;
+  }
+
+  return null;
+}
+
 /** Completar/cerrar orden */
 export async function completarOrden(ordenId: string, data: Partial<Orden>) {
   const ref = doc(db, "ordenes", ordenId);
@@ -120,6 +193,7 @@ export async function completarOrden(ordenId: string, data: Partial<Orden>) {
     ...pruneDeep(data),
     status: "completado",
     completedAt: Date.now(),
+    updatedAt: Date.now(),
   } as any);
 }
 
@@ -151,6 +225,7 @@ export async function registrarPago(pago: Omit<Pago, "id" | "createdAt">) {
       saldo: nuevoSaldo,
       pagado: pagadoActual + pago.monto,
       payStatus: nuevoSaldo <= 0 ? "pagado" : "parcial",
+      updatedAt: Date.now(),
     });
   });
 }
@@ -184,7 +259,8 @@ export async function eliminarPago(pagoId: string, ordenId: string) {
     tx.update(ordenRef, {
       pagado: nuevoPagado,
       saldo: nuevoSaldo,
-      payStatus: nuevoPagado <= 0 ? "impago" : nuevoSaldo <= 0 ? "pagado" : "parcial"
+      payStatus: nuevoPagado <= 0 ? "impago" : nuevoSaldo <= 0 ? "pagado" : "parcial",
+      updatedAt: Date.now(),
     });
   });
 }
@@ -203,11 +279,7 @@ export async function sincronizarOrdenConPresupuesto(ordenId: string, presupuest
     const ord = oSnap.data() as Orden;
     const pres = pSnap.data() as Presupuesto;
 
-    // 1. Recalcular Totales de la Orden
-    // El totalEstimado es el nuevo total del presupuesto
     const totalEstimado = pres.total ?? 0;
-
-    // Sumar extras cargados en la orden (trabajos + repuestos extra)
     const extraTrabajos = (ord.trabajos || []).reduce((acc: number, t: any) => acc + (Number(t.precio) || 0), 0);
     const extraRepuestos = (ord.repuestos || []).reduce((acc: number, r: any) => acc + (Number(r.precio) || 0) * (Number(r.cantidad) || 0), 0);
 
@@ -216,9 +288,11 @@ export async function sincronizarOrdenConPresupuesto(ordenId: string, presupuest
     const nuevoSaldo = Math.max(0, Number((totalFinal - pagado).toFixed(2)));
     const nuevoPayStatus = nuevoSaldo <= 0 ? (pagado > 0 ? 'pagado' : 'impago') : (pagado > 0 ? 'parcial' : 'impago');
 
-    // 2. Actualizar la Orden
     tx.update(ordenRef, {
-      cliente: pres.cliente, // Por si cambió el nombre del cliente
+      cliente: pres.cliente,
+      clienteId: pres.clienteId,
+      clienteTelefono: pres.clienteTelefono,
+      clienteEmail: pres.clienteEmail,
       itemsPresupuesto: (pres.items ?? []).map((it) => pruneDeep(it)),
       totalEstimado,
       totalFinal,

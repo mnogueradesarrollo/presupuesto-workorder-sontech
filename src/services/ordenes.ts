@@ -22,7 +22,12 @@ export type OrdenListItem = Pick<
   | "createdAt"
   | "totalEstimado"
   | "totalFinal"
->;
+> & {
+  equipo?: Orden["equipo"];
+  diagnostico?: string;
+  visitaTecnica?: Orden["visitaTecnica"];
+  clienteTelefono?: string;
+};
 
 export async function listOrdenes(opts?: {
   limit?: number;
@@ -43,6 +48,10 @@ export async function listOrdenes(opts?: {
       id: d.id,
       presupuestoId: data.presupuestoId,
       cliente: data.cliente,
+      clienteTelefono: data.clienteTelefono,
+      equipo: data.equipo,
+      diagnostico: data.diagnostico,
+      visitaTecnica: data.visitaTecnica,
       status: data.status,
       payStatus: data.payStatus,
       saldo:
