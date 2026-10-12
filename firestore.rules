@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función auxiliar: verifica si el usuario inició sesión en Sontech Gestor
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // 1. Órdenes de Trabajo (Lectura pública para el Portal de Seguimiento /seguimiento/:codigo)
+    match /ordenes/{ordenId} {
+      allow read: if true;
+      allow create: if true; // Permite crear OT al aceptar presupuesto desde el portal
+      allow update, delete: if isAuthenticated();
+    }
+
+    // 2. Presupuestos (Lectura y aceptación desde el Portal de Seguimiento)
+    match /presupuestos/{presupuestoId} {
+      allow read: if true;
+      allow update: if true; // Permite aprobar presupuesto en 1 clic desde el portal
+      allow create, delete: if isAuthenticated();
+    }
+
+    // 3. Contadores Secuenciales (Numeración de P-YYYY, OT-YYYY, V-YYYY)
+    match /counters/{counterId} {
+      allow read, write: if true;
+    }
+
+    // 4. Configuración del Negocio (Lectura pública para membretes/logos, escritura solo admin)
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // 5. Colecciones Internas del ERP y Laboratorio (Solo personal autenticado)
+    match /clientes/{clienteId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /proveedores/{proveedorId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /categorias/{categoriaId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /productos/{productoId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /ventas/{ventaId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /equipos/{equipoId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /abonos/{abonoId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /consumibles_scrap/{itemId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /kb_articulos/{articuloId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /pagos/{pagoId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

@@ -46,6 +46,7 @@ export default function OrdenPage() {
   const [orden, setOrden] = useState<Orden | null>(null);
   const [pagos, setPagos] = useState<Pago[]>([]);
   const [saving, setSaving] = useState(false);
+  const [waMenuOpen, setWaMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'taller' | 'checkin' | 'qa' | 'bitacora' | 'rma_sla'>('taller');
 
   // Catálogo de repuestos
@@ -430,30 +431,37 @@ export default function OrdenPage() {
         </div>
         <div className="d-flex flex-wrap gap-2">
           {/* Botón WhatsApp */}
-          <div className="dropdown">
-            <button className="btn btn-outline-success dropdown-toggle d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown">
+          <div className="dropdown position-relative">
+            <button
+              className="btn btn-outline-success dropdown-toggle d-flex align-items-center gap-1"
+              type="button"
+              onClick={() => setWaMenuOpen(prev => !prev)}
+            >
               <i className="bi bi-whatsapp"></i>
               <span>Notificar WhatsApp</span>
             </button>
-            <ul className="dropdown-menu dropdown-menu-end shadow-sm">
+            <ul
+              className={`dropdown-menu dropdown-menu-end shadow-sm ${waMenuOpen ? 'show' : ''}`}
+              style={waMenuOpen ? { position: 'absolute', right: 0, top: '100%', zIndex: 1050 } : undefined}
+            >
               <li>
-                <button className="dropdown-item small" onClick={() => sendWhatsAppMsg('recepcion')}>
+                <button className="dropdown-item small" type="button" onClick={() => { setWaMenuOpen(false); sendWhatsAppMsg('recepcion'); }}>
                   <i className="bi bi-box-arrow-in-down me-2 text-primary"></i> Aviso: Equipo Recibido
                 </button>
               </li>
               <li>
-                <button className="dropdown-item small" onClick={() => sendWhatsAppMsg('presupuesto')}>
+                <button className="dropdown-item small" type="button" onClick={() => { setWaMenuOpen(false); sendWhatsAppMsg('presupuesto'); }}>
                   <i className="bi bi-file-earmark-check me-2 text-warning"></i> Aviso: Presupuesto Listo
                 </button>
               </li>
               <li>
-                <button className="dropdown-item small" onClick={() => sendWhatsAppMsg('retiro')}>
+                <button className="dropdown-item small" type="button" onClick={() => { setWaMenuOpen(false); sendWhatsAppMsg('retiro'); }}>
                   <i className="bi bi-check-circle-fill me-2 text-success"></i> Aviso: Listo para Retirar
                 </button>
               </li>
               <li><hr className="dropdown-divider my-1" /></li>
               <li>
-                <button className="dropdown-item small text-primary" onClick={copyTrackingUrl}>
+                <button className="dropdown-item small text-primary" type="button" onClick={() => { setWaMenuOpen(false); copyTrackingUrl(); }}>
                   <i className="bi bi-link-45deg me-2"></i> Copiar Link de Seguimiento
                 </button>
               </li>

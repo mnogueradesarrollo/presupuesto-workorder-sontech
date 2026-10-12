@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import logoUrl from "../assets/logotipo-sontech.png";
 import { useAuth } from "../context/AuthContext";
@@ -8,6 +8,25 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+
+  // Cerrar dropdowns al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Cerrar menús cuando cambia la ruta
+  useEffect(() => {
+    setIsOpen(false);
+    setActiveDropdown(null);
+  }, [location.pathname]);
 
   // No mostrar navbar en el login o en el portal público de seguimiento
   if (location.pathname === '/login' || location.pathname.startsWith('/seguimiento')) {
@@ -19,13 +38,20 @@ export default function Navbar() {
     navigate('/login');
   };
 
-  const closeMenu = () => setIsOpen(false);
+  const closeMenu = () => {
+    setIsOpen(false);
+    setActiveDropdown(null);
+  };
+
+  const toggleDropdown = (name: string) => {
+    setActiveDropdown((prev) => (prev === name ? null : name));
+  };
 
   return (
-    <header className="nav-premium sticky-top shadow-sm">
+    <header className="nav-premium sticky-top shadow-sm" ref={navRef}>
       <div className="container-fluid px-3 px-md-4 d-flex align-items-center justify-content-between h-100">
         {/* Brand */}
-        <Link to="/" className="d-flex align-items-center">
+        <Link to="/" className="d-flex align-items-center" onClick={closeMenu}>
           <img src={logoUrl} alt="Sontech" className="premium-logo" style={{ height: '36px' }} />
         </Link>
 
@@ -58,7 +84,7 @@ export default function Navbar() {
               </NavLink>
 
               {/* Taller & Laboratorio Dropdown */}
-              <div className="dropdown d-inline-block">
+              <div className="dropdown d-inline-block position-relative">
                 <button
                   className={`nav-link-premium dropdown-toggle border-0 bg-transparent ${
                     location.pathname.startsWith('/gestion') ||
@@ -71,12 +97,15 @@ export default function Navbar() {
                       : ''
                   }`}
                   type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
+                  onClick={() => toggleDropdown('taller')}
+                  aria-expanded={activeDropdown === 'taller'}
                 >
                   <i className="bi bi-tools me-1"></i> Taller & Lab
                 </button>
-                <ul className="dropdown-menu shadow-sm border-0">
+                <ul
+                  className={`dropdown-menu shadow-sm border-0 ${activeDropdown === 'taller' ? 'show' : ''}`}
+                  style={activeDropdown === 'taller' ? { display: 'block', top: '100%', left: 0 } : undefined}
+                >
                   <li>
                     <NavLink to="/gestion" onClick={closeMenu} className="dropdown-item small py-2">
                       <i className="bi bi-clipboard2-check me-2 text-primary"></i> Órdenes de Trabajo (OT)
@@ -106,7 +135,7 @@ export default function Navbar() {
               </div>
 
               {/* Comercial & Ventas Dropdown */}
-              <div className="dropdown d-inline-block">
+              <div className="dropdown d-inline-block position-relative">
                 <button
                   className={`nav-link-premium dropdown-toggle border-0 bg-transparent ${
                     location.pathname.startsWith('/ventas') ||
@@ -116,12 +145,15 @@ export default function Navbar() {
                       : ''
                   }`}
                   type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
+                  onClick={() => toggleDropdown('comercial')}
+                  aria-expanded={activeDropdown === 'comercial'}
                 >
                   <i className="bi bi-bag-check me-1"></i> Comercial
                 </button>
-                <ul className="dropdown-menu shadow-sm border-0">
+                <ul
+                  className={`dropdown-menu shadow-sm border-0 ${activeDropdown === 'comercial' ? 'show' : ''}`}
+                  style={activeDropdown === 'comercial' ? { display: 'block', top: '100%', left: 0 } : undefined}
+                >
                   <li>
                     <NavLink to="/ventas" onClick={closeMenu} className="dropdown-item small py-2">
                       <i className="bi bi-cart3 me-2 text-success"></i> Punto de Venta (POS)
@@ -141,7 +173,7 @@ export default function Navbar() {
               </div>
 
               {/* Inventario & Compras Dropdown */}
-              <div className="dropdown d-inline-block">
+              <div className="dropdown d-inline-block position-relative">
                 <button
                   className={`nav-link-premium dropdown-toggle border-0 bg-transparent ${
                     location.pathname.startsWith('/productos') ||
@@ -150,12 +182,15 @@ export default function Navbar() {
                       : ''
                   }`}
                   type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
+                  onClick={() => toggleDropdown('inventario')}
+                  aria-expanded={activeDropdown === 'inventario'}
                 >
                   <i className="bi bi-boxes me-1"></i> Inventario
                 </button>
-                <ul className="dropdown-menu shadow-sm border-0">
+                <ul
+                  className={`dropdown-menu shadow-sm border-0 ${activeDropdown === 'inventario' ? 'show' : ''}`}
+                  style={activeDropdown === 'inventario' ? { display: 'block', top: '100%', left: 0 } : undefined}
+                >
                   <li>
                     <NavLink to="/productos" onClick={closeMenu} className="dropdown-item small py-2">
                       <i className="bi bi-box-seam me-2 text-warning"></i> Catálogo & Categorías

@@ -304,53 +304,35 @@ export default function Clientes() {
                     </td>
                     <td className="small text-muted font-mono">{formatDate(c.createdAt)}</td>
                     <td className="text-end pe-3">
-                      <div className="dropdown d-inline-block">
+                      <div className="d-inline-flex gap-1">
                         <button
-                          className="btn btn-sm btn-light border dropdown-toggle"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
+                          className="btn btn-sm btn-outline-primary"
+                          title="Crear Nuevo Presupuesto"
+                          onClick={() => navigate(`/presupuesto-it?cliente=${encodeURIComponent(c.nombre)}`)}
                         >
-                          Opciones
+                          <i className="bi bi-file-earmark-plus"></i>
                         </button>
-                        <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                          <li>
-                            <button
-                              className="dropdown-item small"
-                              onClick={() => navigate(`/presupuesto-it?cliente=${encodeURIComponent(c.nombre)}`)}
-                            >
-                              <i className="bi bi-file-earmark-plus me-2 text-primary"></i>
-                              Nuevo Presupuesto
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              className="dropdown-item small"
-                              onClick={() => navigate(`/equipos?clienteId=${c.id}`)}
-                            >
-                              <i className="bi bi-laptop me-2 text-info"></i>
-                              Ver Equipos (CMDB)
-                            </button>
-                          </li>
-                          <li>
-                            <hr className="dropdown-divider my-1" />
-                          </li>
-                          <li>
-                            <button className="dropdown-item small" onClick={() => openEditar(c)}>
-                              <i className="bi bi-pencil-square me-2 text-secondary"></i>
-                              Editar Datos
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              className="dropdown-item small text-danger"
-                              onClick={() => handleDelete(c.id, c.nombre)}
-                            >
-                              <i className="bi bi-trash3 me-2"></i>
-                              Eliminar
-                            </button>
-                          </li>
-                        </ul>
+                        <button
+                          className="btn btn-sm btn-outline-info"
+                          title="Ver Equipos del Cliente (CMDB)"
+                          onClick={() => navigate(`/equipos?clienteId=${c.id}`)}
+                        >
+                          <i className="bi bi-laptop"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-light border"
+                          title="Editar Datos"
+                          onClick={() => openEditar(c)}
+                        >
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          title="Eliminar Cliente"
+                          onClick={() => handleDelete(c.id, c.nombre)}
+                        >
+                          <i className="bi bi-trash3"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>
