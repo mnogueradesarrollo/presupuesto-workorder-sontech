@@ -103,6 +103,10 @@ export default function Dashboard() {
                     </p>
                 </div>
                 <div className="d-flex flex-wrap gap-2">
+                    <Link to="/beneficios-promo" className="btn btn-outline-success btn-sm d-flex align-items-center gap-1 fw-semibold">
+                        <i className="bi bi-gift-fill"></i>
+                        <span>Turnero & Promo Limpieza</span>
+                    </Link>
                     <Link to="/ventas" className="btn btn-outline-dark btn-sm d-flex align-items-center gap-1">
                         <i className="bi bi-cart3"></i>
                         <span>Venta Mostrador</span>

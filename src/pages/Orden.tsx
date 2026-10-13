@@ -16,7 +16,8 @@ import { getSettings } from '../services/settings';
 import logoUrl from '../assets/logotipo-sontech.png';
 import type { ItemPresupuesto } from '../types/presupuesto';
 import { buildWhatsAppLink, WhatsAppTemplates, getTrackingUrl } from '../lib/whatsapp';
-import { formatCurrency, formatDateTime } from '../lib/utils';
+import { formatCurrency, formatDateTime, pruneDeep } from '../lib/utils';
+import { sincronizarEstadoOrdenConBeneficio } from '../services/beneficios';
 
 const schema = z.object({
   diagnostico: z.string().optional(),
@@ -156,10 +157,22 @@ export default function OrdenPage() {
       const totalFinal = totalEstimado + extraTrabajos + extraRepuestos;
       const pagado = orden?.pagado || 0;
       const saldo = Math.max(0, Number((totalFinal - pagado).toFixed(2)));
-      const payStatus = saldo <= 0 ? (pagado > 0 ? 'pagado' : 'impago') : (pagado > 0 ? 'parcial' : 'impago');
+      const esPromo = Boolean(
+        orden?.esBeneficioPromo ||
+        orden?.presupuestoId === 'BENEFICIO-PROMO' ||
+        (orden?.codigo && orden.codigo.startsWith('SON-LIMP'))
+      );
+      const payStatus =
+        saldo <= 0
+          ? pagado > 0 || (esPromo && totalFinal === 0)
+            ? 'pagado'
+            : 'impago'
+          : pagado > 0
+          ? 'parcial'
+          : 'impago';
 
-      // Actualizar presupuesto si existe
-      if (orden?.presupuestoId) {
+      // Actualizar presupuesto si existe y no es el marcador de promoción
+      if (orden?.presupuestoId && orden.presupuestoId !== 'BENEFICIO-PROMO') {
         const extraItems: ItemPresupuesto[] = [
           ...(data.trabajos || []).map((t: any) => ({
             id: t.id,
@@ -192,23 +205,30 @@ export default function OrdenPage() {
         comportamientoInicial,
       };
 
-      await updateDoc(doc(db, 'ordenes', id), {
-        ...data,
-        checkin,
-        qaEntrada,
-        qaSalida,
-        bitacora,
-        esGarantiaRMA,
-        ordenOrigenCodigo: ordenOrigenCodigo || undefined,
-        garantiaDias: Number(garantiaDias) || 90,
-        tecnicoAsignado,
-        esTercerizado,
-        proveedorTercerizadoNombre: esTercerizado ? proveedorTercerizadoNombre : undefined,
-        totalFinal,
-        saldo,
-        payStatus,
-        updatedAt: Date.now()
-      });
+      await updateDoc(
+        doc(db, 'ordenes', id),
+        pruneDeep({
+          ...data,
+          checkin,
+          qaEntrada,
+          qaSalida,
+          bitacora,
+          esGarantiaRMA,
+          ordenOrigenCodigo: ordenOrigenCodigo || undefined,
+          garantiaDias: Number(garantiaDias) || 90,
+          tecnicoAsignado,
+          esTercerizado,
+          proveedorTercerizadoNombre: esTercerizado ? proveedorTercerizadoNombre : undefined,
+          totalFinal,
+          saldo,
+          payStatus,
+          updatedAt: Date.now()
+        })
+      );
+
+      if (orden) {
+        await sincronizarEstadoOrdenConBeneficio(orden, data.status);
+      }
 
       setOrden(prev => prev ? {
         ...prev,
@@ -501,7 +521,14 @@ export default function OrdenPage() {
                 <h1 className="h4 mb-0 fw-bold text-primary">ORDEN DE TRABAJO</h1>
                 <p className="text-muted small mb-0 fw-bold font-mono">OT-{orden.codigo || id?.slice(0, 8)}</p>
                 {esGarantiaRMA && (
-                  <span className="badge bg-danger mt-1">REINGRESO POR GARANTÍA (RMA)</span>
+                  <span className="badge bg-danger mt-1 d-inline-block">REINGRESO POR GARANTÍA (RMA)</span>
+                )}
+                {(orden.esBeneficioPromo ||
+                  orden.presupuestoId === 'BENEFICIO-PROMO' ||
+                  Boolean(orden.codigo && orden.codigo.startsWith('SON-LIMP'))) && (
+                  <span className="badge bg-success mt-1 ms-1 d-inline-block">
+                    <i className="bi bi-gift-fill me-1"></i>BENEFICIO PROMO: LIMPIEZA 100% BONIFICADA
+                  </span>
                 )}
               </div>
             </div>

@@ -78,8 +78,13 @@ export type Orden = {
   presupuestoId: string;
   cliente: string;
   clienteId?: string;
+  clienteDni?: string;
   clienteTelefono?: string;
   clienteEmail?: string;
+
+  /** Vinculación con Beneficio Promocional de Mantenimiento y Limpieza Gratuita */
+  esBeneficioPromo?: boolean;
+  beneficioTurnoId?: string;
 
   equipo: Equipo;
   equipoId?: string; // Referencia a CMDB 'equipos'

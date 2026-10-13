@@ -255,11 +255,25 @@ export default function Clientes() {
                       {c.contacto && (
                         <div className="small text-muted">Contacto: {c.contacto}</div>
                       )}
-                      {c.cuitDni && (
-                        <span className="badge bg-light text-secondary border font-mono small">
-                          ID: {c.cuitDni}
-                        </span>
-                      )}
+                      <div className="d-flex flex-wrap gap-1 mt-1">
+                        {c.cuitDni && (
+                          <span className="badge bg-light text-secondary border font-mono small">
+                            ID: {c.cuitDni}
+                          </span>
+                        )}
+                        {c.beneficioLimpiezaUsado && (
+                          <span
+                            className="badge bg-success-subtle text-success border border-success-subtle small"
+                            title={
+                              c.fechaBeneficioLimpieza
+                                ? `Utilizado el ${c.fechaBeneficioLimpieza}`
+                                : 'Beneficio ya utilizado'
+                            }
+                          >
+                            <i className="bi bi-gift-fill me-1"></i>Promo Limpieza Usada
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td>
                       <span className={`badge ${c.tipo === 'empresa' ? 'bg-primary' : 'bg-secondary'} me-1`}>
@@ -305,6 +319,15 @@ export default function Clientes() {
                     <td className="small text-muted font-mono">{formatDate(c.createdAt)}</td>
                     <td className="text-end pe-3">
                       <div className="d-inline-flex gap-1">
+                        {!c.beneficioLimpiezaUsado && (
+                          <button
+                            className="btn btn-sm btn-outline-success"
+                            title="Otorgar Beneficio Promocional de Limpieza Gratuita"
+                            onClick={() => navigate(`/beneficios-promo?clienteId=${c.id}`)}
+                          >
+                            <i className="bi bi-gift-fill"></i>
+                          </button>
+                        )}
                         <button
                           className="btn btn-sm btn-outline-primary"
                           title="Crear Nuevo Presupuesto"

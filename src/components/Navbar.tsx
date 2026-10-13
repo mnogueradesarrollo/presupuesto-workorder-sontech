@@ -93,7 +93,8 @@ export default function Navbar() {
                       location.pathname.startsWith('/orden') ||
                       location.pathname.startsWith('/kb') ||
                       location.pathname.startsWith('/scrap') ||
-                      location.pathname.startsWith('/visitas')
+                      location.pathname.startsWith('/visitas') ||
+                      location.pathname.startsWith('/beneficios-promo')
                         ? 'active'
                         : ''
                     }`}
@@ -105,11 +106,16 @@ export default function Navbar() {
                   </button>
                   <ul
                     className={`dropdown-menu shadow border-0 ${activeDropdown === 'taller' ? 'show' : ''}`}
-                    style={activeDropdown === 'taller' ? { display: 'block', top: '100%', left: 0, minWidth: '250px' } : undefined}
+                    style={activeDropdown === 'taller' ? { display: 'block', top: '100%', left: 0, minWidth: '260px' } : undefined}
                   >
                     <li>
                       <NavLink to="/gestion" onClick={closeMenu} className="dropdown-item small py-2">
                         <i className="bi bi-clipboard2-check me-2 text-primary"></i> Órdenes de Trabajo (OT)
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/beneficios-promo" onClick={closeMenu} className="dropdown-item small py-2 fw-semibold">
+                        <i className="bi bi-gift-fill me-2 text-success"></i> Turnero & Limpieza Gratuita
                       </NavLink>
                     </li>
                     <li>
@@ -286,6 +292,9 @@ export default function Navbar() {
                 <div className="mobile-submenu ps-3 py-1 my-1 bg-light rounded-3 d-flex flex-column gap-1">
                   <NavLink to="/gestion" onClick={closeMenu} className="nav-link-premium py-2 small">
                     <i className="bi bi-clipboard2-check me-2 text-primary"></i> Órdenes de Trabajo (OT)
+                  </NavLink>
+                  <NavLink to="/beneficios-promo" onClick={closeMenu} className="nav-link-premium py-2 small fw-semibold">
+                    <i className="bi bi-gift-fill me-2 text-success"></i> Turnero & Limpieza Gratuita
                   </NavLink>
                   <NavLink to="/equipos" onClick={closeMenu} className="nav-link-premium py-2 small">
                     <i className="bi bi-laptop me-2 text-info"></i> Equipos & CMDB (Seriales)

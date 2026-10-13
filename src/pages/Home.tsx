@@ -284,7 +284,17 @@ export default function Home() {
 
       {/* === Órdenes === */}
       <div className="card">
-        <h2 className="fs-5 mb-3">Órdenes de Trabajo</h2>
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h2 className="fs-5 mb-0">Órdenes de Trabajo</h2>
+          <button
+            type="button"
+            onClick={() => navigate('/beneficios-promo')}
+            className="btn btn-sm btn-outline-success fw-semibold d-inline-flex align-items-center gap-1"
+          >
+            <i className="bi bi-gift-fill"></i>
+            <span>Turnero & Promo Limpieza Gratuita</span>
+          </button>
+        </div>
         {loadingOrd ? (
           <p className="text-muted text-center py-4">Cargando órdenes...</p>
         ) : (
@@ -318,7 +328,14 @@ export default function Home() {
                   {filteredOrds.map((o) => (
                     <tr key={o.id}>
                       <td className="fw-medium font-mono">{o.codigo || o.id.slice(0, 8)}</td>
-                      <td>{o.cliente}</td>
+                      <td>
+                        <span>{o.cliente}</span>
+                        {o.esBeneficioPromo && (
+                          <span className="badge bg-success-subtle text-success border border-success-subtle ms-2 x-small">
+                            <i className="bi bi-gift-fill me-1"></i>Promo Limpieza
+                          </span>
+                        )}
+                      </td>
                       <td className="text-center">
                         <span className={`badge status-${o.status}`}>
                           {o.status}
@@ -365,11 +382,16 @@ export default function Home() {
               <div className="row g-3">
                 {filteredOrds.map((o) => (
                   <div key={o.id} className="col-12">
-                    <div className="card p-3" style={{ borderLeft: '4px solid var(--warning)' }}>
+                    <div className="card p-3" style={{ borderLeft: o.esBeneficioPromo ? '4px solid var(--success)' : '4px solid var(--warning)' }}>
                       <div className="d-flex justify-content-between align-items-start mb-2">
                         <div>
                           <span className="x-small fw-bold text-muted text-uppercase d-block font-mono">OT-{o.codigo || o.id.slice(0, 8)}</span>
                           <span className="fw-bold d-block">{o.cliente}</span>
+                          {o.esBeneficioPromo && (
+                            <span className="badge bg-success-subtle text-success border border-success-subtle mt-1 x-small">
+                              <i className="bi bi-gift-fill me-1"></i>Promo Limpieza
+                            </span>
+                          )}
                         </div>
                         <div className="d-flex flex-column align-items-end gap-1">
                           <span className={`badge status-${o.status}`}>

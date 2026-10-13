@@ -27,6 +27,8 @@ export type OrdenListItem = Pick<
   diagnostico?: string;
   visitaTecnica?: Orden["visitaTecnica"];
   clienteTelefono?: string;
+  esBeneficioPromo?: boolean;
+  beneficioTurnoId?: string;
 };
 
 export async function listOrdenes(opts?: {
@@ -47,6 +49,11 @@ export async function listOrdenes(opts?: {
     return {
       id: d.id,
       presupuestoId: data.presupuestoId,
+      esBeneficioPromo:
+        data.esBeneficioPromo ||
+        data.presupuestoId === "BENEFICIO-PROMO" ||
+        Boolean(data.codigo && data.codigo.startsWith("SON-LIMP")),
+      beneficioTurnoId: data.beneficioTurnoId,
       cliente: data.cliente,
       clienteTelefono: data.clienteTelefono,
       equipo: data.equipo,

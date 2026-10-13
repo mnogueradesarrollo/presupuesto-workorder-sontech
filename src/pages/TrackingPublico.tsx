@@ -25,7 +25,7 @@ export default function TrackingPublico() {
         const ord = await getOrdenPublica(codigo);
         if (ord) {
           setOrden(ord);
-          if (ord.presupuestoId) {
+          if (ord.presupuestoId && ord.presupuestoId !== 'BENEFICIO-PROMO') {
             const p = await getPresupuesto(ord.presupuestoId);
             setPresupuesto(p);
           }
@@ -217,6 +217,23 @@ export default function TrackingPublico() {
               </div>
             </div>
 
+            {/* Aviso de Beneficio Promocional */}
+            {(orden.esBeneficioPromo ||
+              orden.presupuestoId === 'BENEFICIO-PROMO' ||
+              Boolean(orden.codigo && orden.codigo.startsWith('SON-LIMP'))) && (
+              <div className="alert alert-success border-success-subtle d-flex align-items-center gap-3 p-3 rounded-3 mb-4">
+                <i className="bi bi-gift-fill fs-3 text-success"></i>
+                <div>
+                  <h6 className="fw-bold mb-1 text-success">
+                    Beneficio Oficial Sontech: Mantenimiento & Limpieza 100% Bonificado
+                  </h6>
+                  <p className="mb-0 small text-muted">
+                    Tu equipo ingresó bajo la promoción exclusiva de mantenimiento preventivo, limpieza interna profunda y cambio de pasta térmica sin cargo.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Aviso Destacado de Estado */}
             {orden.status === 'completado' && (
               <div className="alert alert-success d-flex align-items-center gap-3 p-3 rounded-3 mb-4">
@@ -318,7 +335,7 @@ export default function TrackingPublico() {
           <div className="card-footer bg-light p-3 text-center small text-muted">
             ¿Tenés alguna duda o consulta técnica sobre tu orden?{' '}
             <a
-              href={`https://wa.me/5491112345678?text=${encodeURIComponent(
+              href={`https://wa.me/5491134581490?text=${encodeURIComponent(
                 `Hola Sontech, tengo una consulta sobre mi orden ${orden.codigo}`
               )}`}
               target="_blank"

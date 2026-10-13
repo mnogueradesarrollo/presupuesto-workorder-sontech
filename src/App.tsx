@@ -15,6 +15,7 @@ import Abonos from "./pages/Abonos";
 import ConsumiblesScrap from "./pages/ConsumiblesScrap";
 import BaseConocimiento from "./pages/BaseConocimiento";
 import VisitasTecnicas from "./pages/VisitasTecnicas";
+import BeneficiosPromo from "./pages/BeneficiosPromo";
 import TrackingPublico from "./pages/TrackingPublico";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -114,6 +115,12 @@ export default function App() {
             <Route path="/visitas" element={
               <ProtectedRoute>
                 <VisitasTecnicas />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/beneficios-promo" element={
+              <ProtectedRoute>
+                <BeneficiosPromo />
               </ProtectedRoute>
             } />
 

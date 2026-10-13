@@ -19,6 +19,10 @@ export interface Cliente {
   condicionIva?: CondicionIva;
   notas?: string;
   saldoCuentaCorriente?: number;
+  beneficioLimpiezaUsado?: boolean;
+  fechaBeneficioLimpieza?: string;
+  codigoBeneficioLimpieza?: string;
+  origen?: string;
   createdAt: number;
   updatedAt: number;
 }

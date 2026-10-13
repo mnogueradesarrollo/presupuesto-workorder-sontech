@@ -73,5 +73,11 @@ service cloud.firestore {
     match /pagos/{pagoId} {
       allow read, write: if isAuthenticated();
     }
+
+    // 6. Beneficio Promocional de Limpieza Gratuita (Turnero Web + Gestión ERP)
+    match /beneficios_limpieza/{turnoId} {
+      allow read, create, update: if true;
+      allow delete: if isAuthenticated();
+    }
   }
 }
