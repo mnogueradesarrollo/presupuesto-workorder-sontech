@@ -1,13 +1,29 @@
 import type { ItemPresupuesto, Presupuesto } from '../types/presupuesto';
 
 export function lineTotal(it: ItemPresupuesto): number {
-  const unit = (it.horas && it.tarifaHora) ? it.horas * it.tarifaHora : it.precioUnitario;
-  const desc = it.descuentoPct ? (unit * it.descuentoPct) / 100 : 0;
-  return (unit - desc) * (it.cantidad || 1);
+  let unit = 0;
+  const horas = Number(it.horas);
+  const tarifa = Number(it.tarifaHora);
+  const precio = Number(it.precioUnitario);
+
+  if (!isNaN(horas) && horas > 0 && !isNaN(tarifa) && tarifa > 0) {
+    unit = horas * tarifa;
+  } else if (!isNaN(precio) && precio >= 0) {
+    unit = precio;
+  } else if (!isNaN(tarifa) && tarifa >= 0) {
+    unit = tarifa;
+  }
+
+  const descPct = Number(it.descuentoPct);
+  const desc = (!isNaN(descPct) && descPct > 0) ? (unit * descPct) / 100 : 0;
+  const cant = Number(it.cantidad);
+  const cantFinal = (!isNaN(cant) && cant > 0) ? cant : 1;
+  const total = (unit - desc) * cantFinal;
+  return isNaN(total) ? 0 : total;
 }
 
 export const subtotal = (items: ItemPresupuesto[]) =>
-  items.reduce((a, i) => a + lineTotal(i), 0);
+  (items || []).reduce((a, i) => a + lineTotal(i), 0);
 
 export function totals(p: Pick<Presupuesto, 'items' | 'ivaPct' | 'recargoTarjetaPct' | 'bonificacionPct'>) {
   const sub = subtotal(p.items);

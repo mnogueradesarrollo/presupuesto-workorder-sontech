@@ -122,8 +122,9 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                 <input
                   type="number"
                   min={0}
+                  placeholder="3"
                   disabled={readOnly}
-                  {...register(`items.${idx}.garantiaValor`, { valueAsNumber: true })}
+                  {...register(`items.${idx}.garantiaValor`)}
                   className="form-control font-mono"
                   style={{ width: '80px' }}
                 />
@@ -146,40 +147,47 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
               <input
                 type="number"
                 min={1}
+                placeholder="1"
                 disabled={readOnly}
-                {...register(`items.${idx}.cantidad`, { valueAsNumber: true })}
+                {...register(`items.${idx}.cantidad`)}
                 className={`form-control font-mono ${(errors.items as any)?.[idx]?.cantidad ? "is-invalid" : ""}`}
               />
             </div>
 
             {/* Fila 4: Precios */}
             <div className="item-field">
-              <label>{it.tipo === "Producto" ? "Precio Unitario" : "Horas / Tarifa"}</label>
-              {it.tipo !== "Producto" ? (
-                <div className="d-flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="Hr"
-                    disabled={readOnly}
-                    {...register(`items.${idx}.horas`, { valueAsNumber: true })}
-                    className="form-control font-mono"
-                  />
-                  <input
-                    type="number"
-                    placeholder="$$"
-                    disabled={readOnly}
-                    {...register(`items.${idx}.tarifaHora`, { valueAsNumber: true })}
-                    className="form-control font-mono"
-                  />
-                </div>
-              ) : (
+              <label>{it.tipo === "Producto" ? "Precio Unitario ($)" : "Precio / Mano de Obra ($)"}</label>
+              <div className="d-flex gap-2">
                 <input
                   type="number"
+                  placeholder="0.00"
                   disabled={readOnly}
-                  {...register(`items.${idx}.precioUnitario`, { valueAsNumber: true })}
+                  {...register(`items.${idx}.precioUnitario`)}
                   className="form-control font-mono"
                 />
-              )}
+                {it.tipo !== "Producto" && (
+                  <div className="d-flex gap-1" title="Opcional: Si cobras por horas de trabajo (Hs x $/h)">
+                    <input
+                      type="number"
+                      placeholder="Hs"
+                      title="Horas trabajadas (opcional)"
+                      disabled={readOnly}
+                      {...register(`items.${idx}.horas`)}
+                      className="form-control font-mono"
+                      style={{ width: '65px' }}
+                    />
+                    <input
+                      type="number"
+                      placeholder="$/h"
+                      title="Tarifa por hora (opcional)"
+                      disabled={readOnly}
+                      {...register(`items.${idx}.tarifaHora`)}
+                      className="form-control font-mono"
+                      style={{ width: '85px' }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="item-field">
@@ -188,8 +196,9 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                 type="number"
                 min={0}
                 max={100}
+                placeholder="0"
                 disabled={readOnly}
-                {...register(`items.${idx}.descuentoPct`, { valueAsNumber: true })}
+                {...register(`items.${idx}.descuentoPct`)}
                 className="form-control font-mono"
               />
             </div>

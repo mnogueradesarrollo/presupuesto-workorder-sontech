@@ -25,24 +25,41 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import logoUrl from "../assets/logotipo-sontech.png";
 
+const safeOptionalNumber = z.preprocess((val) => {
+  if (val === "" || val === null || val === undefined) return undefined;
+  if (typeof val === "number" && isNaN(val)) return undefined;
+  const num = Number(val);
+  return isNaN(num) ? undefined : num;
+}, z.number().optional());
+
+const safeRequiredNumber = (minVal = 1, defaultVal = 1) => z.preprocess((val) => {
+  if (val === "" || val === null || val === undefined) return defaultVal;
+  if (typeof val === "number" && isNaN(val)) return defaultVal;
+  const num = Number(val);
+  return isNaN(num) || num < minVal ? defaultVal : num;
+}, z.number().min(minVal));
+
 const schema = z.object({
   cliente: z.string().min(1, "El cliente es obligatorio"),
   items: z.array(z.object({
     id: z.string(),
     productoId: z.string().optional(),
-    tipo: z.enum(["Producto", "Servicio", "Reparación"]),
-    descripcion: z.string().min(1, "La descripción es necesaria"),
-    cantidad: z.coerce.number().min(1, "La cantidad debe ser al menos 1"),
-    precioUnitario: z.preprocess((val) => val === "" ? undefined : val, z.coerce.number().optional()),
-    horas: z.preprocess((val) => val === "" ? undefined : val, z.coerce.number().optional()),
-    tarifaHora: z.preprocess((val) => val === "" ? undefined : val, z.coerce.number().optional()),
+    tipo: z.enum(["Producto", "Servicio", "Reparación"]).default("Producto"),
+    descripcion: z.preprocess((val) => {
+      const s = String(val || "").trim();
+      return s.length > 0 ? s : undefined;
+    }, z.string().optional().default("Servicio / Reparación")),
+    cantidad: safeRequiredNumber(1, 1),
+    precioUnitario: safeOptionalNumber,
+    horas: safeOptionalNumber,
+    tarifaHora: safeOptionalNumber,
     marca: z.preprocess((val) => val === "" ? undefined : val, z.string().optional()),
     modelo: z.preprocess((val) => val === "" ? undefined : val, z.string().optional()),
     imeiSerie: z.preprocess((val) => val === "" ? undefined : val, z.string().optional()),
     estado: z.preprocess((val) => val === "" ? undefined : val, z.string().optional()),
-    garantiaValor: z.preprocess((val) => val === "" ? undefined : val, z.coerce.number().optional()),
+    garantiaValor: safeOptionalNumber,
     garantiaUnidad: z.string().optional(),
-    descuentoPct: z.preprocess((val) => val === "" ? undefined : val, z.coerce.number().optional()),
+    descuentoPct: safeOptionalNumber,
   })).min(1, "Debe haber al menos un ítem"),
 });
 
@@ -66,14 +83,14 @@ export default function PresupuestoIT() {
   const [modalProdPicker, setModalProdPicker] = useState(false);
   const [searchPicker, setSearchPicker] = useState("");
 
-  const { register, control, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm<any>({
+  const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm<any>({
     resolver: zodResolver(schema),
     defaultValues: {
       cliente: paramCliente || "",
       items: [{
         id: crypto.randomUUID(),
         tipo: paramMarca || paramModelo ? "Reparación" : "Producto",
-        descripcion: paramMarca || paramModelo ? `Reparación y diagnóstico de ${paramMarca || ''} ${paramModelo || ''}`.trim() : "",
+        descripcion: paramMarca || paramModelo ? `Reparación y diagnóstico de ${paramMarca || ''} ${paramModelo || ''}`.trim() : "Diagnóstico y Reparación",
         cantidad: 1,
         precioUnitario: 0,
         marca: paramMarca || undefined,
@@ -130,11 +147,6 @@ export default function PresupuestoIT() {
     })();
   }, [editingId, reset]);
 
-  // Selección de cliente desde datalist
-  const handleClienteSelect = (selectedName: string) => {
-    setValue("cliente", selectedName);
-  };
-
   // Agregar producto desde catálogo
   const handleAddFromCatalog = (prod: Producto) => {
     append({
@@ -154,11 +166,46 @@ export default function PresupuestoIT() {
   const onSubmit = async (data: any) => {
     setSaving(true);
     try {
+      const sanitizedItems: ItemPresupuesto[] = (data.items || []).map((it: any) => {
+        let desc = (it.descripcion || "").trim();
+        if (!desc) {
+          if (it.marca || it.modelo) {
+            desc = `Servicio de ${it.marca || ''} ${it.modelo || ''}`.trim();
+          } else {
+            desc = it.tipo === "Producto" ? "Producto" : "Servicio técnico";
+          }
+        }
+        return {
+          id: it.id || crypto.randomUUID(),
+          productoId: it.productoId || undefined,
+          tipo: it.tipo || "Producto",
+          descripcion: desc,
+          cantidad: Number(it.cantidad) > 0 ? Number(it.cantidad) : 1,
+          precioUnitario: it.precioUnitario !== undefined && !isNaN(Number(it.precioUnitario)) ? Number(it.precioUnitario) : undefined,
+          horas: it.horas !== undefined && !isNaN(Number(it.horas)) ? Number(it.horas) : undefined,
+          tarifaHora: it.tarifaHora !== undefined && !isNaN(Number(it.tarifaHora)) ? Number(it.tarifaHora) : undefined,
+          marca: it.marca || undefined,
+          modelo: it.modelo || undefined,
+          imeiSerie: it.imeiSerie || undefined,
+          estado: it.estado || undefined,
+          garantiaValor: it.garantiaValor !== undefined && !isNaN(Number(it.garantiaValor)) ? Number(it.garantiaValor) : undefined,
+          garantiaUnidad: it.garantiaUnidad || undefined,
+          descuentoPct: it.descuentoPct !== undefined && !isNaN(Number(it.descuentoPct)) ? Number(it.descuentoPct) : undefined,
+        };
+      });
+
+      const finalTotals = totals({
+        items: sanitizedItems,
+        ivaPct: 0,
+        recargoTarjetaPct: undefined,
+        bonificacionPct: undefined,
+      });
+
       if (editingId) {
         await updatePresupuesto(editingId, {
           cliente: data.cliente,
-          items: data.items as ItemPresupuesto[],
-          total: t.total,
+          items: sanitizedItems,
+          total: finalTotals.total,
           fecha: new Date().toISOString(),
           ivaPct: 0,
         } as Partial<Presupuesto>);
@@ -173,13 +220,13 @@ export default function PresupuestoIT() {
           cliente: data.cliente,
           fecha: new Date().toISOString(),
           moneda: "ARS",
-          items: data.items as ItemPresupuesto[],
+          items: sanitizedItems,
           ivaPct: 0,
           notas: "",
-          total: t.total,
+          total: finalTotals.total,
         });
         setCodigo(newCodigo);
-        toast.success("Presupuesto creado.");
+        toast.success("Presupuesto creado con éxito.");
         navigate(`/presupuesto-it?id=${id}`);
       }
     } catch (e) {
@@ -191,17 +238,28 @@ export default function PresupuestoIT() {
   };
 
   const onInvalid = (errors: any) => {
-    if (errors.cliente) {
-      toast.error("El nombre del cliente es obligatorio.");
-    } else if (errors.items) {
-      if (Array.isArray(errors.items)) {
-        toast.error("Revisa la descripción de los productos.");
-      } else {
-        toast.error("Debes agregar al menos un producto.");
-      }
-    } else {
-      toast.error("Por favor, revisa los campos obligatorios.");
+    console.warn("Validación falló:", errors);
+    if (errors.cliente?.message) {
+      toast.error(errors.cliente.message);
+      return;
     }
+    if (errors.items) {
+      if (Array.isArray(errors.items)) {
+        for (let i = 0; i < errors.items.length; i++) {
+          const itemErr = errors.items[i];
+          if (itemErr) {
+            const firstKey = Object.keys(itemErr)[0];
+            const msg = itemErr[firstKey]?.message || `Error en el ítem #${i + 1}`;
+            toast.error(`Ítem #${i + 1}: ${msg}`);
+            return;
+          }
+        }
+      } else if (errors.items.message) {
+        toast.error(errors.items.message);
+        return;
+      }
+    }
+    toast.error("Por favor, revisa los campos requeridos.");
   };
 
   // Descargar PDF
@@ -321,7 +379,6 @@ export default function PresupuestoIT() {
                     placeholder="Nombre completo o empresa del cliente..."
                     disabled={isViewMode}
                     className={`form-control form-control-lg border-0 bg-white shadow-none ${errors.cliente ? "is-invalid" : ""}`}
-                    onChange={(e) => handleClienteSelect(e.target.value)}
                   />
                   <datalist id="clientesDatalist">
                     {clientesDb.map((c) => (
