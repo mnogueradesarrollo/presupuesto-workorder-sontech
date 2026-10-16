@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { LAST_ACTIVITY_KEY } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import logoCircle from '../assets/logo-sontech-circle.png';
@@ -27,6 +28,7 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
+            localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
             await signInWithEmailAndPassword(auth, cleanEmail, password);
             toast.success('¡Acceso concedido!');
             navigate(from, { replace: true });
