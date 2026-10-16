@@ -339,6 +339,12 @@ npm run lint
 
 > **Regla de mantenimiento:** Toda modificación, corrección o nueva funcionalidad realizada en el proyecto debe registrarse en esta sección indicando fecha, archivos tocados y detalle del cambio para mantener la trazabilidad completa.
 
+### `2026-10-16` — Descuento Automático de Stock al Finalizar Orden de Trabajo
+- **Archivos modificados:** `src/pages/Orden.tsx`, `src/types/orden.ts`
+- **Detalle:**
+  - Al cambiar el estado de una Orden de Trabajo a **`completado`** o **`entregado`**, el sistema ahora descuenta automáticamente del inventario (`ajustarStock`) todos los productos/repuestos del catálogo vinculados (tanto los heredados desde el presupuesto en `itemsPresupuesto` como los agregados en la sección de `repuestos` de la orden).
+  - Se incorporó la bandera `stockDescontado: boolean` en el documento de la orden para evitar descuentos duplicados en guardados posteriores y reponer el stock automáticamente si la orden vuelve a abrirse a un estado previo.
+
 ### `2026-10-16` — Individualización de Presupuestos y Órdenes de Trabajo + Edición Completa de OT
 - **Archivos modificados/creados:** `src/pages/Presupuestos.tsx` *(nuevo)*, `src/pages/Home.tsx`, `src/pages/Orden.tsx`, `src/pages/PresupuestoIT.tsx`, `src/App.tsx`, `src/components/Navbar.tsx`, `src/pages/Dashboard.tsx`
 - **Detalle:**

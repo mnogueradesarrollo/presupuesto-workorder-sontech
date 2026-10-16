@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Orden, OrdenCheckin, QAChecklist, BitacoraNota, QAResult } from '../types/orden';
 import { registrarPago, getPagosPorOrden, eliminarPago } from '../services/flujo';
-import { listProductos } from '../services/productos';
+import { listProductos, ajustarStock } from '../services/productos';
 import { listClientes } from '../services/clientes';
 import type { Pago } from '../types/pago';
 import type { Producto } from '../types/producto';
@@ -269,6 +269,59 @@ export default function OrdenPage() {
         comportamientoInicial,
       };
 
+      // Control automático de Stock al finalizar la orden ('completado' o 'entregado')
+      const esEstadoFinalizado = data.status === 'completado' || data.status === 'entregado';
+      const itemsConProducto = [
+        ...itemsBase
+          .filter((it) => Boolean(it.productoId) && it.tipo !== 'Servicio')
+          .map((it) => ({
+            productoId: it.productoId as string,
+            cantidad: Math.max(1, Number(it.cantidad) || 1),
+          })),
+        ...(data.repuestos || [])
+          .filter((r: any) => Boolean(r.productoId))
+          .map((r: any) => ({
+            productoId: r.productoId as string,
+            cantidad: Math.max(1, Number(r.cantidad) || 1),
+          })),
+      ];
+
+      let nuevoStockDescontado = Boolean(orden?.stockDescontado);
+      let mensajeStock = '';
+
+      if (esEstadoFinalizado && !orden?.stockDescontado && itemsConProducto.length > 0) {
+        for (const item of itemsConProducto) {
+          const prodEnCatalogo = productosDb.find((p) => p.id === item.productoId);
+          if (!prodEnCatalogo || prodEnCatalogo.tipo !== 'servicio') {
+            try {
+              await ajustarStock(item.productoId, -item.cantidad);
+            } catch (err) {
+              console.warn(`No se pudo descontar stock del producto ${item.productoId}:`, err);
+            }
+          }
+        }
+        nuevoStockDescontado = true;
+        mensajeStock = ' (Stock descontado del inventario)';
+        const prodsActualizados = await listProductos(200);
+        setProductosDb(prodsActualizados);
+      } else if (!esEstadoFinalizado && orden?.stockDescontado && itemsConProducto.length > 0) {
+        // Si la orden vuelve a abrirse (ej. pasa de completado a en_progreso), repone el stock
+        for (const item of itemsConProducto) {
+          const prodEnCatalogo = productosDb.find((p) => p.id === item.productoId);
+          if (!prodEnCatalogo || prodEnCatalogo.tipo !== 'servicio') {
+            try {
+              await ajustarStock(item.productoId, item.cantidad);
+            } catch (err) {
+              console.warn(`No se pudo reponer stock del producto ${item.productoId}:`, err);
+            }
+          }
+        }
+        nuevoStockDescontado = false;
+        mensajeStock = ' (Stock repuesto al inventario)';
+        const prodsActualizados = await listProductos(200);
+        setProductosDb(prodsActualizados);
+      }
+
       const payload = pruneDeep({
         ...data,
         cliente: clienteNombre.trim(),
@@ -289,6 +342,7 @@ export default function OrdenPage() {
         totalFinal,
         saldo,
         payStatus,
+        stockDescontado: nuevoStockDescontado,
         updatedAt: Date.now()
       });
 
@@ -312,10 +366,11 @@ export default function OrdenPage() {
         bitacora,
         totalFinal,
         saldo,
-        payStatus
+        payStatus,
+        stockDescontado: nuevoStockDescontado
       } : null);
 
-      toast.success("Orden de Trabajo actualizada exitosamente.");
+      toast.success(`Orden de Trabajo actualizada exitosamente.${mensajeStock}`);
     } catch (e) {
       console.error(e);
       toast.error("Error al actualizar la orden");

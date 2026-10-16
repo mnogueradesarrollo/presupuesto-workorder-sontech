@@ -112,6 +112,9 @@ export type Orden = {
   status: WorkStatus; // 'pendiente' | 'en_progreso' | 'esperando_repuestos' | 'pausado' | 'completado' | 'entregado'
   payStatus: PayStatus; // 'impago' | 'parcial' | 'pagado' | 'reembolsado'
 
+  /** Control de descuento de inventario al finalizar la orden */
+  stockDescontado?: boolean;
+
   garantiaDias?: number;
   /** Notas internas o mensaje que se imprime en el Informe de Servicio */
   notasEntrega?: string;
