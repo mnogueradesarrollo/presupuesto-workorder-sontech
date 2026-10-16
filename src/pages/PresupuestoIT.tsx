@@ -12,7 +12,7 @@ import {
   getPresupuesto,
   updatePresupuesto,
 } from "../services/presupuestos";
-import { aceptarPresupuesto, sincronizarOrdenConPresupuesto } from "../services/flujo";
+import { aceptarPresupuesto } from "../services/flujo";
 import { listClientes } from "../services/clientes";
 import { listProductos } from "../services/productos";
 import type { Cliente } from "../types/cliente";
@@ -75,7 +75,6 @@ export default function PresupuestoIT() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [codigo, setCodigo] = useState<string | undefined>(undefined);
-  const [currentOrdenId, setCurrentOrdenId] = useState<string | undefined>(undefined);
 
   // Catálogos auxiliares
   const [clientesDb, setClientesDb] = useState<Cliente[]>([]);
@@ -143,7 +142,6 @@ export default function PresupuestoIT() {
         items: p.items || []
       });
       setCodigo(p.codigo);
-      setCurrentOrdenId(p.ordenId);
     })();
   }, [editingId, reset]);
 
@@ -209,10 +207,6 @@ export default function PresupuestoIT() {
           fecha: new Date().toISOString(),
           ivaPct: 0,
         } as Partial<Presupuesto>);
-
-        if (currentOrdenId) {
-          await sincronizarOrdenConPresupuesto(currentOrdenId, editingId);
-        }
 
         toast.success("Presupuesto actualizado.");
       } else {

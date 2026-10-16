@@ -89,6 +89,7 @@ export default function Navbar() {
                   <button
                     className={`nav-link-premium dropdown-toggle border-0 bg-transparent ${
                       location.pathname.startsWith('/gestion') ||
+                      location.pathname.startsWith('/ordenes') ||
                       location.pathname.startsWith('/equipos') ||
                       location.pathname.startsWith('/orden') ||
                       location.pathname.startsWith('/kb') ||
@@ -109,7 +110,7 @@ export default function Navbar() {
                     style={activeDropdown === 'taller' ? { display: 'block', top: '100%', left: 0, minWidth: '260px' } : undefined}
                   >
                     <li>
-                      <NavLink to="/gestion" onClick={closeMenu} className="dropdown-item small py-2">
+                      <NavLink to="/gestion" onClick={closeMenu} className="dropdown-item small py-2 fw-semibold">
                         <i className="bi bi-clipboard2-check me-2 text-primary"></i> Órdenes de Trabajo (OT)
                       </NavLink>
                     </li>
@@ -145,6 +146,8 @@ export default function Navbar() {
                 <div className="dropdown position-relative">
                   <button
                     className={`nav-link-premium dropdown-toggle border-0 bg-transparent ${
+                      location.pathname.startsWith('/presupuestos') ||
+                      location.pathname.startsWith('/presupuesto-it') ||
                       location.pathname.startsWith('/ventas') ||
                       location.pathname.startsWith('/clientes') ||
                       location.pathname.startsWith('/abonos')
@@ -159,8 +162,19 @@ export default function Navbar() {
                   </button>
                   <ul
                     className={`dropdown-menu shadow border-0 ${activeDropdown === 'comercial' ? 'show' : ''}`}
-                    style={activeDropdown === 'comercial' ? { display: 'block', top: '100%', left: 0, minWidth: '240px' } : undefined}
+                    style={activeDropdown === 'comercial' ? { display: 'block', top: '100%', left: 0, minWidth: '250px' } : undefined}
                   >
+                    <li>
+                      <NavLink to="/presupuestos" onClick={closeMenu} className="dropdown-item small py-2 fw-semibold">
+                        <i className="bi bi-file-earmark-text me-2 text-primary"></i> Presupuestos Comerciales
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/presupuesto-it" onClick={closeMenu} className="dropdown-item small py-2">
+                        <i className="bi bi-plus-circle me-2 text-info"></i> Nuevo Presupuesto
+                      </NavLink>
+                    </li>
+                    <li><hr className="dropdown-divider my-1" /></li>
                     <li>
                       <NavLink to="/ventas" onClick={closeMenu} className="dropdown-item small py-2">
                         <i className="bi bi-cart3 me-2 text-success"></i> Punto de Venta (POS)
@@ -220,13 +234,13 @@ export default function Navbar() {
                   <i className="bi bi-gear me-1"></i> Ajustes
                 </NavLink>
 
-                {/* Botón Acción Rápida: Nuevo Presupuesto */}
+                {/* Botón Acceso Rápido: Presupuestos */}
                 <NavLink
-                  to="/presupuesto-it"
+                  to="/presupuestos"
                   onClick={closeMenu}
                   className={({ isActive }) => `btn btn-primary btn-sm d-flex align-items-center gap-1 ms-2 ${isActive ? 'active' : ''}`}
                 >
-                  <i className="bi bi-plus-lg"></i> <span>Presupuesto</span>
+                  <i className="bi bi-file-earmark-text"></i> <span>Presupuestos</span>
                 </NavLink>
 
                 {/* Salir */}
@@ -257,14 +271,23 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Botón Acción Rápida en Móvil */}
-            <NavLink
-              to="/presupuesto-it"
-              onClick={closeMenu}
-              className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 mb-2"
-            >
-              <i className="bi bi-plus-lg"></i> <span>Nuevo Presupuesto</span>
-            </NavLink>
+            {/* Botones Acción Rápida en Móvil */}
+            <div className="d-flex gap-2 mb-2">
+              <NavLink
+                to="/gestion"
+                onClick={closeMenu}
+                className="btn btn-outline-primary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+              >
+                <i className="bi bi-tools"></i> <span>Órdenes (OT)</span>
+              </NavLink>
+              <NavLink
+                to="/presupuestos"
+                onClick={closeMenu}
+                className="btn btn-primary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+              >
+                <i className="bi bi-file-earmark-text"></i> <span>Presupuestos</span>
+              </NavLink>
+            </div>
 
             {/* Dashboard */}
             <NavLink
@@ -290,7 +313,7 @@ export default function Navbar() {
               </button>
               {activeDropdown === 'taller' && (
                 <div className="mobile-submenu ps-3 py-1 my-1 bg-light rounded-3 d-flex flex-column gap-1">
-                  <NavLink to="/gestion" onClick={closeMenu} className="nav-link-premium py-2 small">
+                  <NavLink to="/gestion" onClick={closeMenu} className="nav-link-premium py-2 small fw-semibold">
                     <i className="bi bi-clipboard2-check me-2 text-primary"></i> Órdenes de Trabajo (OT)
                   </NavLink>
                   <NavLink to="/beneficios-promo" onClick={closeMenu} className="nav-link-premium py-2 small fw-semibold">
@@ -326,6 +349,12 @@ export default function Navbar() {
               </button>
               {activeDropdown === 'comercial' && (
                 <div className="mobile-submenu ps-3 py-1 my-1 bg-light rounded-3 d-flex flex-column gap-1">
+                  <NavLink to="/presupuestos" onClick={closeMenu} className="nav-link-premium py-2 small fw-semibold">
+                    <i className="bi bi-file-earmark-text me-2 text-primary"></i> Presupuestos Comerciales
+                  </NavLink>
+                  <NavLink to="/presupuesto-it" onClick={closeMenu} className="nav-link-premium py-2 small">
+                    <i className="bi bi-plus-circle me-2 text-info"></i> Nuevo Presupuesto
+                  </NavLink>
                   <NavLink to="/ventas" onClick={closeMenu} className="nav-link-premium py-2 small">
                     <i className="bi bi-cart3 me-2 text-success"></i> Punto de Venta (POS)
                   </NavLink>

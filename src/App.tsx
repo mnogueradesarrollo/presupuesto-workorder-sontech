@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
+import Presupuestos from "./pages/Presupuestos";
 import PresupuestoIT from "./pages/PresupuestoIT";
 import OrdenPage from "./pages/Orden";
 import Settings from "./pages/Settings";
@@ -48,6 +49,22 @@ export default function App() {
               <ProtectedRoute>
                 <div className="container py-4">
                   <Home />
+                </div>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/ordenes" element={
+              <ProtectedRoute>
+                <div className="container py-4">
+                  <Home />
+                </div>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/presupuestos" element={
+              <ProtectedRoute>
+                <div className="container py-4">
+                  <Presupuestos />
                 </div>
               </ProtectedRoute>
             } />

@@ -5,8 +5,10 @@ import { db } from '../lib/firebase';
 import type { Orden, OrdenCheckin, QAChecklist, BitacoraNota, QAResult } from '../types/orden';
 import { registrarPago, getPagosPorOrden, eliminarPago } from '../services/flujo';
 import { listProductos } from '../services/productos';
+import { listClientes } from '../services/clientes';
 import type { Pago } from '../types/pago';
 import type { Producto } from '../types/producto';
+import type { Cliente } from '../types/cliente';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -50,9 +52,23 @@ export default function OrdenPage() {
   const [waMenuOpen, setWaMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'taller' | 'checkin' | 'qa' | 'bitacora' | 'rma_sla'>('taller');
 
-  // Catálogo de repuestos
+  // Catálogos
   const [productosDb, setProductosDb] = useState<Producto[]>([]);
+  const [clientesDb, setClientesDb] = useState<Cliente[]>([]);
   const [modalRepuestoPicker, setModalRepuestoPicker] = useState(false);
+
+  // Datos editables de Cliente y Equipo
+  const [clienteNombre, setClienteNombre] = useState('');
+  const [clienteTelefono, setClienteTelefono] = useState('');
+  const [equipoTipo, setEquipoTipo] = useState('');
+  const [equipoMarca, setEquipoMarca] = useState('');
+  const [equipoModelo, setEquipoModelo] = useState('');
+  const [equipoSerie, setEquipoSerie] = useState('');
+  const [equipoPass, setEquipoPass] = useState('');
+
+  // Importe Base e Ítems Base editables
+  const [totalEstimadoEdit, setTotalEstimadoEdit] = useState<number>(0);
+  const [itemsBase, setItemsBase] = useState<ItemPresupuesto[]>([]);
 
   // Check-in State
   const [estadoEstetico, setEstadoEstetico] = useState('');
@@ -77,7 +93,7 @@ export default function OrdenPage() {
   const [esTercerizado, setEsTercerizado] = useState(false);
   const [proveedorTercerizadoNombre, setProveedorTercerizadoNombre] = useState('');
 
-  const { register, control, handleSubmit, reset } = useForm<any>({
+  const { register, control, handleSubmit, reset, watch } = useForm<any>({
     resolver: zodResolver(schema),
     defaultValues: {
       trabajos: [],
@@ -96,6 +112,9 @@ export default function OrdenPage() {
     name: "repuestos"
   });
 
+  const watchedTrabajos = watch("trabajos") || [];
+  const watchedRepuestos = watch("repuestos") || [];
+
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -111,6 +130,19 @@ export default function OrdenPage() {
             trabajos: data.trabajos || [],
             repuestos: data.repuestos || [],
           });
+
+          // Cliente y Equipo
+          setClienteNombre(data.cliente || '');
+          setClienteTelefono(data.clienteTelefono || '');
+          setEquipoTipo(data.equipo?.tipo || '');
+          setEquipoMarca(data.equipo?.marca || '');
+          setEquipoModelo(data.equipo?.modelo || '');
+          setEquipoSerie(data.equipo?.imeiSerie || '');
+          setEquipoPass(data.equipo?.pass || '');
+
+          // Importe e ítems base
+          setTotalEstimadoEdit(data.totalEstimado ?? 0);
+          setItemsBase(data.itemsPresupuesto || []);
 
           // Check-in
           setEstadoEstetico(data.checkin?.estadoEstetico || '');
@@ -137,24 +169,74 @@ export default function OrdenPage() {
           setPagos(pList);
         }
 
-        const prods = await listProductos(200);
+        const [prods, clis] = await Promise.all([
+          listProductos(200),
+          listClientes(200),
+        ]);
         setProductosDb(prods);
+        setClientesDb(clis);
       } catch (e) {
         console.error(e);
       }
     })();
   }, [id, reset]);
 
+  const recalcularBaseDesdeItems = (lista: ItemPresupuesto[]) => {
+    const suma = lista.reduce((acc, it) => {
+      const unit =
+        it.horas && it.tarifaHora
+          ? Number(it.horas) * Number(it.tarifaHora)
+          : Number(it.precioUnitario || 0);
+      const bruto = unit * Number(it.cantidad || 1);
+      const desc = it.descuentoPct ? bruto * (Number(it.descuentoPct) / 100) : 0;
+      return acc + Math.max(0, bruto - desc);
+    }, 0);
+    setTotalEstimadoEdit(Number(suma.toFixed(2)));
+  };
+
+  const handleUpdateItemBase = (index: number, patch: Partial<ItemPresupuesto>) => {
+    setItemsBase((prev) => {
+      const next = prev.map((it, i) => (i === index ? { ...it, ...patch } : it));
+      recalcularBaseDesdeItems(next);
+      return next;
+    });
+  };
+
+  const handleRemoveItemBase = (index: number) => {
+    setItemsBase((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      recalcularBaseDesdeItems(next);
+      return next;
+    });
+  };
+
+  // Totales en vivo mientras se edita
+  const extraTrabajosLive = watchedTrabajos.reduce(
+    (acc: number, t: any) => acc + (Number(t?.precio) || 0),
+    0
+  );
+  const extraRepuestosLive = watchedRepuestos.reduce(
+    (acc: number, r: any) => acc + (Number(r?.precio) || 0) * (Number(r?.cantidad) || 0),
+    0
+  );
+  const totalEstimadoLive = Number(totalEstimadoEdit) || 0;
+  const totalFinalLive = Number((totalEstimadoLive + extraTrabajosLive + extraRepuestosLive).toFixed(2));
+  const pagadoLive = orden?.pagado || 0;
+  const saldoLive = Math.max(0, Number((totalFinalLive - pagadoLive).toFixed(2)));
+
   const onSubmit = async (data: FormData) => {
     if (!id) return;
+    if (!clienteNombre.trim()) {
+      toast.error("El nombre del cliente es obligatorio");
+      return;
+    }
     setSaving(true);
     try {
-      // Calcular Totales Extra
       const extraTrabajos = (data.trabajos || []).reduce((acc: number, t: any) => acc + (Number(t.precio) || 0), 0);
       const extraRepuestos = (data.repuestos || []).reduce((acc: number, r: any) => acc + (Number(r.precio) || 0) * (Number(r.cantidad) || 0), 0);
 
-      const totalEstimado = orden?.totalEstimado || 0;
-      const totalFinal = totalEstimado + extraTrabajos + extraRepuestos;
+      const totalEstimado = Number(totalEstimadoEdit) || 0;
+      const totalFinal = Number((totalEstimado + extraTrabajos + extraRepuestos).toFixed(2));
       const pagado = orden?.pagado || 0;
       const saldo = Math.max(0, Number((totalFinal - pagado).toFixed(2)));
       const esPromo = Boolean(
@@ -171,31 +253,13 @@ export default function OrdenPage() {
           ? 'parcial'
           : 'impago';
 
-      // Actualizar presupuesto si existe y no es el marcador de promoción
-      if (orden?.presupuestoId && orden.presupuestoId !== 'BENEFICIO-PROMO') {
-        const extraItems: ItemPresupuesto[] = [
-          ...(data.trabajos || []).map((t: any) => ({
-            id: t.id,
-            tipo: 'Servicio' as const,
-            descripcion: t.descripcion,
-            cantidad: 1,
-            precioUnitario: Number(t.precio) || 0,
-          })),
-          ...(data.repuestos || []).map((r: any) => ({
-            id: r.id,
-            tipo: 'Producto' as const,
-            descripcion: r.descripcion,
-            cantidad: Number(r.cantidad) || 1,
-            precioUnitario: Number(r.precio) || 0,
-          }))
-        ];
-        const allItems = [...(orden.itemsPresupuesto || []), ...extraItems];
-        await updateDoc(doc(db, 'presupuestos', orden.presupuestoId), {
-          items: allItems,
-          total: totalFinal,
-          updatedAt: Date.now()
-        });
-      }
+      const equipoActualizado = {
+        tipo: equipoTipo.trim() || undefined,
+        marca: equipoMarca.trim() || undefined,
+        modelo: equipoModelo.trim() || undefined,
+        imeiSerie: equipoSerie.trim() || undefined,
+        pass: equipoPass.trim() || undefined,
+      };
 
       // Checkin y QA estructurados
       const checkin: OrdenCheckin = {
@@ -205,26 +269,30 @@ export default function OrdenPage() {
         comportamientoInicial,
       };
 
-      await updateDoc(
-        doc(db, 'ordenes', id),
-        pruneDeep({
-          ...data,
-          checkin,
-          qaEntrada,
-          qaSalida,
-          bitacora,
-          esGarantiaRMA,
-          ordenOrigenCodigo: ordenOrigenCodigo || undefined,
-          garantiaDias: Number(garantiaDias) || 90,
-          tecnicoAsignado,
-          esTercerizado,
-          proveedorTercerizadoNombre: esTercerizado ? proveedorTercerizadoNombre : undefined,
-          totalFinal,
-          saldo,
-          payStatus,
-          updatedAt: Date.now()
-        })
-      );
+      const payload = pruneDeep({
+        ...data,
+        cliente: clienteNombre.trim(),
+        clienteTelefono: clienteTelefono.trim() || undefined,
+        equipo: equipoActualizado,
+        itemsPresupuesto: itemsBase,
+        totalEstimado,
+        checkin,
+        qaEntrada,
+        qaSalida,
+        bitacora,
+        esGarantiaRMA,
+        ordenOrigenCodigo: ordenOrigenCodigo || undefined,
+        garantiaDias: Number(garantiaDias) || 90,
+        tecnicoAsignado,
+        esTercerizado,
+        proveedorTercerizadoNombre: esTercerizado ? proveedorTercerizadoNombre : undefined,
+        totalFinal,
+        saldo,
+        payStatus,
+        updatedAt: Date.now()
+      });
+
+      await updateDoc(doc(db, 'ordenes', id), payload);
 
       if (orden) {
         await sincronizarEstadoOrdenConBeneficio(orden, data.status);
@@ -233,6 +301,11 @@ export default function OrdenPage() {
       setOrden(prev => prev ? {
         ...prev,
         ...data as any,
+        cliente: clienteNombre.trim(),
+        clienteTelefono: clienteTelefono.trim() || undefined,
+        equipo: equipoActualizado,
+        itemsPresupuesto: itemsBase,
+        totalEstimado,
         checkin,
         qaEntrada,
         qaSalida,
@@ -242,7 +315,7 @@ export default function OrdenPage() {
         payStatus
       } : null);
 
-      toast.success("Orden y registros de laboratorio guardados exitosamente.");
+      toast.success("Orden de Trabajo actualizada exitosamente.");
     } catch (e) {
       console.error(e);
       toast.error("Error al actualizar la orden");
@@ -336,26 +409,28 @@ export default function OrdenPage() {
   // WhatsApp helpers
   const sendWhatsAppMsg = (type: 'recepcion' | 'presupuesto' | 'retiro') => {
     if (!orden) return;
-    const tel = orden.clienteTelefono || '';
+    let tel = clienteTelefono.trim() || orden.clienteTelefono || '';
     if (!tel) {
       const askTel = prompt('Ingresa el teléfono del cliente (+54 9 11...):');
       if (!askTel) return;
-      orden.clienteTelefono = askTel;
+      tel = askTel;
+      setClienteTelefono(askTel);
     }
 
+    const nombre = clienteNombre.trim() || orden.cliente;
     const token = orden.tokenTracking || orden.codigo || orden.id;
-    const equipoStr = `${orden.equipo?.marca || ''} ${orden.equipo?.modelo || ''}`.trim();
+    const equipoStr = `${equipoMarca || orden.equipo?.marca || ''} ${equipoModelo || orden.equipo?.modelo || ''}`.trim();
     let msg = '';
 
     if (type === 'recepcion') {
-      msg = WhatsAppTemplates.recepcion(orden.cliente, orden.codigo || orden.id, equipoStr, token);
+      msg = WhatsAppTemplates.recepcion(nombre, orden.codigo || orden.id, equipoStr, token);
     } else if (type === 'presupuesto') {
-      msg = WhatsAppTemplates.presupuestoListo(orden.cliente, orden.codigo || orden.id, orden.totalFinal ?? orden.totalEstimado ?? 0, token);
+      msg = WhatsAppTemplates.presupuestoListo(nombre, orden.codigo || orden.id, totalFinalLive, token);
     } else if (type === 'retiro') {
-      msg = WhatsAppTemplates.equipoListo(orden.cliente, orden.codigo || orden.id, equipoStr, orden.saldo ?? 0);
+      msg = WhatsAppTemplates.equipoListo(nombre, orden.codigo || orden.id, equipoStr, saldoLive);
     }
 
-    const link = buildWhatsAppLink(orden.clienteTelefono || '', msg);
+    const link = buildWhatsAppLink(tel, msg);
     window.open(link, '_blank');
   };
 
@@ -372,30 +447,41 @@ export default function OrdenPage() {
     const biz = await getSettings();
     const logoDataUrl = biz?.logoUrl ? await toDataURL(biz.logoUrl) : await toDataURL(logoUrl);
 
+    const trabajosBasePdf = itemsBase.map((it) => ({
+      descripcion: `${it.descripcion || 'Servicio'} (x${it.cantidad || 1})`,
+      precio:
+        (it.horas && it.tarifaHora
+          ? Number(it.horas) * Number(it.tarifaHora)
+          : Number(it.precioUnitario || 0)) * Number(it.cantidad || 1),
+      horas: it.horas,
+    }));
+
+    const trabajosExtraPdf = watchedTrabajos.map((t: any) => ({
+      descripcion: t.descripcion,
+      precio: Number(t.precio) || 0,
+      horas: t.horas,
+    }));
+
     const docPdf = await generarOrdenPDF({
-      cliente: orden.cliente,
+      cliente: clienteNombre.trim() || orden.cliente,
       fecha: new Date(orden.createdAt).toLocaleDateString(),
       codigoOrden: orden.codigo,
       equipo: {
-        marca: orden.equipo?.marca,
-        modelo: orden.equipo?.modelo,
-        imeiSerie: orden.equipo?.imeiSerie
+        marca: equipoMarca || orden.equipo?.marca,
+        modelo: equipoModelo || orden.equipo?.modelo,
+        imeiSerie: equipoSerie || orden.equipo?.imeiSerie
       },
-      diagnostico: orden.diagnostico,
-      notasEntrega: orden.notasEntrega,
-      trabajos: orden.trabajos.map(t => ({
-        descripcion: t.descripcion,
-        precio: t.precio,
-        horas: t.horas
-      })),
-      repuestos: orden.repuestos.map(r => ({
+      diagnostico: watch("diagnostico") || orden.diagnostico,
+      notasEntrega: watch("notasEntrega") || orden.notasEntrega,
+      trabajos: [...trabajosBasePdf, ...trabajosExtraPdf],
+      repuestos: watchedRepuestos.map((r: any) => ({
         descripcion: r.descripcion,
-        cantidad: r.cantidad,
-        precio: r.precio || 0
+        cantidad: Number(r.cantidad) || 1,
+        precio: Number(r.precio) || 0
       })),
-      totalFinal: orden.totalFinal ?? orden.totalEstimado ?? 0,
-      pagado: orden.pagado ?? 0,
-      saldo: orden.saldo ?? 0,
+      totalFinal: totalFinalLive,
+      pagado: pagadoLive,
+      saldo: saldoLive,
       moneda: orden.moneda,
       logoDataUrl: logoDataUrl ?? undefined,
       sub: biz?.name,
@@ -533,23 +619,112 @@ export default function OrdenPage() {
               </div>
             </div>
 
-            {/* Info Cliente & Equipo */}
+            {/* Info Cliente & Equipo (Editables) */}
             <div className="row mb-4 g-3">
               <div className="col-md-6">
                 <div className="bg-light p-3 border rounded h-100 border-start border-primary border-3">
-                  <label className="x-small fw-bold text-muted mb-1 d-block text-uppercase">Información del Cliente</label>
-                  <div className="fs-5 fw-bold mb-1">{orden.cliente}</div>
-                  <div className="text-muted small">
-                    {orden.clienteTelefono && <span><i className="bi bi-whatsapp text-success me-1"></i>{orden.clienteTelefono}</span>}
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <label className="x-small fw-bold text-muted mb-0 d-block text-uppercase">
+                      Información del Cliente
+                    </label>
+                    <span className="badge bg-white text-muted border x-small">Editable</span>
+                  </div>
+                  <div className="mb-2">
+                    <input
+                      type="text"
+                      list="ordenClientesList"
+                      className="form-control form-control-sm fw-bold"
+                      placeholder="Nombre del cliente..."
+                      value={clienteNombre}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setClienteNombre(val);
+                        const match = clientesDb.find(
+                          (c) => c.nombre.toLowerCase() === val.trim().toLowerCase()
+                        );
+                        if (match && match.telefono && !clienteTelefono) {
+                          setClienteTelefono(match.telefono);
+                        }
+                      }}
+                    />
+                    <datalist id="ordenClientesList">
+                      {clientesDb.map((c) => (
+                        <option key={c.id} value={c.nombre}>
+                          {c.nombre} {c.telefono ? `(${c.telefono})` : ''}
+                        </option>
+                      ))}
+                    </datalist>
+                  </div>
+                  <div className="input-group input-group-sm">
+                    <span className="input-group-text bg-white">
+                      <i className="bi bi-whatsapp text-success"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Teléfono / WhatsApp del cliente..."
+                      value={clienteTelefono}
+                      onChange={(e) => setClienteTelefono(e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
               <div className="col-md-6">
                 <div className="bg-light p-3 border rounded h-100 border-start border-info border-3">
-                  <label className="x-small fw-bold text-muted mb-1 d-block text-uppercase">Equipo en Servicio</label>
-                  <div className="fw-bold fs-6">{orden.equipo?.marca} {orden.equipo?.modelo}</div>
-                  <div className="text-muted small font-mono">
-                    SN/IMEI: {orden.equipo?.imeiSerie || 'N/A'} {orden.equipo?.pass ? `| PIN: ${orden.equipo.pass}` : ''}
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <label className="x-small fw-bold text-muted mb-0 d-block text-uppercase">
+                      Equipo en Servicio
+                    </label>
+                    <span className="badge bg-white text-muted border x-small">Editable</span>
+                  </div>
+                  <div className="row g-2 mb-2">
+                    <div className="col-4">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder="Tipo (Notebook, PC...)"
+                        value={equipoTipo}
+                        onChange={(e) => setEquipoTipo(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-4">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm fw-semibold"
+                        placeholder="Marca"
+                        value={equipoMarca}
+                        onChange={(e) => setEquipoMarca(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-4">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm fw-semibold"
+                        placeholder="Modelo"
+                        value={equipoModelo}
+                        onChange={(e) => setEquipoModelo(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="row g-2">
+                    <div className="col-7">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm font-mono"
+                        placeholder="SN / IMEI"
+                        value={equipoSerie}
+                        onChange={(e) => setEquipoSerie(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-5">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm font-mono"
+                        placeholder="PIN / Clave"
+                        value={equipoPass}
+                        onChange={(e) => setEquipoPass(e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -559,17 +734,27 @@ export default function OrdenPage() {
             <div className="info-box-premium mb-4 border">
               <div className="stats-grid-compact">
                 <div className="stat-item">
+                  <label>Importe Base ($)</label>
+                  <input
+                    type="number"
+                    className="form-control form-control-sm font-mono fw-bold mt-1"
+                    value={totalEstimadoEdit}
+                    onChange={(e) => setTotalEstimadoEdit(Number(e.target.value) || 0)}
+                    title="Importe base de la orden"
+                  />
+                </div>
+                <div className="stat-item">
                   <label>Total Final</label>
-                  <div className="value font-mono">${(orden.totalFinal ?? orden.totalEstimado ?? 0).toLocaleString()}</div>
+                  <div className="value font-mono">${totalFinalLive.toLocaleString()}</div>
                 </div>
                 <div className="stat-item">
                   <label>Pagado</label>
-                  <div className="value text-success font-mono">${(orden.pagado ?? 0).toLocaleString()}</div>
+                  <div className="value text-success font-mono">${pagadoLive.toLocaleString()}</div>
                 </div>
                 <div className="stat-item">
                   <label>Saldo Pendiente</label>
-                  <div className={`value font-mono ${(orden.saldo ?? 0) > 0 ? 'balance-negative' : 'balance-positive'}`}>
-                    ${(orden.saldo ?? 0).toLocaleString()}
+                  <div className={`value font-mono ${saldoLive > 0 ? 'balance-negative' : 'balance-positive'}`}>
+                    ${saldoLive.toLocaleString()}
                   </div>
                 </div>
                 <div className="stat-item">
@@ -662,6 +847,81 @@ export default function OrdenPage() {
                     />
                   </div>
                 </div>
+
+                {/* Ítems Iniciales de la Orden (si tiene ítems cargados) */}
+                {itemsBase.length > 0 && (
+                  <div className="mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h3 className="h6 fw-bold text-uppercase m-0">
+                        Ítems Iniciales de la Orden
+                      </h3>
+                      <span className="x-small text-muted">
+                        Al editar estos ítems se recalcula el Importe Base automáticamente
+                      </span>
+                    </div>
+                    <div className="items-container-vertical">
+                      {itemsBase.map((it, idx) => (
+                        <div key={it.id || idx} className="item-card p-3">
+                          <div className="row g-2 align-items-center">
+                            <div className="col-md-7">
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                placeholder="Descripción del ítem..."
+                                value={it.descripcion || ''}
+                                onChange={(e) =>
+                                  handleUpdateItemBase(idx, { descripcion: e.target.value })
+                                }
+                              />
+                            </div>
+                            <div className="col-md-2">
+                              <input
+                                type="number"
+                                className="form-control form-control-sm font-mono"
+                                placeholder="Cant."
+                                value={it.cantidad ?? 1}
+                                onChange={(e) =>
+                                  handleUpdateItemBase(idx, {
+                                    cantidad: Math.max(1, Number(e.target.value) || 1),
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="col-md-2">
+                              <input
+                                type="number"
+                                className="form-control form-control-sm font-mono"
+                                placeholder="Precio $"
+                                value={
+                                  it.horas && it.tarifaHora
+                                    ? Number(it.horas) * Number(it.tarifaHora)
+                                    : it.precioUnitario ?? 0
+                                }
+                                onChange={(e) =>
+                                  handleUpdateItemBase(idx, {
+                                    precioUnitario: Number(e.target.value) || 0,
+                                    horas: undefined,
+                                    tarifaHora: undefined,
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="col-md-1 text-end">
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveItemBase(idx)}
+                                className="btn btn-sm btn-link text-danger p-0 border-0"
+                                title="Quitar ítem inicial"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Trabajos Realizados */}
                 <div className="mb-4">

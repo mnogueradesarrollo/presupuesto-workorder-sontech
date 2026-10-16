@@ -60,33 +60,54 @@ presupuesto-workorder-sontech/
     │   └── ...
     │
     ├── components/              # Componentes de UI reutilizables
-    │   ├── Navbar.tsx           # Barra superior con drawer responsivo y enlaces de navegación
+    │   ├── Navbar.tsx           # Barra superior con menús desplegables React y drawer móvil
     │   ├── ProtectedRoute.tsx   # Guardián de rutas autenticadas (redirige a /login)
-    │   ├── ItemsTableIT.tsx     # Tabla interactiva dinámica para añadir/eliminar ítems de presupuesto
-    │   └── Container.tsx        # [Archivo vacío - candidato a limpieza]
+    │   └── ItemsTableIT.tsx     # Tabla interactiva dinámica para añadir/eliminar ítems de presupuesto
     │
     ├── context/                 # Estado global de la aplicación
-    │   └── AuthContext.tsx      # Proveedor de autenticación (onAuthStateChanged, user, logout)
+    │   └── AuthContext.tsx      # Proveedor de autenticación y cierre automático por inactividad (30 min)
     │
     ├── lib/                     # Librerías de soporte y utilidades puras
     │   ├── firebase.ts          # Inicialización del SDK de Firebase (db, auth, storage)
     │   ├── calc.ts              # Cálculos matemáticos: subtotales, descuentos, bonificaciones, total
     │   ├── pdf.ts               # Lógica de dibujo de PDFs comerciales y de informes técnicos
-    │   └── print.ts             # Utilidad de impresión en iframe silencioso
+    │   ├── print.ts             # Utilidad de impresión en iframe silencioso
+    │   ├── utils.ts             # Funciones auxiliares y sanitización de datos Firestore
+    │   └── whatsapp.ts          # Generación de enlaces y mensajes automáticos para WhatsApp
     │
     ├── pages/                   # Páginas / Vistas completas de la aplicación
-    │   ├── Login.tsx            # Formulario de inicio de sesión con estética Glassmorphism
-    │   ├── Dashboard.tsx        # Métricas comerciales y estado de órdenes
-    │   ├── Home.tsx             # Panel de "Gestión": listado de presupuestos y órdenes con filtros
+    │   ├── Login.tsx            # Inicio de sesión (Glassmorphism, ver/ocultar clave, recuperar contraseña)
+    │   ├── Dashboard.tsx        # Métricas comerciales, financieras y operativas de taller
+    │   ├── Home.tsx             # Pantalla exclusiva de Órdenes de Trabajo (OT) (/gestion, /ordenes)
+    │   ├── Presupuestos.tsx     # Pantalla exclusiva de listado y gestión de Presupuestos (/presupuestos)
     │   ├── PresupuestoIT.tsx    # Creación, edición, visualización y exportación de presupuestos
-    │   ├── Orden.tsx            # Ficha de Orden de Trabajo (diagnóstico, extras, pagos, cierre)
-    │   ├── Settings.tsx         # Configuración del negocio (nombre, dirección, teléfono, logo)
-    │   └── PresupuestoNuevo.tsx # [Archivo vacío - candidato a limpieza]
+    │   ├── Orden.tsx            # Ficha editable completa de Orden de Trabajo (cliente, equipo, ítems, pagos)
+    │   ├── TrackingPublico.tsx  # Portal público de seguimiento de OT para clientes (/seguimiento/:codigo)
+    │   ├── Clientes.tsx         # Directorio CRM de clientes y cuentas corrientes
+    │   ├── Proveedores.tsx      # Directorio de proveedores de repuestos e insumos
+    │   ├── Productos.tsx        # Catálogo e inventario de productos y repuestos
+    │   ├── Ventas.tsx           # Punto de Venta (POS) y facturación rápida de mostrador
+    │   ├── Equipos.tsx          # Base de datos de equipos / activos (CMDB) e historial por serie/IMEI
+    │   ├── ConsumiblesScrap.tsx # Control de consumibles de taller y desguace (scrap)
+    │   ├── BaseConocimiento.tsx # Wiki técnica interna (soluciones, pinouts, procedimientos)
+    │   ├── VisitasTecnicas.tsx  # Agenda y registro de visitas técnicas a domicilio / empresas
+    │   ├── BeneficiosPromo.tsx  # Módulo nativo de beneficios promocionales y sincronización con OT
+    │   ├── Abonos.tsx           # Gestión de abonos mensuales y mantenimiento preventivo IT
+    │   └── Settings.tsx         # Configuración del negocio (nombre, dirección, teléfono, logo)
     │
     ├── services/                # Capa de comunicación con Firebase Firestore
     │   ├── flujo.ts             # Transacciones críticas: aceptar presupuesto, registrar/borrar pago, sincronizar
     │   ├── presupuestos.ts      # CRUD y numeración anual de presupuestos
-    │   ├── ordenes.ts           # Consulta y paginación de órdenes de trabajo
+    │   ├── ordenes.ts           # Consulta, actualización y seguimiento de órdenes de trabajo
+    │   ├── clientes.ts          # CRUD de clientes
+    │   ├── proveedores.ts       # CRUD de proveedores
+    │   ├── productos.ts         # CRUD de catálogo y control de stock
+    │   ├── ventas.ts            # Registro de ventas directas y descuento de inventario
+    │   ├── equipos.ts           # CRUD de equipos (CMDB)
+    │   ├── scrap.ts             # Gestión de consumibles y scrap
+    │   ├── kb.ts                # CRUD de artículos de base de conocimiento
+    │   ├── beneficios.ts        # CRUD y aplicación de beneficios promocionales
+    │   ├── abonos.ts            # CRUD de abonos recurrentes y visitas técnicas
     │   └── settings.ts          # Lectura y guardado de datos corporativos
     │
     ├── styles/                  # Hojas de estilo específicas
@@ -96,7 +117,16 @@ presupuesto-workorder-sontech/
         ├── common.ts            # Monedas, métodos de pago, estados generales
         ├── presupuesto.ts       # Esquema de Presupuesto, Ítem, Aceptación y Garantía
         ├── orden.ts             # Esquema de Orden de Trabajo, Equipo, Trabajos y Repuestos
-        └── pago.ts              # Esquema de registro de Pagos
+        ├── pago.ts              # Esquema de registro de Pagos
+        ├── cliente.ts           # Esquema de Cliente
+        ├── proveedor.ts         # Esquema de Proveedor
+        ├── producto.ts          # Esquema de Producto / Repuesto
+        ├── venta.ts             # Esquema de Venta POS
+        ├── equipo.ts            # Esquema de Equipo (CMDB)
+        ├── scrap.ts             # Esquema de Consumibles y Scrap
+        ├── kb.ts                # Esquema de Base de Conocimiento
+        ├── beneficio.ts         # Esquema de Beneficio Promocional
+        └── abono.ts             # Esquema de Abono y Visita Técnica
 ```
 
 ---
@@ -203,18 +233,28 @@ Datos de la empresa utilizados en los encabezados y pies de los PDFs:
   - Cambio de estado a 'completado' / 'entregado'
 ```
 
-### Reglas Clave de Sincronización:
-1. **Presupuesto $\rightarrow$ Orden**: Al aceptar un presupuesto, se copian los datos del cliente, equipo cotizado y se fija el `totalEstimado` y `saldo` inicial.
-2. **Orden $\rightarrow$ Presupuesto**: Si en la orden de trabajo se agregan trabajos o repuestos adicionales, la función `onSubmit` en `Orden.tsx` actualiza también el documento del presupuesto original para que la cotización refleje los nuevos costos agregados en taller.
-3. **Presupuesto $\rightarrow$ Orden**: Si se edita un presupuesto que ya posee una orden asociada (`currentOrdenId`), se ejecuta `sincronizarOrdenConPresupuesto(...)` recalculando saldos sin perder los extras ya cargados en la orden.
+### Reglas Clave de Individualización (Presupuesto vs. Orden de Trabajo):
+1. **Pantallas Independientes**:
+   - **Presupuestos (`/presupuestos`)**: Gestión exclusiva de cotizaciones comerciales (`Presupuestos.tsx` y `PresupuestoIT.tsx`).
+   - **Órdenes de Trabajo (`/gestion` o `/ordenes`)**: Gestión exclusiva de órdenes de taller (`Home.tsx` y `Orden.tsx`), con opción de crear una **Nueva Orden de Trabajo directa** sin requerir un presupuesto previo.
+2. **Edición Independiente**:
+   - Al aceptar un presupuesto se puede generar una OT inicial copiando los datos base, pero a partir de ese momento **Presupuesto y Orden de Trabajo son documentos independientes**: modificar clientes, equipos, ítems base, mano de obra o repuestos en la OT actualiza únicamente la Orden de Trabajo sin alterar ni sobrescribir el presupuesto original.
 
 ---
 
 ## 🔒 6. Autenticación y Seguridad
 
-- **Mecanismo**: Firebase Authentication basado en Email/Contraseña.
-- **Protección de Rutas**: `ProtectedRoute.tsx` envuelve todas las rutas principales (`/`, `/gestion`, `/presupuesto-it`, `/orden/:id`, `/settings`). Si no hay sesión activa en `AuthContext`, redirige automáticamente a `/login` preservando la ruta previa en el estado para retornar al autenticar.
-- **Cierre de Sesión**: Accesible desde la barra superior (`Navbar.tsx`), ejecuta `signOut(auth)`.
+- **Mecanismo**: Firebase Authentication basado en Email/Contraseña (`src/pages/Login.tsx`).
+- **Mejoras en Login (`Login.tsx`)**:
+  - Limpieza automática de espacios en el correo (`email.trim()`) y soporte de `autoComplete`.
+  - Botón para **ver/ocultar contraseña** (`bi-eye` / `bi-eye-slash`) para evitar errores de tipeo al ingresar desde otros dispositivos.
+  - Recuperación de clave integrada (`sendPasswordResetEmail`) mediante el botón **"¿Olvidaste tu contraseña?"**.
+- **Protección de Rutas**: `ProtectedRoute.tsx` envuelve todas las rutas internas (`/`, `/gestion`, `/ordenes`, `/presupuestos`, `/presupuesto-it`, `/orden/:id`, `/clientes`, `/proveedores`, `/productos`, `/ventas`, `/equipos`, `/scrap`, `/kb`, `/visitas`, `/beneficios-promo`, `/abonos`, `/settings`). Solo `/login` y `/seguimiento/:codigo` son públicas.
+- **Cierre de Sesión por Inactividad (`AuthContext.tsx`)**:
+  - Tiempo máximo de inactividad: **30 minutos** (`INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000`).
+  - Monitorea eventos de interacción (`mousemove`, `mousedown`, `keydown`, `touchstart`, `scroll`, `click`), cambios de visibilidad de pestaña (`visibilitychange`) y sincronización entre pestañas mediante `localStorage` (`sontech_last_activity`).
+  - Si el equipo entra en suspensión o se cierra el navegador y se reabre pasados los 30 minutos de inactividad, cierra la sesión automáticamente (`signOut(auth)`), notifica `"🔒 Sesión cerrada por inactividad"` y redirige a `/login`.
+- **Cierre de Sesión Manual**: Accesible desde la barra superior (`Navbar.tsx`), limpia `sontech_last_activity` y ejecuta `signOut(auth)`.
 
 ---
 
@@ -268,7 +308,7 @@ npm run lint
 
 1. **Evitar `undefined` en Firestore**:
    - Firestore rechaza objetos con propiedades que tengan valor `undefined` (lanza error `Function DocumentReference.set() called with invalid data`).
-   - Por esta razón, se desarrollaron las utilidades `pruneDeep` (en `flujo.ts`) y `pruneUndefined` (en `presupuestos.ts`).
+   - Por esta razón, se desarrollaron las utilidades `pruneDeep` (en `flujo.ts`) y `pruneUndefined` (en `presupuestos.ts` / `utils.ts`).
    - **Regla**: Todo nuevo servicio que guarde o actualice documentos con campos opcionales debe pasar los datos por estas funciones sanitizadoras antes de invocar Firebase.
 
 2. **Transacciones Atómicas (`runTransaction`)**:
@@ -279,18 +319,65 @@ npm run lint
    - En `src/lib/pdf.ts`, `jsPDF` requiere que las imágenes estén en formato base64 (`data:image/png;base64,...`).
    - Para ello se utiliza la función auxiliar `toDataURL(url)`. Si el logo se actualiza desde una URL remota en `Settings`, dicha URL debe permitir peticiones CORS para poder ser dibujada en el PDF.
 
-4. **Archivos Huérfanos a Considerar**:
-   - `src/pages/PresupuestoNuevo.tsx`: Archivo con 0 bytes (no se utiliza en las rutas).
-   - `src/components/Container.tsx`: Archivo con 0 bytes.
-   - `src/pdf.ts`: Archivo con 0 bytes en la raíz de `src/` (el código real y activo reside en `src/lib/pdf.ts`).
-   - Estos archivos pueden removerse con seguridad si se desea limpiar el árbol de trabajo.
-
 ---
 
 ## 🚀 9. Ideas y Hoja de Ruta para Futuras Mejoras
 
+- [x] **Envío Directo por WhatsApp**: Integrado en `src/lib/whatsapp.ts` para envío rápido de presupuestos, órdenes y avisos de retiro.
+- [x] **Gestión de Stock de Repuestos y POS**: Implementado catálogo en `Productos.tsx`, `Ventas.tsx` y `Proveedores.tsx`.
+- [x] **Portal Público de Seguimiento**: Implementado en `TrackingPublico.tsx` (`/seguimiento/:codigo`).
+- [x] **Módulo de Beneficios Promocionales**: Implementado en `BeneficiosPromo.tsx` con sincronización automática con OT.
+- [x] **Seguridad en Login e Inactividad**: Ver/ocultar contraseña, recuperación por email y cierre automático tras 30 minutos de inactividad.
+- [x] **Individualización de Presupuestos y Órdenes de Trabajo**: Pantallas separadas (`/presupuestos` y `/gestion`) y edición completa de datos en OT.
 - [ ] **Adjuntos en Taller**: Permitir subir fotografías del estado estético del equipo (roturas, rayones previos) al momento de recibirlo, almacenándolas en Firebase Storage e incluyéndolas en la ficha de la orden.
-- [ ] **Envío Directo por WhatsApp**: Integrar un botón con la API de `wa.me` para enviar al cliente un mensaje predefinido con el enlace o resumen de su presupuesto o aviso de *"Equipo listo para retirar"*.
-- [ ] **Gestión de Stock de Repuestos**: Vincular la lista de repuestos usados a una colección de inventario con alertas de reposición.
 - [ ] **Filtros Avanzados en Dashboard**: Filtros por rango de fechas (mes actual, trimestre) y exportación de reportes contables a Excel/CSV.
 - [ ] **Roles de Usuario**: Diferenciación entre rol *Técnico* (solo ve tareas y diagnóstico) y rol *Administrador* (ve saldos, pagos y configuración de empresa).
+
+---
+
+## 📜 10. Historial de Modificaciones (Memoria de Movimientos)
+
+> **Regla de mantenimiento:** Toda modificación, corrección o nueva funcionalidad realizada en el proyecto debe registrarse en esta sección indicando fecha, archivos tocados y detalle del cambio para mantener la trazabilidad completa.
+
+### `2026-10-16` — Individualización de Presupuestos y Órdenes de Trabajo + Edición Completa de OT
+- **Archivos modificados/creados:** `src/pages/Presupuestos.tsx` *(nuevo)*, `src/pages/Home.tsx`, `src/pages/Orden.tsx`, `src/pages/PresupuestoIT.tsx`, `src/App.tsx`, `src/components/Navbar.tsx`, `src/pages/Dashboard.tsx`
+- **Detalle:**
+  - **Pantallas separadas:** Se creó `src/pages/Presupuestos.tsx` en la ruta `/presupuestos` exclusivamente para gestionar presupuestos comerciales (buscar, filtrar, ver, editar, aceptar o anular), dejando `src/pages/Home.tsx` (`/gestion` y `/ordenes`) exclusivamente para **Órdenes de Trabajo (OT)** con filtros propios de taller y estado de pago, creación directa de OT (`+ Nueva Orden de Trabajo`) y eliminación de órdenes.
+  - **Edición completa en Orden de Trabajo (`Orden.tsx`):** Ahora se pueden modificar directamente en la ficha de la OT los datos del **Cliente** (nombre y WhatsApp con autocompletado), los datos del **Equipo en Servicio** (tipo, marca, modelo, N° de serie/IMEI y PIN/clave), el **Importe Base ($)** y los **Ítems Iniciales de la Orden** (con recálculo en vivo de Total Final y Saldo Pendiente).
+  - **Independencia de documentos:** Guardar modificaciones en una Orden de Trabajo actualiza únicamente la orden en Firestore sin pisar ni sobreescribir el presupuesto original, y viceversa.
+
+### `2026-10-15` — Cierre de Sesión Automático por Inactividad
+- **Archivos modificados:** `src/context/AuthContext.tsx`, `src/pages/Login.tsx`
+- **Detalle:**
+  - Se incorporó un control de inactividad de **30 minutos** (`INACTIVITY_TIMEOUT_MS`) cuando el usuario está autenticado.
+  - Monitoreo de actividad del usuario (`mousemove`, `mousedown`, `keydown`, `touchstart`, `scroll`, `click`) con persistencia en `localStorage` (`sontech_last_activity`) para sincronizar pestañas y detectar expiración incluso si la PC estuvo suspendida o con el navegador cerrado.
+  - Al superarse el tiempo de inactividad, se ejecuta `signOut(auth)` automáticamente, se notifica `"🔒 Sesión cerrada por inactividad"` y se redirige a `/login`.
+
+### `2026-10-15` — Mejoras de Usabilidad y Recuperación en Pantalla de Login
+- **Archivos modificados:** `src/pages/Login.tsx`
+- **Detalle:**
+  - Se agregó botón con ícono de ojo (`bi-eye` / `bi-eye-slash`) para mostrar u ocultar la contraseña al escribirla (evitando errores `auth/invalid-credential` al loguearse desde otros equipos).
+  - Se incorporó el botón **"¿Olvidaste tu contraseña?"** conectado a `sendPasswordResetEmail` de Firebase Auth para enviar el correo de restablecimiento directamente al usuario.
+  - Se añadió sanitización automática del correo (`email.trim()`), atributos `autoComplete` y mensajes de error más claros.
+
+### `2026-10-14` — Validación y Guardado de Presupuestos con Precios Directos o por Horas (`989ca6e`)
+- **Archivos modificados:** `src/pages/PresupuestoIT.tsx`, `src/components/ItemsTableIT.tsx`, `src/lib/calc.ts`
+- **Detalle:**
+  - Corrección en la validación y cálculo de ítems de presupuesto para soportar indistintamente precios unitarios directos o cálculo por `horas * tarifaHora`.
+
+### `2026-10-13` — Módulo Nativo de Beneficio Promocional y Sincronización OT (`09e5e6b`)
+- **Archivos modificados:** `src/pages/BeneficiosPromo.tsx`, `src/services/beneficios.ts`, `src/types/beneficio.ts`, `src/pages/Orden.tsx`, `src/App.tsx`, `src/components/Navbar.tsx`
+- **Detalle:**
+  - Creación del módulo de beneficios promocionales para clientes y su sincronización directa con las Órdenes de Trabajo (OT).
+
+### `2026-10-12` — Mejoras de Navegación y Diseño Responsivo Móvil (`66e3b7b`, `cc14b29`)
+- **Archivos modificados:** `src/components/Navbar.tsx`, `src/index.css`
+- **Detalle:**
+  - Menús desplegables de navegación controlados por estado en React sin conflictos con Bootstrap JS.
+  - Drawer lateral móvil de altura completa (`100dvh`) con backdrop difuminado y tablas/pestañas adaptadas a pantallas chicas.
+
+### `2026-10-12` — Evolución a Sistema ERP y Lab Manager (`43748e2`)
+- **Archivos modificados/creados:** `src/pages/*`, `src/services/*`, `src/types/*`, `firestore.rules`
+- **Detalle:**
+  - Expansión integral del sistema desde un generador de presupuestos hacia un ERP y Lab Manager completo: módulos de **Clientes**, **Proveedores**, **Productos/Inventario**, **Ventas (POS)**, **Equipos (CMDB)**, **Consumibles/Scrap**, **Base de Conocimiento (KB)**, **Visitas Técnicas**, **Abonos Mensuales** y **Portal Público de Seguimiento de OT** (`/seguimiento/:codigo`).
+

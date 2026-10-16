@@ -111,9 +111,13 @@ export default function Dashboard() {
                         <i className="bi bi-cart3"></i>
                         <span>Venta Mostrador</span>
                     </Link>
-                    <Link to="/presupuesto-it" className="btn btn-primary btn-sm d-flex align-items-center gap-1">
-                        <i className="bi bi-plus-lg"></i>
-                        <span>Nuevo Presupuesto</span>
+                    <Link to="/gestion" className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                        <i className="bi bi-tools"></i>
+                        <span>Órdenes (OT)</span>
+                    </Link>
+                    <Link to="/presupuestos" className="btn btn-primary btn-sm d-flex align-items-center gap-1">
+                        <i className="bi bi-file-earmark-text"></i>
+                        <span>Presupuestos</span>
                     </Link>
                 </div>
             </div>
@@ -136,23 +140,23 @@ export default function Dashboard() {
 
             {/* Grid Estadísticas Principales */}
             <div className="grid-stats mb-4">
-                <div className="card shadow-sm border-0" style={{ borderTop: '3px solid var(--tech-accent)' }}>
-                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block">PRESUPUESTOS</label>
+                <Link to="/presupuestos" className="card shadow-sm border-0 text-decoration-none text-reset" style={{ borderTop: '3px solid var(--tech-accent)' }}>
+                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block cursor-pointer">PRESUPUESTOS</label>
                     <div className="fs-1 fw-bold text-primary font-mono">{stats.totalPres}</div>
                     <div className="text-success small mt-1 fw-semibold">
                         <i className="bi bi-check-circle-fill me-1"></i>
                         <span className="font-mono">{stats.presAceptados}</span> convertidos a OT
                     </div>
-                </div>
+                </Link>
 
-                <div className="card shadow-sm border-0" style={{ borderTop: '3px solid var(--warning)' }}>
-                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block">ÓRDENES EN BANCO</label>
+                <Link to="/gestion" className="card shadow-sm border-0 text-decoration-none text-reset" style={{ borderTop: '3px solid var(--warning)' }}>
+                    <label className="text-uppercase small fw-bold text-muted mb-2 d-block cursor-pointer">ÓRDENES EN BANCO</label>
                     <div className="fs-1 fw-bold font-mono text-warning">{stats.ordsPendientes}</div>
                     <div className="text-muted small mt-1">
                         <i className="bi bi-tools me-1"></i>
                         <span className="font-mono">{stats.ordsCompletadas}</span> listas para retirar
                     </div>
-                </div>
+                </Link>
 
                 <div className="card shadow-sm border-0" style={{ borderTop: '3px solid var(--success)' }}>
                     <label className="text-uppercase small fw-bold text-muted mb-2 d-block">COBRANZAS TALLER</label>
