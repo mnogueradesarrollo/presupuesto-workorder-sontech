@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -8,7 +8,9 @@ import logoCircle from '../assets/logo-sontech-circle.png';
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -16,23 +18,62 @@ const Login: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const cleanEmail = email.trim();
+        if (!cleanEmail) {
+            toast.error('Ingresá un correo válido');
+            return;
+        }
+
         setLoading(true);
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            await signInWithEmailAndPassword(auth, cleanEmail, password);
             toast.success('¡Acceso concedido!');
             navigate(from, { replace: true });
         } catch (error: any) {
             console.error('Error de acceso:', error);
             let message = 'Error al entrar';
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                message = 'Credenciales inválidas';
+            if (
+                error.code === 'auth/user-not-found' ||
+                error.code === 'auth/wrong-password' ||
+                error.code === 'auth/invalid-credential'
+            ) {
+                message = 'Correo o contraseña incorrectos. Verificá los datos o recuperá tu contraseña.';
+            } else if (error.code === 'auth/invalid-email') {
+                message = 'El formato del correo electrónico no es válido.';
             } else if (error.code === 'auth/too-many-requests') {
-                message = 'Acceso bloqueado por seguridad. Intenta más tarde.';
+                message = 'Acceso bloqueado temporalmente por intentos fallidos. Intentá más tarde o restablecé tu contraseña.';
             }
             toast.error(message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleResetPassword = async () => {
+        const cleanEmail = email.trim();
+        if (!cleanEmail) {
+            toast.error('Escribí tu email en el campo de arriba para enviarte el enlace de recuperación.');
+            return;
+        }
+
+        setResetLoading(true);
+        try {
+            await sendPasswordResetEmail(auth, cleanEmail);
+            toast.success(`Enlace de recuperación enviado a ${cleanEmail}. Revisá tu bandeja de entrada o Spam.`, {
+                duration: 6000,
+            });
+        } catch (error: any) {
+            console.error('Error al recuperar contraseña:', error);
+            if (error.code === 'auth/invalid-email') {
+                toast.error('El formato del correo electrónico no es válido.');
+            } else if (error.code === 'auth/too-many-requests') {
+                toast.error('Demasiados intentos. Esperá unos minutos antes de volver a solicitarlo.');
+            } else {
+                toast.error('No se pudo enviar el correo de recuperación. Verificá el email ingresado.');
+            }
+        } finally {
+            setResetLoading(false);
         }
     };
 
@@ -69,23 +110,48 @@ const Login: React.FC = () => {
                                 placeholder="usuario@sontech.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                autoComplete="username"
                                 required
                             />
                         </div>
                     </div>
 
-                    <div className="mb-5 text-start">
-                        <label className="x-small fw-bold text-uppercase mb-2 d-block text-white text-opacity-50 ms-1">
-                            Contraseña
-                        </label>
-                        <input
-                            type="password"
-                            className="form-control glass-input"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                    <div className="mb-4 text-start">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <label className="x-small fw-bold text-uppercase mb-0 text-white text-opacity-50 ms-1">
+                                Contraseña
+                            </label>
+                            <button
+                                type="button"
+                                onClick={handleResetPassword}
+                                disabled={resetLoading}
+                                className="btn btn-link p-0 x-small text-white text-opacity-75 text-decoration-none"
+                                style={{ minHeight: 'auto', fontSize: '0.75rem' }}
+                            >
+                                {resetLoading ? 'Enviando...' : '¿Olvidaste tu contraseña?'}
+                            </button>
+                        </div>
+                        <div className="position-relative">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                className="form-control glass-input pe-5"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="current-password"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-white text-opacity-75 text-decoration-none px-3"
+                                style={{ minHeight: 'auto' }}
+                                tabIndex={-1}
+                                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                            >
+                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                            </button>
+                        </div>
                     </div>
 
                     <button
