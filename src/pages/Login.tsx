@@ -80,7 +80,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="login-wrapper">
+        <div className="login-wrapper notranslate" translate="no">
             <div className="glass-card shadow-lg">
                 <div className="mb-5">
                     <img
@@ -130,7 +130,7 @@ const Login: React.FC = () => {
                                 className="btn btn-link p-0 x-small text-white text-opacity-75 text-decoration-none"
                                 style={{ minHeight: 'auto', fontSize: '0.75rem' }}
                             >
-                                {resetLoading ? 'Enviando...' : '¿Olvidaste tu contraseña?'}
+                                <span>{resetLoading ? 'Enviando...' : '¿Olvidaste tu contraseña?'}</span>
                             </button>
                         </div>
                         <div className="position-relative">
@@ -166,7 +166,7 @@ const Login: React.FC = () => {
                         ) : (
                             <i className="bi bi-shield-lock me-2"></i>
                         )}
-                        {loading ? 'VERIFICANDO...' : 'INICIAR SESIÓN'}
+                        <span>{loading ? 'VERIFICANDO...' : 'INICIAR SESIÓN'}</span>
                     </button>
                 </form>
 

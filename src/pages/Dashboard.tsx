@@ -87,7 +87,7 @@ export default function Dashboard() {
         return (
             <div className="container py-5 text-center text-muted">
                 <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-                Cargando panel de control de Sontech...
+                <span>Cargando panel de control de Sontech...</span>
             </div>
         );
     }

@@ -60,6 +60,7 @@ presupuesto-workorder-sontech/
     │   └── ...
     │
     ├── components/              # Componentes de UI reutilizables
+    │   ├── ErrorBoundary.tsx    # Atrapador global de errores de render y mitigación de fallos de DOM
     │   ├── Navbar.tsx           # Barra superior con menús desplegables React y drawer móvil
     │   ├── ProtectedRoute.tsx   # Guardián de rutas autenticadas (redirige a /login)
     │   └── ItemsTableIT.tsx     # Tabla interactiva dinámica para añadir/eliminar ítems de presupuesto
@@ -338,6 +339,15 @@ npm run lint
 ## 📜 10. Historial de Modificaciones (Memoria de Movimientos)
 
 > **Regla de mantenimiento:** Toda modificación, corrección o nueva funcionalidad realizada en el proyecto debe registrarse en esta sección indicando fecha, archivos tocados y detalle del cambio para mantener la trazabilidad completa.
+
+### `2026-10-27` — Corrección de Error 'removeChild' en Login (Conflicto con Traductor Automático y Extensiones)
+- **Archivos modificados/creados:** `index.html`, `src/main.tsx`, `src/components/ErrorBoundary.tsx` *(nuevo)*, `src/pages/Login.tsx`, `src/pages/Dashboard.tsx`, `readme-presu.md`
+- **Detalle:**
+  - **Causa raíz:** En navegadores con traductor automático activado (Google Translate / Microsoft Edge Translator) o con extensiones que manipulan el DOM (gestores de contraseñas, correctores), el navegador inyecta etiquetas `<font>` o modifica nodos de texto directamente. Al autenticarse y transicionar desde el formulario de Login hacia el Dashboard, React intentaba remover nodos del DOM que habían sido alterados externamente, disparando la excepción fatal `Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node` y dejando la pantalla completamente en blanco.
+  - **Parche defensivo de reconciliación DOM:** Se implementó en `src/main.tsx` la intercepción segura para `Node.prototype.removeChild` y `Node.prototype.insertBefore`, evitando que mutaciones externas en el árbol de nodos derriben la aplicación React.
+  - **Desactivación de auto-traducción indebida:** Se corrigió en `index.html` la etiqueta a `<html lang="es" class="notranslate" translate="no">` junto al meta tag `<meta name="google" content="notranslate" />` y la clase `notranslate` en el contenedor de Login, impidiendo que los motores de traducción intenten traducir una interfaz que ya está en español nativo.
+  - **Encapsulación de nodos de texto:** Se envolvieron cadenas de texto condicionales de botones y avisos de carga en elementos `<span>` para garantizar estabilidad ante el reconciliador de React 19.
+  - **Error Boundary Global:** Se creó el componente `src/components/ErrorBoundary.tsx` envolviendo la app completa para capturar cualquier fallo imprevisto y ofrecer una vista amigable de recuperación con botón de recarga en lugar de pantalla en blanco.
 
 ### `2026-10-16` — Descuento Automático de Stock al Finalizar Orden de Trabajo
 - **Archivos modificados:** `src/pages/Orden.tsx`, `src/types/orden.ts`
