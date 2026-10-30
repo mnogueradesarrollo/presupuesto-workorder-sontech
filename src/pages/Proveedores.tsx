@@ -151,7 +151,7 @@ export default function Proveedores() {
   }, [proveedores, search]);
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
           <h2 className="fw-bold mb-1 font-display">Directorio de Proveedores</h2>
@@ -159,7 +159,7 @@ export default function Proveedores() {
             Control de proveedores de repuestos, insumos de microelectrónica y garantías RMA
           </p>
         </div>
-        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center gap-2">
+        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
           <i className="bi bi-building-add"></i>
           <span>Nuevo Proveedor</span>
         </button>
@@ -252,15 +252,15 @@ export default function Proveedores() {
                       </div>
                     )}
                     {p.email && (
-                      <div>
+                      <div className="text-break">
                         <i className="bi bi-envelope me-2"></i>
                         {p.email}
                       </div>
                     )}
                     {p.web && (
-                      <div>
+                      <div className="text-break">
                         <i className="bi bi-globe me-2 text-primary"></i>
-                        <a href={p.web} target="_blank" rel="noreferrer" className="text-decoration-none text-truncate">
+                        <a href={p.web} target="_blank" rel="noreferrer" className="text-decoration-none">
                           {p.web}
                         </a>
                       </div>

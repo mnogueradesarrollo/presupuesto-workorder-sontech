@@ -290,7 +290,7 @@ export default function Ventas() {
   }, [productos, searchProd]);
 
   return (
-    <div className="container-fluid px-3 px-md-4 py-4">
+    <div className="container-fluid px-3 px-md-4 py-3 py-md-4">
       {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
         <div>
@@ -299,7 +299,7 @@ export default function Ventas() {
             Ventas rápidas de mostrador, accesorios, repuestos y emisión de comprobantes
           </p>
         </div>
-        <div className="btn-group">
+        <div className="btn-group w-100 w-md-auto">
           <button
             className={`btn btn-sm ${activeView === 'pos' ? 'btn-dark' : 'btn-outline-secondary'}`}
             onClick={() => setActiveView('pos')}
@@ -310,7 +310,7 @@ export default function Ventas() {
             className={`btn btn-sm ${activeView === 'historial' ? 'btn-dark' : 'btn-outline-secondary'}`}
             onClick={() => setActiveView('historial')}
           >
-            <i className="bi bi-receipt me-1"></i> Historial de Ventas ({ventas.length})
+            <i className="bi bi-receipt me-1"></i> Historial ({ventas.length})
           </button>
         </div>
       </div>
@@ -341,7 +341,7 @@ export default function Ventas() {
                 No se encontraron productos coincidentes.
               </div>
             ) : (
-              <div className="row g-2" style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto' }}>
+              <div className="row g-2 pos-catalog-scroll">
                 {prodsDisponibles.map((p) => {
                   const sinStock = p.tipo !== 'servicio' && p.stock <= 0;
                   return (
@@ -388,7 +388,7 @@ export default function Ventas() {
 
           {/* LADO DERECHO: TICKET & COBRO */}
           <div className="col-12 col-lg-5">
-            <div className="card border-0 shadow-sm bg-white p-4 sticky-top" style={{ top: '85px' }}>
+            <div className="card border-0 shadow-sm bg-white p-3 p-md-4 pos-sticky-panel">
               <div className="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                 <h5 className="fw-bold mb-0">Detalle de Venta</h5>
                 <button
@@ -429,66 +429,54 @@ export default function Ventas() {
               </div>
 
               {/* Lista del Carrito */}
-              <div
-                className="table-responsive mb-3"
-                style={{ maxHeight: '250px', overflowY: 'auto' }}
-              >
+              <div className="mb-3" style={{ maxHeight: '280px', overflowY: 'auto' }}>
                 {cart.length === 0 ? (
-                  <div className="text-center py-4 text-muted small">
+                  <div className="text-center py-4 text-muted small border rounded">
                     <i className="bi bi-cart-x fs-2 d-block mb-1 opacity-50"></i>
                     Haz clic en los productos para agregarlos al ticket.
                   </div>
                 ) : (
-                  <table className="table table-sm align-middle mb-0">
-                    <thead className="table-light small">
-                      <tr>
-                        <th>Ítem</th>
-                        <th style={{ width: '85px' }}>Cant</th>
-                        <th style={{ width: '90px' }}>Precio</th>
-                        <th className="text-end">Subtotal</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cart.map((it, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <div className="small fw-semibold text-truncate" style={{ maxWidth: '140px' }}>
-                              {it.descripcion}
+                  <div className="d-flex flex-column gap-2">
+                    {cart.map((it, idx) => (
+                      <div key={idx} className="border rounded p-2 bg-light">
+                        <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                          <div className="small fw-semibold text-dark text-break">{it.descripcion}</div>
+                          <button
+                            className="btn btn-sm btn-link text-danger p-0 border-0 flex-shrink-0"
+                            onClick={() => removeFromCart(idx)}
+                            title="Quitar ítem"
+                          >
+                            <i className="bi bi-x-lg"></i>
+                          </button>
+                        </div>
+                        <div className="row g-2 align-items-center">
+                          <div className="col-4">
+                            <div className="input-group input-group-sm">
+                              <span className="input-group-text px-1 text-muted">x</span>
+                              <input
+                                type="number"
+                                min="1"
+                                className="form-control form-control-sm font-mono text-center px-1"
+                                value={it.cantidad}
+                                onChange={(e) => updateCartQty(idx, parseInt(e.target.value) || 1)}
+                              />
                             </div>
-                          </td>
-                          <td>
+                          </div>
+                          <div className="col-5">
                             <input
                               type="number"
-                              min="1"
-                              className="form-control form-control-sm font-mono text-center p-1"
-                              value={it.cantidad}
-                              onChange={(e) => updateCartQty(idx, parseInt(e.target.value) || 1)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="form-control form-control-sm font-mono text-end p-1"
+                              className="form-control form-control-sm font-mono text-end px-2"
                               value={it.precioUnitario}
                               onChange={(e) => updateCartPrice(idx, parseFloat(e.target.value) || 0)}
                             />
-                          </td>
-                          <td className="text-end font-mono small fw-bold">
+                          </div>
+                          <div className="col-3 text-end font-mono small fw-bold text-primary text-break">
                             {formatCurrency(it.subtotal)}
-                          </td>
-                          <td className="text-end">
-                            <button
-                              className="btn btn-sm btn-link text-danger p-0 border-0"
-                              onClick={() => removeFromCart(idx)}
-                            >
-                              <i className="bi bi-x"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -589,66 +577,111 @@ export default function Ventas() {
         </div>
       ) : (
         /* HISTORIAL DE VENTAS */
-        <div className="card border-0 shadow-sm bg-white overflow-hidden">
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="table-light small text-uppercase text-muted">
-                <tr>
-                  <th className="ps-3">Código</th>
-                  <th>Fecha & Hora</th>
-                  <th>Cliente</th>
-                  <th>Comprobante / Pago</th>
-                  <th>Ítems</th>
-                  <th className="text-end">Total</th>
-                  <th className="text-end pe-3">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ventas.length === 0 ? (
+        <>
+          <div className="d-md-none d-flex flex-column gap-3">
+            {ventas.length === 0 ? (
+              <div className="card border-0 shadow-sm p-4 text-center bg-white text-muted">
+                No hay ventas registradas aún.
+              </div>
+            ) : (
+              ventas.map((v) => (
+                <div key={v.id} className="mobile-data-card">
+                  <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <div>
+                      <span className="font-mono fw-bold text-dark">{v.codigo}</span>
+                      <div className="small text-muted font-mono">{formatDateTime(v.createdAt)}</div>
+                    </div>
+                    <span className="font-mono fw-bold text-primary fs-6">
+                      {formatCurrency(v.total)}
+                    </span>
+                  </div>
+                  <div className="fw-semibold text-dark">{v.clienteNombre}</div>
+                  {v.clienteCuitDni && (
+                    <div className="small text-muted font-mono mb-2">CUIT/DNI: {v.clienteCuitDni}</div>
+                  )}
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 mt-2 border-top">
+                    <div className="d-flex flex-wrap gap-1 align-items-center">
+                      <span className="badge bg-light text-dark border text-uppercase">
+                        {v.tipoComprobante}
+                      </span>
+                      <span className="badge bg-secondary small">{v.metodoPago}</span>
+                      <span className="small text-muted ms-1">
+                        ({v.items.length} {v.items.length === 1 ? 'ítem' : 'ítems'})
+                      </span>
+                    </div>
+                    <button
+                      className="btn btn-sm btn-outline-dark"
+                      onClick={() => imprimirTicket(v)}
+                    >
+                      <i className="bi bi-printer me-1"></i> Ticket
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="card border-0 shadow-sm bg-white overflow-hidden d-none d-md-block p-0">
+            <div className="table-responsive border-0">
+              <table className="table table-hover align-middle mb-0">
+                <thead className="table-light small text-uppercase text-muted">
                   <tr>
-                    <td colSpan={7} className="text-center py-5 text-muted">
-                      No hay ventas registradas aún.
-                    </td>
+                    <th className="ps-3">Código</th>
+                    <th>Fecha & Hora</th>
+                    <th>Cliente</th>
+                    <th>Comprobante / Pago</th>
+                    <th>Ítems</th>
+                    <th className="text-end">Total</th>
+                    <th className="text-end pe-3">Acciones</th>
                   </tr>
-                ) : (
-                  ventas.map((v) => (
-                    <tr key={v.id}>
-                      <td className="ps-3 font-mono fw-bold text-dark">{v.codigo}</td>
-                      <td className="small text-muted font-mono">{formatDateTime(v.createdAt)}</td>
-                      <td>
-                        <div className="fw-semibold text-dark">{v.clienteNombre}</div>
-                        {v.clienteCuitDni && (
-                          <div className="small text-muted font-mono">CUIT/DNI: {v.clienteCuitDni}</div>
-                        )}
-                      </td>
-                      <td>
-                        <span className="badge bg-light text-dark border me-1 text-uppercase">
-                          {v.tipoComprobante}
-                        </span>
-                        <span className="badge bg-secondary small">{v.metodoPago}</span>
-                      </td>
-                      <td className="small text-muted">
-                        {v.items.length} {v.items.length === 1 ? 'producto' : 'productos'}
-                      </td>
-                      <td className="text-end font-mono fw-bold text-primary">
-                        {formatCurrency(v.total)}
-                      </td>
-                      <td className="text-end pe-3">
-                        <button
-                          className="btn btn-sm btn-outline-dark"
-                          onClick={() => imprimirTicket(v)}
-                          title="Imprimir Ticket"
-                        >
-                          <i className="bi bi-printer me-1"></i> Ticket
-                        </button>
+                </thead>
+                <tbody>
+                  {ventas.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-5 text-muted">
+                        No hay ventas registradas aún.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    ventas.map((v) => (
+                      <tr key={v.id}>
+                        <td className="ps-3 font-mono fw-bold text-dark">{v.codigo}</td>
+                        <td className="small text-muted font-mono">{formatDateTime(v.createdAt)}</td>
+                        <td>
+                          <div className="fw-semibold text-dark">{v.clienteNombre}</div>
+                          {v.clienteCuitDni && (
+                            <div className="small text-muted font-mono">CUIT/DNI: {v.clienteCuitDni}</div>
+                          )}
+                        </td>
+                        <td>
+                          <span className="badge bg-light text-dark border me-1 text-uppercase">
+                            {v.tipoComprobante}
+                          </span>
+                          <span className="badge bg-secondary small">{v.metodoPago}</span>
+                        </td>
+                        <td className="small text-muted">
+                          {v.items.length} {v.items.length === 1 ? 'producto' : 'productos'}
+                        </td>
+                        <td className="text-end font-mono fw-bold text-primary">
+                          {formatCurrency(v.total)}
+                        </td>
+                        <td className="text-end pe-3">
+                          <button
+                            className="btn btn-sm btn-outline-dark"
+                            onClick={() => imprimirTicket(v)}
+                            title="Imprimir Ticket"
+                          >
+                            <i className="bi bi-printer me-1"></i> Ticket
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Modal Última Venta / Éxito */}

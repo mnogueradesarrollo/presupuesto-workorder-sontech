@@ -263,7 +263,7 @@ export default function Productos() {
   }, [productos, search, selectedCategoria, selectedTipo, soloStockBajo]);
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
@@ -274,12 +274,12 @@ export default function Productos() {
         </div>
         <div className="d-flex gap-2">
           {activeTab === 'productos' ? (
-            <button onClick={openCrearProd} className="btn btn-primary d-inline-flex align-items-center gap-2">
+            <button onClick={openCrearProd} className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
               <i className="bi bi-box-seam"></i>
               <span>Nuevo Producto/Repuesto</span>
             </button>
           ) : (
-            <button onClick={openCrearCat} className="btn btn-primary d-inline-flex align-items-center gap-2">
+            <button onClick={openCrearCat} className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
               <i className="bi bi-tag-fill"></i>
               <span>Nueva Categoría</span>
             </button>
@@ -391,43 +391,156 @@ export default function Productos() {
               </div>
             </div>
           ) : (
-            <div className="card border-0 shadow-sm overflow-hidden bg-white">
-              <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                  <thead className="table-light small text-uppercase text-muted">
-                    <tr>
-                      <th className="ps-3">Código / Producto</th>
-                      <th>Categoría / Tipo</th>
-                      <th>Ubicación</th>
-                      <th>Costo</th>
-                      <th>Precio Venta</th>
-                      <th>Margen</th>
-                      <th className="text-center">Stock</th>
-                      <th className="text-end pe-3">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProds.map((p) => {
-                      const margen =
-                        p.costo > 0 ? (((p.precioVenta - p.costo) / p.costo) * 100).toFixed(0) : '-';
-                      const esBajo = p.tipo !== 'servicio' && p.stock <= p.stockMinimo;
+            <>
+              {/* Vista Tabla (Desktop) */}
+              <div className="card border-0 shadow-sm overflow-hidden bg-white d-none d-md-block">
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light small text-uppercase text-muted">
+                      <tr>
+                        <th className="ps-3">Código / Producto</th>
+                        <th>Categoría / Tipo</th>
+                        <th>Ubicación</th>
+                        <th>Costo</th>
+                        <th>Precio Venta</th>
+                        <th>Margen</th>
+                        <th className="text-center">Stock</th>
+                        <th className="text-end pe-3">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProds.map((p) => {
+                        const margen =
+                          p.costo > 0 ? (((p.precioVenta - p.costo) / p.costo) * 100).toFixed(0) : '-';
+                        const esBajo = p.tipo !== 'servicio' && p.stock <= p.stockMinimo;
 
-                      return (
-                        <tr key={p.id}>
-                          <td className="ps-3">
-                            <div className="fw-bold text-dark">{p.nombre}</div>
-                            <span className="badge bg-light text-secondary border font-mono small">
+                        return (
+                          <tr key={p.id}>
+                            <td className="ps-3">
+                              <div className="fw-bold text-dark">{p.nombre}</div>
+                              <span className="badge bg-light text-secondary border font-mono small">
+                                {p.codigo}
+                              </span>
+                              {p.garantiaMesesCliente ? (
+                                <span className="text-muted small ms-2">
+                                  <i className="bi bi-shield-check text-success me-1"></i>
+                                  {p.garantiaMesesCliente}m g/cliente
+                                </span>
+                              ) : null}
+                            </td>
+                            <td>
+                              <span className="badge bg-light text-dark border me-1">
+                                {p.categoriaNombre}
+                              </span>
+                              <span
+                                className={`badge ${
+                                  p.tipo === 'repuesto'
+                                    ? 'bg-info'
+                                    : p.tipo === 'servicio'
+                                    ? 'bg-warning text-dark'
+                                    : 'bg-secondary'
+                                } small`}
+                              >
+                                {p.tipo}
+                              </span>
+                              {p.proveedorNombre && (
+                                <div className="small text-muted mt-1">Prov: {p.proveedorNombre}</div>
+                              )}
+                            </td>
+                            <td className="small text-muted">
+                              {p.ubicacionTaller ? (
+                                <span>
+                                  <i className="bi bi-geo-alt me-1 text-danger"></i>
+                                  {p.ubicacionTaller}
+                                </span>
+                              ) : (
+                                '-'
+                              )}
+                            </td>
+                            <td className="font-mono small text-muted">{formatCurrency(p.costo)}</td>
+                            <td className="font-mono fw-bold text-dark">{formatCurrency(p.precioVenta)}</td>
+                            <td className="font-mono small">
+                              {margen !== '-' ? (
+                                <span className="badge bg-light text-success border">+{margen}%</span>
+                              ) : (
+                                '-'
+                              )}
+                            </td>
+                            <td className="text-center">
+                              {p.tipo === 'servicio' ? (
+                                <span className="badge bg-light text-muted">N/A</span>
+                              ) : (
+                                <div className="d-flex align-items-center justify-content-center gap-2">
+                                  <button
+                                    className="btn btn-outline-secondary btn-sm p-0 px-2"
+                                    onClick={() => handleAjusteStock(p.id, -1)}
+                                    title="Restar 1"
+                                  >
+                                    -
+                                  </button>
+                                  <span
+                                    className={`badge font-mono px-2 py-1 ${
+                                      esBajo ? 'bg-danger' : 'bg-success'
+                                    }`}
+                                  >
+                                    {p.stock}
+                                  </span>
+                                  <button
+                                    className="btn btn-outline-secondary btn-sm p-0 px-2"
+                                    onClick={() => handleAjusteStock(p.id, +1)}
+                                    title="Sumar 1"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              )}
+                              {esBajo && (
+                                <div className="small text-danger fw-bold mt-1" style={{ fontSize: '0.7rem' }}>
+                                  Mín: {p.stockMinimo}
+                                </div>
+                              )}
+                            </td>
+                            <td className="text-end pe-3">
+                              <button
+                                className="btn btn-sm btn-light border me-1"
+                                onClick={() => openEditarProd(p)}
+                                title="Editar"
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDeleteProd(p.id, p.nombre)}
+                                title="Eliminar"
+                              >
+                                <i className="bi bi-trash3"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Vista Tarjetas (Móvil) */}
+              <div className="d-md-none d-flex flex-column gap-3">
+                {filteredProds.map((p) => {
+                  const margen =
+                    p.costo > 0 ? (((p.precioVenta - p.costo) / p.costo) * 100).toFixed(0) : '-';
+                  const esBajo = p.tipo !== 'servicio' && p.stock <= p.stockMinimo;
+
+                  return (
+                    <div key={p.id} className="mobile-data-card">
+                      <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <div>
+                          <div className="fw-bold text-dark">{p.nombre}</div>
+                          <div className="d-flex flex-wrap gap-1 mt-1">
+                            <span className="badge bg-light text-secondary border font-mono x-small">
                               {p.codigo}
                             </span>
-                            {p.garantiaMesesCliente ? (
-                              <span className="text-muted small ms-2">
-                                <i className="bi bi-shield-check text-success me-1"></i>
-                                {p.garantiaMesesCliente}m g/cliente
-                              </span>
-                            ) : null}
-                          </td>
-                          <td>
-                            <span className="badge bg-light text-dark border me-1">
+                            <span className="badge bg-light text-dark border x-small">
                               {p.categoriaNombre}
                             </span>
                             <span
@@ -437,90 +550,87 @@ export default function Productos() {
                                   : p.tipo === 'servicio'
                                   ? 'bg-warning text-dark'
                                   : 'bg-secondary'
-                              } small`}
+                              } x-small`}
                             >
                               {p.tipo}
                             </span>
-                            {p.proveedorNombre && (
-                              <div className="small text-muted mt-1">Prov: {p.proveedorNombre}</div>
-                            )}
-                          </td>
-                          <td className="small text-muted">
-                            {p.ubicacionTaller ? (
-                              <span>
-                                <i className="bi bi-geo-alt me-1 text-danger"></i>
-                                {p.ubicacionTaller}
+                          </div>
+                        </div>
+                        <div className="text-end flex-shrink-0">
+                          <div className="fw-bold font-mono text-primary fs-6">
+                            {formatCurrency(p.precioVenta)}
+                          </div>
+                          <div className="x-small text-muted font-mono">
+                            Costo: {formatCurrency(p.costo)}
+                            {margen !== '-' ? ` (+${margen}%)` : ''}
+                          </div>
+                        </div>
+                      </div>
+
+                      {(p.ubicacionTaller || p.proveedorNombre) && (
+                        <div className="x-small text-muted mb-2">
+                          {p.ubicacionTaller && (
+                            <span className="me-3">
+                              <i className="bi bi-geo-alt text-danger me-1"></i>
+                              {p.ubicacionTaller}
+                            </span>
+                          )}
+                          {p.proveedorNombre && <span>Prov: {p.proveedorNombre}</span>}
+                        </div>
+                      )}
+
+                      <div className="d-flex justify-content-between align-items-center pt-2 border-top gap-2">
+                        <div>
+                          {p.tipo === 'servicio' ? (
+                            <span className="badge bg-light text-muted">Servicio</span>
+                          ) : (
+                            <div className="d-flex align-items-center gap-2">
+                              <button
+                                className="btn btn-outline-secondary btn-sm py-0 px-2"
+                                style={{ minHeight: '32px' }}
+                                onClick={() => handleAjusteStock(p.id, -1)}
+                              >
+                                -
+                              </button>
+                              <span
+                                className={`badge font-mono px-2 py-1 ${
+                                  esBajo ? 'bg-danger' : 'bg-success'
+                                }`}
+                              >
+                                Stock: {p.stock}
                               </span>
-                            ) : (
-                              '-'
-                            )}
-                          </td>
-                          <td className="font-mono small text-muted">{formatCurrency(p.costo)}</td>
-                          <td className="font-mono fw-bold text-dark">{formatCurrency(p.precioVenta)}</td>
-                          <td className="font-mono small">
-                            {margen !== '-' ? (
-                              <span className="badge bg-light text-success border">+{margen}%</span>
-                            ) : (
-                              '-'
-                            )}
-                          </td>
-                          <td className="text-center">
-                            {p.tipo === 'servicio' ? (
-                              <span className="badge bg-light text-muted">N/A</span>
-                            ) : (
-                              <div className="d-flex align-items-center justify-content-center gap-2">
-                                <button
-                                  className="btn btn-outline-secondary btn-sm p-0 px-2"
-                                  onClick={() => handleAjusteStock(p.id, -1)}
-                                  title="Restar 1"
-                                >
-                                  -
-                                </button>
-                                <span
-                                  className={`badge font-mono px-2 py-1 ${
-                                    esBajo ? 'bg-danger' : 'bg-success'
-                                  }`}
-                                >
-                                  {p.stock}
-                                </span>
-                                <button
-                                  className="btn btn-outline-secondary btn-sm p-0 px-2"
-                                  onClick={() => handleAjusteStock(p.id, +1)}
-                                  title="Sumar 1"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            )}
-                            {esBajo && (
-                              <div className="small text-danger fw-bold mt-1" style={{ fontSize: '0.7rem' }}>
-                                Mín: {p.stockMinimo}
-                              </div>
-                            )}
-                          </td>
-                          <td className="text-end pe-3">
-                            <button
-                              className="btn btn-sm btn-light border me-1"
-                              onClick={() => openEditarProd(p)}
-                              title="Editar"
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleDeleteProd(p.id, p.nombre)}
-                              title="Eliminar"
-                            >
-                              <i className="bi bi-trash3"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                              <button
+                                className="btn btn-outline-secondary btn-sm py-0 px-2"
+                                style={{ minHeight: '32px' }}
+                                onClick={() => handleAjusteStock(p.id, +1)}
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <div className="d-flex gap-1">
+                          <button
+                            className="btn btn-sm btn-light border"
+                            onClick={() => openEditarProd(p)}
+                            title="Editar"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDeleteProd(p.id, p.nombre)}
+                            title="Eliminar"
+                          >
+                            <i className="bi bi-trash3"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            </>
           )}
         </>
       )}

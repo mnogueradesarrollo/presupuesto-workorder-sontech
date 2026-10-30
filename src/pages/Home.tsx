@@ -143,7 +143,7 @@ export default function Home() {
   }, [ords, search, statusFilter, payFilter]);
 
   return (
-    <div className="container">
+    <div className="container py-3 py-md-4">
       {/* Encabezado */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
@@ -158,7 +158,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => navigate("/beneficios-promo")}
-            className="btn btn-outline-success fw-semibold d-inline-flex align-items-center gap-1"
+            className="btn btn-outline-success fw-semibold d-inline-flex align-items-center justify-content-center gap-1 flex-fill flex-md-grow-0"
           >
             <i className="bi bi-gift-fill"></i>
             <span>Turnero & Promo Limpieza</span>
@@ -166,7 +166,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setShowNuevaModal(true)}
-            className="btn btn-primary d-inline-flex align-items-center gap-2"
+            className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 flex-fill flex-md-grow-0"
           >
             <i className="bi bi-plus-lg"></i>
             <span>Nueva Orden de Trabajo</span>

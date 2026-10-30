@@ -93,7 +93,7 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="container py-4">
+        <div className="container py-3 py-md-4">
             {/* Header del Dashboard */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
                 <div>
@@ -102,37 +102,45 @@ export default function Dashboard() {
                         Métricas comerciales, taller técnico en tiempo real e inventario de Sontech
                     </p>
                 </div>
-                <div className="d-flex flex-wrap gap-2">
-                    <Link to="/beneficios-promo" className="btn btn-outline-success btn-sm d-flex align-items-center gap-1 fw-semibold">
-                        <i className="bi bi-gift-fill"></i>
-                        <span>Turnero & Promo Limpieza</span>
-                    </Link>
-                    <Link to="/ventas" className="btn btn-outline-dark btn-sm d-flex align-items-center gap-1">
-                        <i className="bi bi-cart3"></i>
-                        <span>Venta Mostrador</span>
-                    </Link>
-                    <Link to="/gestion" className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
-                        <i className="bi bi-tools"></i>
-                        <span>Órdenes (OT)</span>
-                    </Link>
-                    <Link to="/presupuestos" className="btn btn-primary btn-sm d-flex align-items-center gap-1">
-                        <i className="bi bi-file-earmark-text"></i>
-                        <span>Presupuestos</span>
-                    </Link>
+                <div className="row g-2 d-md-flex flex-md-wrap gap-md-2 m-0">
+                    <div className="col-6 col-md-auto p-0 pe-1 pe-md-0">
+                        <Link to="/beneficios-promo" className="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center gap-1 fw-semibold">
+                            <i className="bi bi-gift-fill"></i>
+                            <span>Turnero Promo</span>
+                        </Link>
+                    </div>
+                    <div className="col-6 col-md-auto p-0 ps-1 ps-md-0">
+                        <Link to="/ventas" className="btn btn-outline-dark btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
+                            <i className="bi bi-cart3"></i>
+                            <span>Venta POS</span>
+                        </Link>
+                    </div>
+                    <div className="col-6 col-md-auto p-0 pe-1 pe-md-0 mt-2 mt-md-0">
+                        <Link to="/gestion" className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
+                            <i className="bi bi-tools"></i>
+                            <span>Órdenes (OT)</span>
+                        </Link>
+                    </div>
+                    <div className="col-6 col-md-auto p-0 ps-1 ps-md-0 mt-2 mt-md-0">
+                        <Link to="/presupuestos" className="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
+                            <i className="bi bi-file-earmark-text"></i>
+                            <span>Presupuestos</span>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
             {/* Alerta de SLA si hay demoras */}
             {stats.ordsSlaAlerta > 0 && (
-                <div className="alert alert-warning border-0 shadow-sm d-flex align-items-center justify-content-between p-3 rounded-3 mb-4">
+                <div className="alert alert-warning border-0 shadow-sm d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 p-3 rounded-3 mb-4">
                     <div className="d-flex align-items-center gap-2">
-                        <i className="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
-                        <div>
+                        <i className="bi bi-exclamation-triangle-fill fs-4 text-warning flex-shrink-0"></i>
+                        <div className="small">
                             <strong>Alerta de Taller:</strong> Hay{' '}
                             <span className="badge bg-warning text-dark font-mono">{stats.ordsSlaAlerta}</span> órdenes con más de 5 días de demora en diagnóstico o repuestos.
                         </div>
                     </div>
-                    <Link to="/gestion" className="btn btn-sm btn-dark">
+                    <Link to="/gestion" className="btn btn-sm btn-dark align-self-end align-self-sm-center flex-shrink-0">
                         Ver Órdenes
                     </Link>
                 </div>
@@ -250,27 +258,27 @@ export default function Dashboard() {
             </div>
 
             {/* Accesos Rápidos del Laboratorio */}
-            <div className="card border-0 shadow-sm p-4 bg-white">
+            <div className="card border-0 shadow-sm p-3 p-md-4 bg-white">
                 <h6 className="fw-bold text-dark text-uppercase small mb-3">Módulos & Herramientas Rápidas</h6>
                 <div className="row g-2">
                     <div className="col-6 col-md-3">
-                        <Link to="/equipos" className="btn btn-outline-secondary w-100 text-start py-2 px-3">
-                            <i className="bi bi-laptop me-2 text-primary"></i> Equipos (CMDB)
+                        <Link to="/equipos" className="btn btn-outline-secondary w-100 text-start py-2 px-2 px-md-3 small">
+                            <i className="bi bi-laptop me-1 text-primary"></i> <span>Equipos (CMDB)</span>
                         </Link>
                     </div>
                     <div className="col-6 col-md-3">
-                        <Link to="/clientes" className="btn btn-outline-secondary w-100 text-start py-2 px-3">
-                            <i className="bi bi-people me-2 text-info"></i> Directorio Clientes
+                        <Link to="/clientes" className="btn btn-outline-secondary w-100 text-start py-2 px-2 px-md-3 small">
+                            <i className="bi bi-people me-1 text-info"></i> <span>Clientes</span>
                         </Link>
                     </div>
                     <div className="col-6 col-md-3">
-                        <Link to="/productos" className="btn btn-outline-secondary w-100 text-start py-2 px-3">
-                            <i className="bi bi-boxes me-2 text-warning"></i> Catálogo de Stock
+                        <Link to="/productos" className="btn btn-outline-secondary w-100 text-start py-2 px-2 px-md-3 small">
+                            <i className="bi bi-boxes me-1 text-warning"></i> <span>Catálogo Stock</span>
                         </Link>
                     </div>
                     <div className="col-6 col-md-3">
-                        <Link to="/kb" className="btn btn-outline-secondary w-100 text-start py-2 px-3">
-                            <i className="bi bi-journal-code me-2 text-success"></i> Base de Conocimiento
+                        <Link to="/kb" className="btn btn-outline-secondary w-100 text-start py-2 px-2 px-md-3 small">
+                            <i className="bi bi-journal-code me-1 text-success"></i> <span>Base Conocim.</span>
                         </Link>
                     </div>
                 </div>

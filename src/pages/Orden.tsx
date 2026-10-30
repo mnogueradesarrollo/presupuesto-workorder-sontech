@@ -578,7 +578,7 @@ export default function OrdenPage() {
   const esSlaCritico = diasAbierta > 5 && orden.status !== 'completado' && orden.status !== 'entregado';
 
   return (
-    <div className="container py-5">
+    <div className="container py-3 py-md-4">
       {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
         <div>
@@ -592,9 +592,9 @@ export default function OrdenPage() {
         </div>
         <div className="d-flex flex-wrap gap-2">
           {/* Botón WhatsApp */}
-          <div className="dropdown position-relative">
+          <div className="dropdown position-relative flex-fill flex-md-grow-0">
             <button
-              className="btn btn-outline-success dropdown-toggle d-flex align-items-center gap-1"
+              className="btn btn-outline-success dropdown-toggle w-100 d-flex align-items-center justify-content-center gap-1"
               type="button"
               onClick={() => setWaMenuOpen(prev => !prev)}
             >
@@ -603,7 +603,7 @@ export default function OrdenPage() {
             </button>
             <ul
               className={`dropdown-menu dropdown-menu-end shadow-sm ${waMenuOpen ? 'show' : ''}`}
-              style={waMenuOpen ? { position: 'absolute', right: 0, top: '100%', zIndex: 1050 } : undefined}
+              style={waMenuOpen ? { position: 'absolute', left: 0, right: 'auto', top: '100%', zIndex: 1050, minWidth: '230px' } : undefined}
             >
               <li>
                 <button className="dropdown-item small" type="button" onClick={() => { setWaMenuOpen(false); sendWhatsAppMsg('recepcion'); }}>
@@ -629,7 +629,7 @@ export default function OrdenPage() {
             </ul>
           </div>
 
-          <button onClick={() => navigate(-1)} className="btn btn-light">
+          <button onClick={() => navigate(-1)} className="btn btn-light flex-fill flex-md-grow-0">
             <i className="bi bi-arrow-left me-1"></i> Volver
           </button>
         </div>
@@ -640,7 +640,7 @@ export default function OrdenPage() {
           {/* Alerta SLA */}
           {esSlaCritico && (
             <div className="alert alert-warning d-flex align-items-center gap-3 p-3 rounded-3 mb-4 shadow-sm">
-              <i className="bi bi-exclamation-triangle-fill fs-3 text-warning"></i>
+              <i className="bi bi-exclamation-triangle-fill fs-3 text-warning flex-shrink-0"></i>
               <div>
                 <strong>Alerta de SLA / Demora en Taller:</strong>
                 <div className="small">
@@ -653,9 +653,9 @@ export default function OrdenPage() {
           {/* Formulario */}
           <form onSubmit={handleSubmit(onSubmit)} className="paper-container mb-4 shadow-lg">
             {/* Cabecera Sontech */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <img src={logoUrl} alt="Sontech" width={180} />
-              <div className="text-end">
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+              <img src={logoUrl} alt="Sontech" style={{ width: '145px', maxWidth: '100%', height: 'auto' }} />
+              <div className="text-sm-end w-100">
                 <span className={`badge mb-2 status-${orden.status} text-uppercase`}>
                   {orden.status.replace('_', ' ')}
                 </span>
@@ -667,7 +667,7 @@ export default function OrdenPage() {
                 {(orden.esBeneficioPromo ||
                   orden.presupuestoId === 'BENEFICIO-PROMO' ||
                   Boolean(orden.codigo && orden.codigo.startsWith('SON-LIMP'))) && (
-                  <span className="badge bg-success mt-1 ms-1 d-inline-block">
+                  <span className="badge bg-success mt-1 ms-sm-1 d-inline-block">
                     <i className="bi bi-gift-fill me-1"></i>BENEFICIO PROMO: LIMPIEZA 100% BONIFICADA
                   </span>
                 )}
@@ -733,7 +733,7 @@ export default function OrdenPage() {
                     <span className="badge bg-white text-muted border x-small">Editable</span>
                   </div>
                   <div className="row g-2 mb-2">
-                    <div className="col-4">
+                    <div className="col-12 col-sm-4">
                       <input
                         type="text"
                         className="form-control form-control-sm"
@@ -742,7 +742,7 @@ export default function OrdenPage() {
                         onChange={(e) => setEquipoTipo(e.target.value)}
                       />
                     </div>
-                    <div className="col-4">
+                    <div className="col-6 col-sm-4">
                       <input
                         type="text"
                         className="form-control form-control-sm fw-semibold"
@@ -751,7 +751,7 @@ export default function OrdenPage() {
                         onChange={(e) => setEquipoMarca(e.target.value)}
                       />
                     </div>
-                    <div className="col-4">
+                    <div className="col-6 col-sm-4">
                       <input
                         type="text"
                         className="form-control form-control-sm fw-semibold"
@@ -906,7 +906,7 @@ export default function OrdenPage() {
                 {/* Ítems Iniciales de la Orden (si tiene ítems cargados) */}
                 {itemsBase.length > 0 && (
                   <div className="mb-4">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-2">
                       <h3 className="h6 fw-bold text-uppercase m-0">
                         Ítems Iniciales de la Orden
                       </h3>
@@ -918,7 +918,7 @@ export default function OrdenPage() {
                       {itemsBase.map((it, idx) => (
                         <div key={it.id || idx} className="item-card p-3">
                           <div className="row g-2 align-items-center">
-                            <div className="col-md-7">
+                            <div className="col-12 col-md-7">
                               <input
                                 type="text"
                                 className="form-control form-control-sm"
@@ -929,7 +929,7 @@ export default function OrdenPage() {
                                 }
                               />
                             </div>
-                            <div className="col-md-2">
+                            <div className="col-5 col-md-2">
                               <input
                                 type="number"
                                 className="form-control form-control-sm font-mono"
@@ -942,7 +942,7 @@ export default function OrdenPage() {
                                 }
                               />
                             </div>
-                            <div className="col-md-2">
+                            <div className="col-5 col-md-2">
                               <input
                                 type="number"
                                 className="form-control form-control-sm font-mono"
@@ -961,7 +961,7 @@ export default function OrdenPage() {
                                 }
                               />
                             </div>
-                            <div className="col-md-1 text-end">
+                            <div className="col-2 col-md-1 text-end">
                               <button
                                 type="button"
                                 onClick={() => handleRemoveItemBase(idx)}
@@ -980,7 +980,7 @@ export default function OrdenPage() {
 
                 {/* Trabajos Realizados */}
                 <div className="mb-4">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                     <h3 className="h6 fw-bold text-uppercase m-0">Trabajos & Mano de Obra</h3>
                     <button
                       type="button"
@@ -995,14 +995,14 @@ export default function OrdenPage() {
                     {trabajoFields.map((field, index) => (
                       <div key={field.id} className="item-card p-3">
                         <div className="row g-2 align-items-center">
-                          <div className="col-md-7">
+                          <div className="col-12 col-md-7">
                             <input
                               {...register(`trabajos.${index}.descripcion`)}
                               placeholder="Ej: Micro-soldadura conector de carga, limpieza ultrasónica..."
                               className="form-control form-control-sm"
                             />
                           </div>
-                          <div className="col-md-2">
+                          <div className="col-5 col-md-2">
                             <input
                               type="number"
                               {...register(`trabajos.${index}.horas`)}
@@ -1010,7 +1010,7 @@ export default function OrdenPage() {
                               className="form-control form-control-sm font-mono"
                             />
                           </div>
-                          <div className="col-md-2">
+                          <div className="col-5 col-md-2">
                             <input
                               type="number"
                               {...register(`trabajos.${index}.precio`)}
@@ -1018,7 +1018,7 @@ export default function OrdenPage() {
                               className="form-control form-control-sm font-mono"
                             />
                           </div>
-                          <div className="col-md-1 text-end">
+                          <div className="col-2 col-md-1 text-end">
                             <button
                               type="button"
                               onClick={() => removeTrabajo(index)}
@@ -1040,9 +1040,9 @@ export default function OrdenPage() {
 
                 {/* Repuestos & Materiales */}
                 <div className="mb-4">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                     <h3 className="h6 fw-bold text-uppercase m-0">Repuestos & Materiales Utilizados</h3>
-                    <div className="d-flex gap-2">
+                    <div className="d-flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => setModalRepuestoPicker(true)}
@@ -1064,14 +1064,14 @@ export default function OrdenPage() {
                     {repuestoFields.map((field, index) => (
                       <div key={field.id} className="item-card p-3">
                         <div className="row g-2 align-items-center">
-                          <div className="col-md-7">
+                          <div className="col-12 col-md-7">
                             <input
                               {...register(`repuestos.${index}.descripcion`)}
                               placeholder="Ej: Pantalla OLED, Batería 3000mAh..."
                               className="form-control form-control-sm"
                             />
                           </div>
-                          <div className="col-md-2">
+                          <div className="col-5 col-md-2">
                             <input
                               type="number"
                               {...register(`repuestos.${index}.cantidad`)}
@@ -1079,7 +1079,7 @@ export default function OrdenPage() {
                               className="form-control form-control-sm font-mono"
                             />
                           </div>
-                          <div className="col-md-2">
+                          <div className="col-5 col-md-2">
                             <input
                               type="number"
                               {...register(`repuestos.${index}.precio`)}
@@ -1087,7 +1087,7 @@ export default function OrdenPage() {
                               className="form-control form-control-sm font-mono"
                             />
                           </div>
-                          <div className="col-md-1 text-end">
+                          <div className="col-2 col-md-1 text-end">
                             <button
                               type="button"
                               onClick={() => removeRepuesto(index)}
@@ -1109,14 +1109,14 @@ export default function OrdenPage() {
 
                 {/* Pagos Realizados */}
                 <div className="mb-4">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                     <h3 className="h6 fw-bold text-uppercase m-0">Pagos & Cobros Registrados</h3>
                     <button type="button" onClick={handlePagar} className="btn btn-sm btn-soft-success">
                       + Cobrar Pago
                     </button>
                   </div>
                   <div className="table-responsive bg-light p-2 rounded">
-                    <table className="table table-sm table-borderless m-0 bg-transparent">
+                    <table className="table table-sm table-borderless m-0 bg-transparent" style={{ minWidth: 0 }}>
                       <thead className="x-small text-muted text-uppercase">
                         <tr>
                           <th>Fecha</th>
@@ -1215,8 +1215,10 @@ export default function OrdenPage() {
                 <p className="text-muted small mb-3">
                   Verifica cada punto de control al ingresar el equipo y al finalizar el servicio para garantizar que no existan reclamos posteriores.
                 </p>
-                <div className="table-responsive">
-                  <table className="table table-bordered align-middle">
+
+                {/* Vista Tabla (Desktop) */}
+                <div className="table-responsive d-none d-md-block">
+                  <table className="table table-bordered align-middle mb-0">
                     <thead className="table-light small text-uppercase">
                       <tr>
                         <th>Punto de Control</th>
@@ -1282,6 +1284,69 @@ export default function OrdenPage() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Vista Tarjetas (Móvil) */}
+                <div className="d-md-none d-flex flex-column gap-2">
+                  {qaItems.map((item) => (
+                    <div key={item.key} className="mobile-data-card">
+                      <div className="fw-bold small text-dark mb-2">{item.label}</div>
+                      <div className="row g-2">
+                        <div className="col-6">
+                          <span className="x-small text-muted text-uppercase fw-bold d-block mb-1">Entrada</span>
+                          <div className="btn-group btn-group-sm w-100">
+                            <button
+                              type="button"
+                              className={`btn px-1 ${qaEntrada[item.key] === 'ok' ? 'btn-success' : 'btn-outline-secondary'}`}
+                              onClick={() => handleSetQA('entrada', item.key, 'ok')}
+                            >
+                              OK
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn px-1 ${qaEntrada[item.key] === 'falla' ? 'btn-danger' : 'btn-outline-secondary'}`}
+                              onClick={() => handleSetQA('entrada', item.key, 'falla')}
+                            >
+                              Falla
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn px-1 ${qaEntrada[item.key] === 'na' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                              onClick={() => handleSetQA('entrada', item.key, 'na')}
+                            >
+                              N/A
+                            </button>
+                          </div>
+                        </div>
+                        <div className="col-6">
+                          <span className="x-small text-muted text-uppercase fw-bold d-block mb-1">Salida</span>
+                          <div className="btn-group btn-group-sm w-100">
+                            <button
+                              type="button"
+                              className={`btn px-1 ${qaSalida[item.key] === 'ok' ? 'btn-success' : 'btn-outline-secondary'}`}
+                              onClick={() => handleSetQA('salida', item.key, 'ok')}
+                            >
+                              OK
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn px-1 ${qaSalida[item.key] === 'falla' ? 'btn-danger' : 'btn-outline-secondary'}`}
+                              onClick={() => handleSetQA('salida', item.key, 'falla')}
+                            >
+                              Falla
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn px-1 ${qaSalida[item.key] === 'na' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                              onClick={() => handleSetQA('salida', item.key, 'na')}
+                            >
+                              N/A
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

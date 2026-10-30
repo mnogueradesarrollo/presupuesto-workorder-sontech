@@ -41,7 +41,7 @@ export default function Settings() {
     if (loading) return <div className="container">Cargando…</div>;
 
     return (
-        <div className="container py-4">
+        <div className="container py-3 py-md-4">
             <div className="card">
                 <h2 className="mb-2 fw-bold text-gradient">Configuración de la Empresa</h2>
                 <p className="text-muted mb-4">
@@ -107,7 +107,7 @@ export default function Settings() {
                     </div>
 
                     <div className="d-flex justify-content-end mt-3">
-                        <button type="submit" className="btn btn-primary px-4" disabled={saving}>
+                        <button type="submit" className="btn btn-primary px-4 w-100 w-sm-auto" disabled={saving}>
                             {saving ? (
                                 <><span className="spinner-border spinner-border-sm me-2"></span>Guardando…</>
                             ) : (

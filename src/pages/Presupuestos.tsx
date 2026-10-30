@@ -82,7 +82,7 @@ export default function Presupuestos() {
   }, [pres, search, statusFilter]);
 
   return (
-    <div className="container">
+    <div className="container py-3 py-md-4">
       {/* Encabezado de página */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
@@ -93,7 +93,7 @@ export default function Presupuestos() {
         </div>
         <div className="d-flex flex-wrap gap-2">
           <button
-            className="btn btn-primary d-flex align-items-center gap-2"
+            className="btn btn-primary d-flex align-items-center justify-content-center gap-2 flex-fill flex-md-grow-0"
             onClick={() => navigate("/presupuesto-it")}
           >
             <i className="bi bi-plus-lg"></i>
@@ -104,8 +104,8 @@ export default function Presupuestos() {
 
       {/* Filtros */}
       <div className="card mb-4">
-        <div className="d-flex gap-3 align-items-center flex-wrap">
-          <div style={{ flex: 1, minWidth: "240px" }}>
+        <div className="row g-3 align-items-end">
+          <div className="col-12 col-md-8">
             <label className="d-block small text-muted fw-bold mb-1">BUSCAR PRESUPUESTO</label>
             <input
               type="text"
@@ -115,7 +115,7 @@ export default function Presupuestos() {
               className="form-control"
             />
           </div>
-          <div style={{ minWidth: "200px" }}>
+          <div className="col-12 col-md-4">
             <label className="d-block small text-muted fw-bold mb-1">ESTADO</label>
             <select
               value={statusFilter}

@@ -405,11 +405,11 @@ Te avisaremos apenas esté listo para retirar (entrega estimada en 24 hs hábile
   };
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Cabecera */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-          <div className="d-flex align-items-center gap-2 mb-1">
+          <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span className="badge bg-success-subtle text-success border border-success-subtle text-uppercase small">
               <i className="bi bi-gift-fill me-1"></i> Promoción Oficial Sontech
             </span>
@@ -424,11 +424,11 @@ Te avisaremos apenas esté listo para retirar (entrega estimada en 24 hs hábile
             Recepción de turnos web (<code>soporte.sontech.com.ar</code>), control antifraude por DNI y generación de Órdenes de Trabajo bonificadas
           </p>
         </div>
-        <div className="d-flex flex-wrap gap-2">
+        <div className="d-flex flex-wrap gap-2 w-100 w-md-auto">
           <button
             type="button"
             onClick={loadData}
-            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1"
+            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-1 flex-fill flex-md-grow-0"
           >
             <i className="bi bi-arrow-clockwise"></i>
             <span>Actualizar</span>
@@ -436,7 +436,7 @@ Te avisaremos apenas esté listo para retirar (entrega estimada en 24 hs hábile
           <button
             type="button"
             onClick={() => openModalNuevo()}
-            className="btn btn-success btn-sm d-inline-flex align-items-center gap-2 fw-bold shadow-sm"
+            className="btn btn-success btn-sm d-inline-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm flex-fill flex-md-grow-0"
           >
             <i className="bi bi-plus-circle-fill"></i>
             <span>Otorgar Beneficio en Mostrador</span>
@@ -659,9 +659,134 @@ Te avisaremos apenas esté listo para retirar (entrega estimada en 24 hs hábile
           </div>
         </div>
       ) : (
-        <div className="card border-0 shadow-sm overflow-hidden bg-white">
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
+        <>
+          {/* Vista Mobile en Tarjetas */}
+          <div className="d-md-none d-flex flex-column gap-3">
+            {filteredTurnos.map((t) => {
+              const esHoy = t.fechaTurno === hoyStr;
+              return (
+                <div key={t.id} className="mobile-data-card">
+                  <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <div>
+                      <div className="fw-bold font-mono text-dark d-flex align-items-center gap-1">
+                        <span>{t.fechaTurno}</span>
+                        {esHoy && <span className="badge bg-success x-small">HOY</span>}
+                      </div>
+                      <div className="small text-muted">{t.franjaHoraria || '10:00 a 18:00 hs'}</div>
+                    </div>
+                    <div>{getBadgeEstado(t.estado)}</div>
+                  </div>
+
+                  <div className="fw-bold text-dark">
+                    {t.cliente?.nombre} {t.cliente?.apellido}
+                  </div>
+                  <div className="d-flex flex-wrap gap-2 align-items-center mt-1 mb-2">
+                    <span className="badge bg-light text-dark border font-mono">
+                      DNI: {t.cliente?.dni}
+                    </span>
+                    {t.cliente?.telefono && (
+                      <button
+                        type="button"
+                        onClick={() => enviarWhatsAppTurno(t)}
+                        className="btn btn-link btn-sm p-0 text-success text-decoration-none font-mono small"
+                      >
+                        <i className="bi bi-whatsapp me-1"></i>
+                        {t.cliente.telefono}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="bg-light rounded p-2 mb-2 small">
+                    <div className="fw-semibold text-dark">
+                      <i
+                        className={`bi ${
+                          t.equipo?.tipo === 'PC de Escritorio' ? 'bi-pc-display' : 'bi-laptop'
+                        } me-1 text-primary`}
+                      ></i>
+                      {t.equipo?.tipo}: {t.equipo?.marca} {t.equipo?.modelo}
+                    </div>
+                    {t.equipo?.numeroSerie && (
+                      <div className="font-mono text-muted">S/N: {t.equipo.numeroSerie}</div>
+                    )}
+                    {t.codigoUnico && (
+                      <div className="mt-1">
+                        <span className="badge bg-primary-subtle text-primary border border-primary-subtle font-mono">
+                          {t.codigoUnico}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-2">
+                    <label className="form-label x-small text-muted fw-bold text-uppercase mb-1">
+                      Cambiar Estado
+                    </label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={t.estado}
+                      onChange={(e) =>
+                        handleStatusChange(t.id, e.target.value as EstadoTurnoBeneficio)
+                      }
+                    >
+                      <option value="pendiente_recepcion">Pendiente Recepción</option>
+                      <option value="recepcionado">Recepcionado</option>
+                      <option value="en_mantenimiento">En Mantenimiento</option>
+                      <option value="listo_entrega">Listo p/ Retirar</option>
+                      <option value="entregado">Entregado</option>
+                      <option value="cancelado">Cancelado</option>
+                    </select>
+                  </div>
+
+                  <div className="d-flex flex-wrap gap-2 pt-2 border-top">
+                    {t.estado === 'pendiente_recepcion' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenRecepcion(t)}
+                        className="btn btn-sm btn-success fw-bold d-inline-flex align-items-center justify-content-center gap-1 w-100 shadow-sm"
+                      >
+                        <i className="bi bi-qr-code-scan"></i>
+                        <span>Recepcionar y Crear OT</span>
+                      </button>
+                    ) : (
+                      <>
+                        {t.ordenId && (
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/orden/${t.ordenId}`)}
+                            className="btn btn-sm btn-soft-primary flex-fill"
+                          >
+                            <i className="bi bi-folder2-open me-1"></i>Abrir OT
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => enviarWhatsAppTurno(t)}
+                          className="btn btn-sm btn-outline-success flex-fill"
+                        >
+                          <i className="bi bi-whatsapp me-1"></i>WhatsApp
+                        </button>
+                        {(t.tokenTracking || t.codigoUnico) && (
+                          <a
+                            href={`/seguimiento/${t.tokenTracking || t.codigoUnico}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-sm btn-soft-info"
+                            title="Ver Portal de Seguimiento Público"
+                          >
+                            <i className="bi bi-eye"></i>
+                          </a>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="card border-0 shadow-sm overflow-hidden bg-white d-none d-md-block p-0">
+            <div className="table-responsive border-0">
+              <table className="table table-hover align-middle mb-0">
               <thead className="table-light small text-uppercase text-muted">
                 <tr>
                   <th className="ps-3">Fecha Turno</th>
@@ -758,7 +883,7 @@ Te avisaremos apenas esté listo para retirar (entrega estimada en 24 hs hábile
                         <div className="mb-1">{getBadgeEstado(t.estado)}</div>
                         <select
                           className="form-select form-select-sm py-0 px-2 x-small"
-                          style={{ width: 'auto', fontSize: '0.75rem' }}
+                          style={{ width: 'auto' }}
                           value={t.estado}
                           onChange={(e) =>
                             handleStatusChange(t.id, e.target.value as EstadoTurnoBeneficio)
@@ -826,6 +951,7 @@ Te avisaremos apenas esté listo para retirar (entrega estimada en 24 hs hábile
             </table>
           </div>
         </div>
+        </>
       )}
 
       {/* =====================================================================

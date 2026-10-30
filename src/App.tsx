@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Presupuestos from "./pages/Presupuestos";
@@ -24,13 +25,31 @@ import { Toaster } from "react-hot-toast";
 import "./index.css";
 import "./styles/print.css";
 
+function ViewportRouteReset() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Toaster position="top-right" />
+        <ViewportRouteReset />
+        <Toaster
+          position="top-right"
+          containerStyle={{ top: 14, left: 12, right: 12 }}
+          toastOptions={{ style: { maxWidth: "calc(100vw - 24px)" } }}
+        />
         <Navbar />
-        <main className="container-fluid p-0">
+        <main className="app-main">
           <Routes>
             {/* Rutas Públicas */}
             <Route path="/login" element={<Login />} />
@@ -39,49 +58,37 @@ export default function App() {
             {/* Dashboard & Gestión Principal */}
             <Route path="/" element={
               <ProtectedRoute>
-                <div className="container py-4">
-                  <Dashboard />
-                </div>
+                <Dashboard />
               </ProtectedRoute>
             } />
 
             <Route path="/gestion" element={
               <ProtectedRoute>
-                <div className="container py-4">
-                  <Home />
-                </div>
+                <Home />
               </ProtectedRoute>
             } />
 
             <Route path="/ordenes" element={
               <ProtectedRoute>
-                <div className="container py-4">
-                  <Home />
-                </div>
+                <Home />
               </ProtectedRoute>
             } />
 
             <Route path="/presupuestos" element={
               <ProtectedRoute>
-                <div className="container py-4">
-                  <Presupuestos />
-                </div>
+                <Presupuestos />
               </ProtectedRoute>
             } />
 
             <Route path="/presupuesto-it" element={
               <ProtectedRoute>
-                <div className="container py-4">
-                  <PresupuestoIT />
-                </div>
+                <PresupuestoIT />
               </ProtectedRoute>
             } />
 
             <Route path="/orden/:id" element={
               <ProtectedRoute>
-                <div className="container py-4">
-                  <OrdenPage />
-                </div>
+                <OrdenPage />
               </ProtectedRoute>
             } />
 
@@ -149,9 +156,7 @@ export default function App() {
 
             <Route path="/settings" element={
               <ProtectedRoute>
-                <div className="container py-4">
-                  <Settings />
-                </div>
+                <Settings />
               </ProtectedRoute>
             } />
 

@@ -169,7 +169,7 @@ export default function Abonos() {
   };
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
@@ -178,7 +178,7 @@ export default function Abonos() {
             Soporte recurrente para empresas, banco de horas mensuales y cálculo de excedentes
           </p>
         </div>
-        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center gap-2">
+        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
           <i className="bi bi-file-earmark-lock2-fill"></i>
           <span>Nuevo Contrato / Abono</span>
         </button>
@@ -213,8 +213,8 @@ export default function Abonos() {
             return (
               <div key={ab.id} className="col-12 col-lg-6">
                 <div className="card border-0 shadow-sm h-100 bg-white">
-                  <div className="card-body p-4 d-flex flex-column">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
+                  <div className="card-body p-3 p-md-4 d-flex flex-column">
+                    <div className="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                       <div>
                         <span
                           className={`badge ${
@@ -255,7 +255,7 @@ export default function Abonos() {
                           style={{ width: `${Math.min(100, pct)}%` }}
                         ></div>
                       </div>
-                      <div className="d-flex justify-content-between align-items-center small text-muted">
+                      <div className="d-flex flex-wrap justify-content-between align-items-center gap-1 small text-muted">
                         <span>
                           Visitas: {p.visitasRealizadas} / {ab.visitasIncluidas}
                         </span>
@@ -276,7 +276,7 @@ export default function Abonos() {
                       <div className="small text-muted mb-3 fst-italic">"{ab.notas}"</div>
                     )}
 
-                    <div className="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                    <div className="mt-auto pt-2 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
                       <button
                         className="btn btn-sm btn-outline-primary"
                         onClick={() => {

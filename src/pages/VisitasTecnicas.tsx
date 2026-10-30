@@ -112,7 +112,7 @@ export default function VisitasTecnicas() {
   };
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
@@ -123,7 +123,7 @@ export default function VisitasTecnicas() {
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="btn btn-primary d-inline-flex align-items-center gap-2"
+          className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto"
         >
           <i className="bi bi-calendar-plus"></i>
           <span>Agendar Visita</span>

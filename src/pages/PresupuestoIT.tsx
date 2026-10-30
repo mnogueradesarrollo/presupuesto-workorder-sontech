@@ -336,14 +336,14 @@ export default function PresupuestoIT() {
   });
 
   return (
-    <div className="container py-5">
+    <div className="container py-3 py-md-4">
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h2 className="m-0 fw-bold text-gradient">
           {isViewMode ? 'Vista de Presupuesto' : (editingId ? 'Editar Presupuesto' : 'Nuevo Presupuesto')}
           {codigo && <span className="ms-2 text-muted small fw-normal font-mono">({codigo})</span>}
         </h2>
-        <button onClick={() => navigate(-1)} className="btn btn-light">
+        <button onClick={() => navigate(-1)} className="btn btn-light btn-sm">
           <i className="bi bi-arrow-left me-1"></i> Volver
         </button>
       </div>
@@ -352,27 +352,27 @@ export default function PresupuestoIT() {
         <div className="col-lg-10 mx-auto">
           {/* El formulario estilo papel */}
           <form onSubmit={handleSubmit(onSubmit)} className="paper-container mb-4 border shadow-sm">
-            <div className="d-flex justify-content-between align-items-center mb-5">
-              <img src={logoUrl} alt="Sontech" width={180} />
-              <div className="text-end">
-                <h1 className="h3 mb-0 fw-bold text-primary">PRESUPUESTO</h1>
-                <p className="text-muted mb-0 fw-bold font-mono">{codigo || 'BORRADOR PENDIENTE'}</p>
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4 mb-md-5">
+              <img src={logoUrl} alt="Sontech" style={{ width: '145px', maxWidth: '100%', height: 'auto' }} />
+              <div className="text-sm-end">
+                <h1 className="h4 mb-0 fw-bold text-primary">PRESUPUESTO</h1>
+                <p className="text-muted small mb-0 fw-bold font-mono">{codigo || 'BORRADOR PENDIENTE'}</p>
               </div>
             </div>
 
-            <div className="row mb-5">
+            <div className="row mb-4 mb-md-5">
               <div className="col-md-7">
                 <div className="bg-light p-3 border rounded">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-2">
                     <label className="small fw-bold text-muted text-uppercase m-0">Datos del Cliente</label>
-                    <span className="small text-muted">Escribe o selecciona de la lista</span>
+                    <span className="x-small text-muted">Escribe o selecciona de la lista</span>
                   </div>
                   <input
                     {...register("cliente")}
                     list="clientesDatalist"
                     placeholder="Nombre completo o empresa del cliente..."
                     disabled={isViewMode}
-                    className={`form-control form-control-lg border-0 bg-white shadow-none ${errors.cliente ? "is-invalid" : ""}`}
+                    className={`form-control border-0 bg-white shadow-none ${errors.cliente ? "is-invalid" : ""}`}
                   />
                   <datalist id="clientesDatalist">
                     {clientesDb.map((c) => (
@@ -387,14 +387,14 @@ export default function PresupuestoIT() {
             </div>
 
             <div className="mb-4">
-              <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
                 <label className="small fw-bold text-muted text-uppercase m-0">Detalle de Productos / Servicios</label>
                 {!isViewMode && (
-                  <div className="d-flex gap-2">
+                  <div className="d-flex flex-wrap gap-2 w-100 w-sm-auto justify-content-sm-end">
                     <button
                       type="button"
                       onClick={() => setModalProdPicker(true)}
-                      className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                      className="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-1 flex-fill flex-sm-grow-0"
                     >
                       <i className="bi bi-box-seam"></i>
                       <span>Desde Catálogo</span>
@@ -402,7 +402,7 @@ export default function PresupuestoIT() {
                     <button
                       type="button"
                       onClick={() => append({ id: crypto.randomUUID(), tipo: "Producto", descripcion: "", cantidad: 1, precioUnitario: 0 })}
-                      className="btn btn-soft-primary btn-sm d-flex align-items-center gap-1"
+                      className="btn btn-soft-primary btn-sm d-flex align-items-center justify-content-center gap-1 flex-fill flex-sm-grow-0"
                     >
                       <i className="bi bi-plus-circle"></i>
                       <span>Ítem Manual</span>
@@ -420,10 +420,10 @@ export default function PresupuestoIT() {
               />
             </div>
 
-            <div className="d-flex justify-content-end mt-5 border-top pt-4">
-              <div className="text-end bg-light p-4 border rounded" style={{ minWidth: '250px' }}>
+            <div className="d-flex justify-content-end mt-4 mt-md-5 border-top pt-3 pt-md-4">
+              <div className="text-end bg-light p-3 p-md-4 border rounded w-100" style={{ maxWidth: '320px' }}>
                 <div className="text-muted small mb-1 fw-bold text-uppercase">Total Presupuesto</div>
-                <div className="fs-2 fw-bold text-primary font-mono">${t.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                <div className="fs-3 fw-bold text-primary font-mono text-break">${t.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                 <div className="text-muted x-small mt-1">IVA no incluido</div>
               </div>
             </div>

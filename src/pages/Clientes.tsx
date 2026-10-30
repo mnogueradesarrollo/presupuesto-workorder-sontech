@@ -153,7 +153,7 @@ export default function Clientes() {
   }, [clientes, search, filterTipo]);
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
           <h2 className="fw-bold mb-1 font-display">Directorio de Clientes</h2>
@@ -161,7 +161,7 @@ export default function Clientes() {
             Administración de clientes particulares y cuentas corporativas
           </p>
         </div>
-        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center gap-2">
+        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2">
           <i className="bi bi-person-plus-fill"></i>
           <span>Nuevo Cliente</span>
         </button>
@@ -185,7 +185,7 @@ export default function Clientes() {
             </div>
           </div>
           <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
-            <div className="btn-group" role="group">
+            <div className="btn-group w-100 w-md-auto" role="group">
               <button
                 type="button"
                 className={`btn btn-sm ${filterTipo === 'todos' ? 'btn-dark' : 'btn-outline-secondary'}`}
@@ -234,136 +234,243 @@ export default function Clientes() {
           )}
         </div>
       ) : (
-        <div className="card border-0 shadow-sm overflow-hidden bg-white">
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="table-light small text-uppercase text-muted">
-                <tr>
-                  <th className="ps-3">Cliente</th>
-                  <th>Tipo / IVA</th>
-                  <th>Contacto</th>
-                  <th>Ubicación</th>
-                  <th>Registrado</th>
-                  <th className="text-end pe-3">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredClientes.map((c) => (
-                  <tr key={c.id}>
-                    <td className="ps-3">
-                      <div className="fw-bold text-dark">{c.nombre}</div>
-                      {c.contacto && (
-                        <div className="small text-muted">Contacto: {c.contacto}</div>
-                      )}
-                      <div className="d-flex flex-wrap gap-1 mt-1">
-                        {c.cuitDni && (
-                          <span className="badge bg-light text-secondary border font-mono small">
-                            ID: {c.cuitDni}
-                          </span>
-                        )}
-                        {c.beneficioLimpiezaUsado && (
-                          <span
-                            className="badge bg-success-subtle text-success border border-success-subtle small"
-                            title={
-                              c.fechaBeneficioLimpieza
-                                ? `Utilizado el ${c.fechaBeneficioLimpieza}`
-                                : 'Beneficio ya utilizado'
-                            }
-                          >
-                            <i className="bi bi-gift-fill me-1"></i>Promo Limpieza Usada
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`badge ${c.tipo === 'empresa' ? 'bg-primary' : 'bg-secondary'} me-1`}>
-                        {c.tipo === 'empresa' ? 'Empresa' : 'Particular'}
-                      </span>
-                      {c.condicionIva && (
-                        <div className="small text-muted mt-1">{c.condicionIva}</div>
-                      )}
-                    </td>
-                    <td>
-                      {c.telefono ? (
-                        <div className="small">
-                          <i className="bi bi-whatsapp text-success me-1"></i>
-                          <a
-                            href={`https://wa.me/${c.telefono.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-decoration-none font-mono text-dark"
-                          >
-                            {c.telefono}
-                          </a>
-                        </div>
-                      ) : (
-                        <span className="text-muted small">-</span>
-                      )}
-                      {c.email && (
-                        <div className="small text-muted">
-                          <i className="bi bi-envelope me-1"></i>
-                          {c.email}
-                        </div>
-                      )}
-                    </td>
-                    <td className="small text-muted">
-                      {c.direccion || c.localidad ? (
-                        <div>
-                          {c.direccion && <div>{c.direccion}</div>}
-                          {c.localidad && <div className="text-secondary">{c.localidad}</div>}
-                        </div>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
-                    <td className="small text-muted font-mono">{formatDate(c.createdAt)}</td>
-                    <td className="text-end pe-3">
-                      <div className="d-inline-flex gap-1">
-                        {!c.beneficioLimpiezaUsado && (
-                          <button
-                            className="btn btn-sm btn-outline-success"
-                            title="Otorgar Beneficio Promocional de Limpieza Gratuita"
-                            onClick={() => navigate(`/beneficios-promo?clienteId=${c.id}`)}
-                          >
-                            <i className="bi bi-gift-fill"></i>
-                          </button>
-                        )}
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          title="Crear Nuevo Presupuesto"
-                          onClick={() => navigate(`/presupuesto-it?cliente=${encodeURIComponent(c.nombre)}`)}
-                        >
-                          <i className="bi bi-file-earmark-plus"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-info"
-                          title="Ver Equipos del Cliente (CMDB)"
-                          onClick={() => navigate(`/equipos?clienteId=${c.id}`)}
-                        >
-                          <i className="bi bi-laptop"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-light border"
-                          title="Editar Datos"
-                          onClick={() => openEditar(c)}
-                        >
-                          <i className="bi bi-pencil"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          title="Eliminar Cliente"
-                          onClick={() => handleDelete(c.id, c.nombre)}
-                        >
-                          <i className="bi bi-trash3"></i>
-                        </button>
-                      </div>
-                    </td>
+        <>
+          {/* Vista Tabla (Desktop) */}
+          <div className="card border-0 shadow-sm overflow-hidden bg-white d-none d-md-block">
+            <div className="table-responsive">
+              <table className="table table-hover align-middle mb-0">
+                <thead className="table-light small text-uppercase text-muted">
+                  <tr>
+                    <th className="ps-3">Cliente</th>
+                    <th>Tipo / IVA</th>
+                    <th>Contacto</th>
+                    <th>Ubicación</th>
+                    <th>Registrado</th>
+                    <th className="text-end pe-3">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredClientes.map((c) => (
+                    <tr key={c.id}>
+                      <td className="ps-3">
+                        <div className="fw-bold text-dark">{c.nombre}</div>
+                        {c.contacto && (
+                          <div className="small text-muted">Contacto: {c.contacto}</div>
+                        )}
+                        <div className="d-flex flex-wrap gap-1 mt-1">
+                          {c.cuitDni && (
+                            <span className="badge bg-light text-secondary border font-mono small">
+                              ID: {c.cuitDni}
+                            </span>
+                          )}
+                          {c.beneficioLimpiezaUsado && (
+                            <span
+                              className="badge bg-success-subtle text-success border border-success-subtle small"
+                              title={
+                                c.fechaBeneficioLimpieza
+                                  ? `Utilizado el ${c.fechaBeneficioLimpieza}`
+                                  : 'Beneficio ya utilizado'
+                              }
+                            >
+                              <i className="bi bi-gift-fill me-1"></i>Promo Limpieza Usada
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${c.tipo === 'empresa' ? 'bg-primary' : 'bg-secondary'} me-1`}>
+                          {c.tipo === 'empresa' ? 'Empresa' : 'Particular'}
+                        </span>
+                        {c.condicionIva && (
+                          <div className="small text-muted mt-1">{c.condicionIva}</div>
+                        )}
+                      </td>
+                      <td>
+                        {c.telefono ? (
+                          <div className="small">
+                            <i className="bi bi-whatsapp text-success me-1"></i>
+                            <a
+                              href={`https://wa.me/${c.telefono.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-decoration-none font-mono text-dark"
+                            >
+                              {c.telefono}
+                            </a>
+                          </div>
+                        ) : (
+                          <span className="text-muted small">-</span>
+                        )}
+                        {c.email && (
+                          <div className="small text-muted">
+                            <i className="bi bi-envelope me-1"></i>
+                            {c.email}
+                          </div>
+                        )}
+                      </td>
+                      <td className="small text-muted">
+                        {c.direccion || c.localidad ? (
+                          <div>
+                            {c.direccion && <div>{c.direccion}</div>}
+                            {c.localidad && <div className="text-secondary">{c.localidad}</div>}
+                          </div>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td className="small text-muted font-mono">{formatDate(c.createdAt)}</td>
+                      <td className="text-end pe-3">
+                        <div className="d-inline-flex gap-1">
+                          {!c.beneficioLimpiezaUsado && (
+                            <button
+                              className="btn btn-sm btn-outline-success"
+                              title="Otorgar Beneficio Promocional de Limpieza Gratuita"
+                              onClick={() => navigate(`/beneficios-promo?clienteId=${c.id}`)}
+                            >
+                              <i className="bi bi-gift-fill"></i>
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-outline-primary"
+                            title="Crear Nuevo Presupuesto"
+                            onClick={() => navigate(`/presupuesto-it?cliente=${encodeURIComponent(c.nombre)}`)}
+                          >
+                            <i className="bi bi-file-earmark-plus"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-info"
+                            title="Ver Equipos del Cliente (CMDB)"
+                            onClick={() => navigate(`/equipos?clienteId=${c.id}`)}
+                          >
+                            <i className="bi bi-laptop"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-light border"
+                            title="Editar Datos"
+                            onClick={() => openEditar(c)}
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            title="Eliminar Cliente"
+                            onClick={() => handleDelete(c.id, c.nombre)}
+                          >
+                            <i className="bi bi-trash3"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          {/* Vista Tarjetas (Móvil) */}
+          <div className="d-md-none d-flex flex-column gap-3">
+            {filteredClientes.map((c) => (
+              <div key={c.id} className="mobile-data-card">
+                <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                  <div>
+                    <div className="fw-bold text-dark">{c.nombre}</div>
+                    {c.contacto && <div className="x-small text-muted">Contacto: {c.contacto}</div>}
+                  </div>
+                  <span className={`badge ${c.tipo === 'empresa' ? 'bg-primary' : 'bg-secondary'} flex-shrink-0`}>
+                    {c.tipo === 'empresa' ? 'Empresa' : 'Particular'}
+                  </span>
+                </div>
+
+                <div className="d-flex flex-wrap gap-1 mb-2">
+                  {c.cuitDni && (
+                    <span className="badge bg-light text-secondary border font-mono x-small">
+                      ID: {c.cuitDni}
+                    </span>
+                  )}
+                  {c.condicionIva && (
+                    <span className="badge bg-light text-muted border x-small">{c.condicionIva}</span>
+                  )}
+                  {c.beneficioLimpiezaUsado && (
+                    <span className="badge bg-success-subtle text-success border border-success-subtle x-small">
+                      <i className="bi bi-gift-fill me-1"></i>Promo Usada
+                    </span>
+                  )}
+                </div>
+
+                <div className="small text-muted mb-2">
+                  {c.telefono && (
+                    <div className="mb-1">
+                      <i className="bi bi-whatsapp text-success me-1"></i>
+                      <a
+                        href={`https://wa.me/${c.telefono.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-decoration-none font-mono text-dark fw-semibold"
+                      >
+                        {c.telefono}
+                      </a>
+                    </div>
+                  )}
+                  {c.email && (
+                    <div className="text-break mb-1">
+                      <i className="bi bi-envelope me-1"></i>
+                      {c.email}
+                    </div>
+                  )}
+                  {(c.direccion || c.localidad) && (
+                    <div>
+                      <i className="bi bi-geo-alt me-1"></i>
+                      {[c.direccion, c.localidad].filter(Boolean).join(', ')}
+                    </div>
+                  )}
+                </div>
+
+                <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 border-top">
+                  <span className="x-small text-muted font-mono">Alta: {formatDate(c.createdAt)}</span>
+                  <div className="d-flex flex-wrap gap-1">
+                    {!c.beneficioLimpiezaUsado && (
+                      <button
+                        className="btn btn-sm btn-outline-success"
+                        title="Beneficio Limpieza"
+                        onClick={() => navigate(`/beneficios-promo?clienteId=${c.id}`)}
+                      >
+                        <i className="bi bi-gift-fill"></i>
+                      </button>
+                    )}
+                    <button
+                      className="btn btn-sm btn-outline-primary"
+                      title="Nuevo Presupuesto"
+                      onClick={() => navigate(`/presupuesto-it?cliente=${encodeURIComponent(c.nombre)}`)}
+                    >
+                      <i className="bi bi-file-earmark-plus"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-info"
+                      title="Equipos CMDB"
+                      onClick={() => navigate(`/equipos?clienteId=${c.id}`)}
+                    >
+                      <i className="bi bi-laptop"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-light border"
+                      title="Editar"
+                      onClick={() => openEditar(c)}
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      title="Eliminar"
+                      onClick={() => handleDelete(c.id, c.nombre)}
+                    >
+                      <i className="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Modal Crear / Editar Cliente */}

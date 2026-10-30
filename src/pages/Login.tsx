@@ -82,27 +82,19 @@ const Login: React.FC = () => {
     return (
         <div className="login-wrapper notranslate" translate="no">
             <div className="glass-card shadow-lg">
-                <div className="mb-5">
+                <div className="mb-4">
                     <img
                         src={logoCircle}
                         alt="Sontech"
-                        className="mb-4 shadow-sm"
-                        style={{
-                            width: '160px',
-                            height: '160px',
-                            borderRadius: '50%',
-                            border: '4px solid rgba(255, 255, 255, 0.2)',
-                            objectFit: 'contain',
-                            background: 'white'
-                        }}
+                        className="login-logo mb-3 shadow-sm"
                     />
-                    <h1 className="h3 fw-bold mb-1">Panel de Control</h1>
-                    <p className="text-white text-opacity-75 small">Bienvenido, ingresa tus credenciales</p>
+                    <h1 className="h4 fw-bold mb-1">Panel de Control</h1>
+                    <p className="text-white text-opacity-75 small mb-0">Bienvenido, ingresa tus credenciales</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="w-100">
-                    <div className="mb-4 text-start">
-                        <label className="x-small fw-bold text-uppercase mb-2 d-block text-white text-opacity-50 ms-1">
+                    <div className="mb-3 text-start">
+                        <label className="x-small fw-bold text-uppercase mb-1 d-block text-white text-opacity-50 ms-1">
                             Email / Usuario
                         </label>
                         <div className="position-relative">
@@ -118,8 +110,8 @@ const Login: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mb-4 text-start">
-                        <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="mb-3 text-start">
+                        <div className="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
                             <label className="x-small fw-bold text-uppercase mb-0 text-white text-opacity-50 ms-1">
                                 Contraseña
                             </label>
@@ -170,7 +162,7 @@ const Login: React.FC = () => {
                     </button>
                 </form>
 
-                <div className="mt-5 pt-4 border-top border-white border-opacity-10">
+                <div className="mt-4 pt-3 border-top border-white border-opacity-10">
                     <p className="x-small text-white text-opacity-40 mb-0">
                         © 2026 Sontech Gestor • v2.5
                     </p>

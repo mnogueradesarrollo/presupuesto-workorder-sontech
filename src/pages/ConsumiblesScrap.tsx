@@ -141,7 +141,7 @@ export default function ConsumiblesScrap() {
   const scrapList = items.filter((i) => i.tipo === 'scrap');
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
           <h2 className="fw-bold mb-1 font-display">Consumibles de Taller & Despiece (Scrap)</h2>
@@ -151,7 +151,7 @@ export default function ConsumiblesScrap() {
         </div>
         <button
           onClick={() => openCrear(activeTab === 'consumibles' ? 'consumible' : 'scrap')}
-          className="btn btn-primary d-inline-flex align-items-center gap-2"
+          className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto"
         >
           <i className="bi bi-plus-lg"></i>
           <span>{activeTab === 'consumibles' ? 'Nuevo Consumible' : 'Ingresar Equipo p/ Despiece'}</span>

@@ -131,28 +131,28 @@ export default function TrackingPublico() {
   const equipoStr = `${orden.equipo?.marca || ''} ${orden.equipo?.modelo || ''}`.trim() || 'Dispositivo';
 
   return (
-    <div className="min-vh-100 bg-light py-4 py-md-5">
+    <div className="min-vh-100 bg-light py-3 py-md-5">
       <div className="container" style={{ maxWidth: '850px' }}>
         {/* Header Branding */}
-        <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 pb-2 border-bottom">
           <Link to="/" className="text-decoration-none">
-            <img src={logoUrl} alt="Sontech" style={{ height: '40px' }} />
+            <img src={logoUrl} alt="Sontech" style={{ height: '38px' }} />
           </Link>
-          <span className="badge bg-dark font-mono fs-6 px-3 py-2">
+          <span className="badge bg-dark font-mono px-3 py-2">
             OT: {orden.codigo || orden.id}
           </span>
         </div>
 
         {/* Card Principal: Estado & Progreso */}
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
-          <div className="card-header bg-dark text-white p-4">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white p-0">
+          <div className="card-header bg-dark text-white p-3 p-md-4">
             <div className="row align-items-center">
               <div className="col-12 col-md-8">
                 <span className="badge bg-primary-subtle text-primary border border-primary-subtle small text-uppercase mb-2">
                   Portal de Seguimiento Técnico
                 </span>
                 <h3 className="fw-bold mb-1 font-display text-white">{equipoStr}</h3>
-                <div className="text-white-50 small font-mono">
+                <div className="text-white-50 small font-mono text-break">
                   Titular: {orden.cliente} {orden.equipo?.imeiSerie ? `| S/N: ${orden.equipo.imeiSerie}` : ''}
                 </div>
               </div>
@@ -165,13 +165,13 @@ export default function TrackingPublico() {
             </div>
           </div>
 
-          <div className="card-body p-4 p-md-5">
+          <div className="card-body p-3 p-md-5">
             {/* Barra Visual de Progreso */}
-            <h6 className="text-uppercase text-muted fw-bold small mb-4">Progreso de Reparación</h6>
-            <div className="position-relative mb-5">
+            <h6 className="text-uppercase text-muted fw-bold small mb-3">Progreso de Reparación</h6>
+            <div className="position-relative mb-4 pb-2">
               <div
-                className="progress"
-                style={{ height: '6px', backgroundColor: '#e2e8f0' }}
+                className="progress mx-3"
+                style={{ height: '6px', backgroundColor: '#e2e8f0', position: 'relative', top: '16px' }}
               >
                 <div
                   className="progress-bar bg-primary"
@@ -180,13 +180,13 @@ export default function TrackingPublico() {
                 ></div>
               </div>
 
-              <div className="d-flex justify-content-between position-absolute top-50 start-0 w-100 translate-middle-y">
+              <div className="d-flex justify-content-between align-items-start w-100 position-relative">
                 {etapas.map((etapa, idx) => {
                   const alcanzada = idx <= currentStep;
                   const esActual = idx === currentStep;
 
                   return (
-                    <div key={etapa.key} className="text-center" style={{ width: '80px' }}>
+                    <div key={etapa.key} className="text-center px-1" style={{ flex: '1 1 0', minWidth: 0 }}>
                       <div
                         className={`rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm ${
                           esActual
@@ -195,7 +195,7 @@ export default function TrackingPublico() {
                             ? 'bg-dark text-white'
                             : 'bg-white text-muted border'
                         }`}
-                        style={{ width: '32px', height: '32px', fontSize: '13px' }}
+                        style={{ width: '30px', height: '30px', fontSize: '12px' }}
                       >
                         {alcanzada && !esActual ? (
                           <i className="bi bi-check-lg"></i>
@@ -204,10 +204,10 @@ export default function TrackingPublico() {
                         )}
                       </div>
                       <div
-                        className={`small mt-2 ${
+                        className={`mt-2 text-break ${
                           esActual ? 'fw-bold text-primary' : alcanzada ? 'fw-semibold text-dark' : 'text-muted'
                         }`}
-                        style={{ fontSize: '0.75rem', lineHeight: '1.2' }}
+                        style={{ fontSize: '0.68rem', lineHeight: '1.15' }}
                       >
                         {etapa.label}
                       </div>
@@ -314,7 +314,7 @@ export default function TrackingPublico() {
 
             {/* Resumen Financiero */}
             <div className="border-top pt-4 mt-4">
-              <div className="d-flex justify-content-between align-items-center">
+              <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
                   <span className="small text-muted d-block">Estado de Pago:</span>
                   <span className={`badge ${orden.payStatus === 'pagado' ? 'bg-success' : 'bg-warning text-dark'} text-uppercase`}>

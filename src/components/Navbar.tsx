@@ -257,10 +257,10 @@ export default function Navbar() {
       </header>
 
       {/* Mobile Drawer & Backdrop (fuera del header para evitar recorte por backdrop-filter) */}
-      {user && (
+      {user && isOpen && (
         <div className="d-lg-none">
-          {isOpen && <div className="nav-backdrop" onClick={closeMenu}></div>}
-          <nav className={`nav-menu-drawer ${isOpen ? 'show' : ''}`} ref={drawerRef}>
+          <div className="nav-backdrop" onClick={closeMenu}></div>
+          <nav className="nav-menu-drawer show" ref={drawerRef}>
             <div className="d-flex justify-content-between align-items-center border-bottom pb-3 mb-2 w-100">
               <div className="d-flex align-items-center gap-2">
                 <img src={logoUrl} alt="Sontech" style={{ height: '28px' }} />

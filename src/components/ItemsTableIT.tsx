@@ -157,16 +157,17 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
             {/* Fila 4: Precios */}
             <div className="item-field">
               <label>{it.tipo === "Producto" ? "Precio Unitario ($)" : "Precio / Mano de Obra ($)"}</label>
-              <div className="d-flex gap-2">
+              <div className="d-flex flex-wrap gap-2">
                 <input
                   type="number"
                   placeholder="0.00"
                   disabled={readOnly}
                   {...register(`items.${idx}.precioUnitario`)}
-                  className="form-control font-mono"
+                  className="form-control font-mono flex-grow-1"
+                  style={{ minWidth: '120px' }}
                 />
                 {it.tipo !== "Producto" && (
-                  <div className="d-flex gap-1" title="Opcional: Si cobras por horas de trabajo (Hs x $/h)">
+                  <div className="d-flex gap-2 flex-grow-1" title="Opcional: Si cobras por horas de trabajo (Hs x $/h)">
                     <input
                       type="number"
                       placeholder="Hs"
@@ -174,7 +175,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                       disabled={readOnly}
                       {...register(`items.${idx}.horas`)}
                       className="form-control font-mono"
-                      style={{ width: '65px' }}
+                      style={{ minWidth: '65px' }}
                     />
                     <input
                       type="number"
@@ -183,7 +184,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
                       disabled={readOnly}
                       {...register(`items.${idx}.tarifaHora`)}
                       className="form-control font-mono"
-                      style={{ width: '85px' }}
+                      style={{ minWidth: '85px' }}
                     />
                   </div>
                 )}
@@ -205,7 +206,7 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
           </div>
 
           {/* Footer del ítem con el subtotal */}
-          <div className="item-card-footer">
+          <div className="item-card-footer flex-wrap">
             <span className="text-muted small">Subtotal ítem:</span>
             <span className="fs-5 fw-bold text-primary font-mono">${lineTotal(it).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
@@ -213,8 +214,8 @@ export default function ItemsTableIT({ items, register, remove, errors, readOnly
       ))}
 
       {/* Resumen total de la lista */}
-      <div className="d-flex justify-content-end align-items-center mt-3 p-3 bg-white border rounded">
-        <span className="text-muted me-3">Subtotal de todos los ítems:</span>
+      <div className="d-flex flex-wrap justify-content-between justify-content-sm-end align-items-center gap-2 mt-3 p-3 bg-white border rounded">
+        <span className="text-muted small">Subtotal de todos los ítems:</span>
         <span className="fs-4 fw-bold text-gradient font-mono">${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
       </div>
     </div>

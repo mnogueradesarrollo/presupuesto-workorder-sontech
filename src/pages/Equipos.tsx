@@ -196,7 +196,7 @@ export default function Equipos() {
   }, [selectedEquipoHistorial, ordenes]);
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
@@ -205,7 +205,7 @@ export default function Equipos() {
             Fichas técnicas de hardware, credenciales y trazabilidad histórica por Nro. de Serie / IMEI
           </p>
         </div>
-        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center gap-2">
+        <button onClick={openCrear} className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
           <i className="bi bi-laptop"></i>
           <span>Registrar Equipo</span>
         </button>
@@ -326,7 +326,7 @@ export default function Equipos() {
                     <div className="small text-muted mb-3 fst-italic">"{eq.notas}"</div>
                   )}
 
-                  <div className="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                  <div className="mt-auto pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <button
                       className="btn btn-sm btn-outline-primary"
                       onClick={() => setSelectedEquipoHistorial(eq)}
