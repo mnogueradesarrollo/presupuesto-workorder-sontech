@@ -68,6 +68,7 @@ export async function aceptarPresupuesto(
       clienteTelefono: p.clienteTelefono,
       clienteEmail: p.clienteEmail,
       equipo: Object.keys(eq).length ? eq : ({} as any),
+      diagnostico: p.diagnostico || '',
       trabajos: [],
       repuestos: [],
       itemsPresupuesto: (p.items ?? []).map((it) => pruneDeep(it)),

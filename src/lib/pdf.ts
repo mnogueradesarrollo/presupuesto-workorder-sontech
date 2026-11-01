@@ -331,36 +331,38 @@ export async function generarOrdenPDF(o: OrdenPDF) {
   }
 
   y += 10;
-  // ==== Diagnóstico ====
-  if (o.diagnostico) {
+  // ==== Notas de Entrega (Para el Cliente) ====
+  // El diagnóstico técnico es de uso interno del laboratorio y NO se incluye en el informe entregado al cliente.
+  const notas = o.notasEntrega?.trim();
+  if (notas) {
     doc.setFont("helvetica", "bold");
-    doc.text("Diagnóstico / Informe Técnico:", M, y);
-    y += 14;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const splitDiag = doc.splitTextToSize(o.diagnostico, W - M * 2);
-    doc.text(splitDiag, M, y);
-    y += splitDiag.length * 12 + 20;
-  }
-
-  // ==== Notas de Entrega ====
-  if (o.notasEntrega) {
-    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
     doc.text("Notas de Entrega (Para el Cliente):", M, y);
-    y += 14;
+    y += 16;
+
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    const splitNotas = doc.splitTextToSize(o.notasEntrega, W - M * 2);
-    doc.text(splitNotas, M, y);
-    y += splitNotas.length * 12 + 20;
+    const splitNotas = doc.splitTextToSize(notas, W - M * 2);
+    const lineHeight = 13;
+    for (let i = 0; i < splitNotas.length; i++) {
+      if (y > H - 50) {
+        doc.addPage();
+        y = M;
+      }
+      doc.text(splitNotas[i], M, y);
+      y += lineHeight;
+    }
+    y += 20;
   }
 
-  y += 10;
-
-  // ==== Footer ====
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text(o.footerText || "Sontech - Servicio Técnico Profesional", M, H - 30);
+  // ==== Footer en todas las páginas ====
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(o.footerText || "Sontech - Servicio Técnico Profesional", M, H - 30);
+  }
 
   return doc;
 }

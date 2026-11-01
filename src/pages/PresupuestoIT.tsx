@@ -41,6 +41,7 @@ const safeRequiredNumber = (minVal = 1, defaultVal = 1) => z.preprocess((val) =>
 
 const schema = z.object({
   cliente: z.string().min(1, "El cliente es obligatorio"),
+  diagnostico: z.string().optional(),
   items: z.array(z.object({
     id: z.string(),
     productoId: z.string().optional(),
@@ -86,6 +87,7 @@ export default function PresupuestoIT() {
     resolver: zodResolver(schema),
     defaultValues: {
       cliente: paramCliente || "",
+      diagnostico: "",
       items: [{
         id: crypto.randomUUID(),
         tipo: paramMarca || paramModelo ? "Reparación" : "Producto",
@@ -139,6 +141,7 @@ export default function PresupuestoIT() {
       if (!p) return;
       reset({
         cliente: p.cliente || "",
+        diagnostico: p.diagnostico || "",
         items: p.items || []
       });
       setCodigo(p.codigo);
@@ -202,6 +205,7 @@ export default function PresupuestoIT() {
       if (editingId) {
         await updatePresupuesto(editingId, {
           cliente: data.cliente,
+          diagnostico: (data.diagnostico || "").trim(),
           items: sanitizedItems,
           total: finalTotals.total,
           fecha: new Date().toISOString(),
@@ -212,6 +216,7 @@ export default function PresupuestoIT() {
       } else {
         const { id, codigo: newCodigo } = await crearPresupuesto({
           cliente: data.cliente,
+          diagnostico: (data.diagnostico || "").trim(),
           fecha: new Date().toISOString(),
           moneda: "ARS",
           items: sanitizedItems,
@@ -317,13 +322,68 @@ export default function PresupuestoIT() {
       toast.error("Guardá el presupuesto primero.");
       return;
     }
-    const aceptacion: Aceptacion = {
-      nombre: cliente || "Cliente",
-      metodo: "whatsapp",
-      aceptadoAt: Date.now(),
-    };
-    const ordenId = await aceptarPresupuesto(editingId, aceptacion);
-    navigate(`/orden/${ordenId}`);
+    setSaving(true);
+    try {
+      const currentValues = watch();
+      const sanitizedItems: ItemPresupuesto[] = (currentValues.items || []).map((it: any) => {
+        let desc = (it.descripcion || "").trim();
+        if (!desc) {
+          if (it.marca || it.modelo) {
+            desc = `Servicio de ${it.marca || ''} ${it.modelo || ''}`.trim();
+          } else {
+            desc = it.tipo === "Producto" ? "Producto" : "Servicio técnico";
+          }
+        }
+        return {
+          id: it.id || crypto.randomUUID(),
+          productoId: it.productoId || undefined,
+          tipo: it.tipo || "Producto",
+          descripcion: desc,
+          cantidad: Number(it.cantidad) || 1,
+          precioUnitario: it.precioUnitario !== undefined && !isNaN(Number(it.precioUnitario)) ? Number(it.precioUnitario) : 0,
+          horas: it.horas !== undefined && !isNaN(Number(it.horas)) ? Number(it.horas) : undefined,
+          tarifaHora: it.tarifaHora !== undefined && !isNaN(Number(it.tarifaHora)) ? Number(it.tarifaHora) : undefined,
+          marca: it.marca || undefined,
+          modelo: it.modelo || undefined,
+          imeiSerie: it.imeiSerie || undefined,
+          estado: it.estado || undefined,
+          garantiaValor: it.garantiaValor !== undefined && !isNaN(Number(it.garantiaValor)) ? Number(it.garantiaValor) : undefined,
+          garantiaUnidad: it.garantiaUnidad || undefined,
+          descuentoPct: it.descuentoPct !== undefined && !isNaN(Number(it.descuentoPct)) ? Number(it.descuentoPct) : undefined,
+        };
+      });
+
+      const finalTotals = totals({
+        items: sanitizedItems,
+        ivaPct: 0,
+      });
+
+      await updatePresupuesto(editingId, {
+        cliente: currentValues.cliente,
+        diagnostico: (currentValues.diagnostico || "").trim(),
+        items: sanitizedItems,
+        total: finalTotals.total,
+        fecha: new Date().toISOString(),
+        ivaPct: 0,
+      } as Partial<Presupuesto>);
+
+      const aceptacion: Aceptacion = {
+        nombre: currentValues.cliente || cliente || "Cliente",
+        metodo: "whatsapp",
+        aceptadoAt: Date.now(),
+      };
+      const ordenId = await aceptarPresupuesto(editingId, aceptacion);
+      navigate(`/orden/${ordenId}`);
+    } catch (e: any) {
+      if (e?.redirectedOrdenId) {
+        navigate(`/orden/${e.redirectedOrdenId}`);
+      } else {
+        console.error(e);
+        toast.error("Error al aceptar presupuesto.");
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const prodsFiltradosPicker = productosDb.filter((p) => {
@@ -382,6 +442,30 @@ export default function PresupuestoIT() {
                     ))}
                   </datalist>
                   {errors.cliente && <div className="invalid-feedback">{(errors.cliente as any).message}</div>}
+                </div>
+              </div>
+            </div>
+
+            {/* Informe Técnico / Diagnóstico de Banco previo a OT */}
+            <div className="mb-4 mb-md-5">
+              <div className="bg-light p-3 border rounded">
+                <div className="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-2">
+                  <label className="small fw-bold text-muted text-uppercase m-0">
+                    <i className="bi bi-clipboard-pulse text-primary me-1"></i>
+                    Informe Técnico / Diagnóstico de Banco
+                  </label>
+                  <span className="x-small text-muted">Uso interno del taller</span>
+                </div>
+                <textarea
+                  {...register("diagnostico")}
+                  rows={3}
+                  disabled={isViewMode}
+                  className="form-control border-0 bg-white shadow-none"
+                  placeholder="Detalla las mediciones en placa, fallas detectadas, voltajes o trabajo a realizar antes de generar la OT..."
+                />
+                <div className="form-text text-muted x-small mt-1">
+                  <i className="bi bi-arrow-right-circle me-1 text-primary"></i>
+                  Al aceptar este presupuesto y generar la OT, este diagnóstico se transferirá automáticamente a la Orden de Trabajo.
                 </div>
               </div>
             </div>

@@ -48,6 +48,8 @@ export type Presupuesto = {
   recargoTarjetaPct?: number;
   bonificacionPct?: number;
   notas?: string;
+  /** Informe Técnico / Diagnóstico de Banco previo a la OT */
+  diagnostico?: string;
   total: number;
   createdAt: number;
   status: QuoteStatus;

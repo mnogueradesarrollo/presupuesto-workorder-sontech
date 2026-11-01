@@ -340,6 +340,21 @@ npm run lint
 
 > **Regla de mantenimiento:** Toda modificación, corrección o nueva funcionalidad realizada en el proyecto debe registrarse en esta sección indicando fecha, archivos tocados y detalle del cambio para mantener la trazabilidad completa.
 
+### `2026-11-01` — Integración de "Informe Técnico / Diagnóstico de Banco" en Presupuestos y Traspaso Automático a OT
+- **Archivos modificados:** `src/types/presupuesto.ts`, `src/services/flujo.ts`, `src/pages/PresupuestoIT.tsx`, `readme-presu.md`
+- **Detalle:**
+  - **Campo de Diagnóstico en Presupuesto (`src/types/presupuesto.ts`, `src/pages/PresupuestoIT.tsx`):** Se incorporó la propiedad `diagnostico?: string` en el modelo y esquema del presupuesto. En la interfaz de edición (`PresupuestoIT.tsx`) se añadió una sección visual destacada para redactar el *Informe Técnico / Diagnóstico de Banco* (mediciones en placa, voltajes, fallas de componentes) antes de formalizar la orden.
+  - **Traspaso automático a la Orden de Trabajo (`src/services/flujo.ts`):** En la función transaccional `aceptarPresupuesto`, se asigna directamente `diagnostico: p.diagnostico || ''` en la creación de `ordenBase`. De esta forma, al aceptar el presupuesto la Orden de Trabajo nace con el diagnóstico técnico previamente cargado en banco.
+  - **Guardado reactivo al aceptar (`src/pages/PresupuestoIT.tsx`):** Al presionar *Aceptar Presupuesto → Generar OT*, la aplicación ahora persiste automáticamente los cambios más recientes del formulario (incluyendo el diagnóstico recién redactado) antes de ejecutar la conversión transaccional en Firestore.
+
+### `2026-11-01` — Privacidad de Diagnóstico Técnico de Banco y Exclusividad de Notas para el Cliente en Informe PDF
+- **Archivos modificados:** `src/lib/pdf.ts`, `src/pages/Orden.tsx`, `src/pages/TrackingPublico.tsx`, `readme-presu.md`
+- **Detalle:**
+  - **Exclusión de Diagnóstico Técnico en el Informe PDF (`src/lib/pdf.ts`):** Se eliminó la sección de *Diagnóstico / Informe Técnico* del generador de PDF de la orden. Dado que este informe se entrega al cliente final, ahora se imprimen de forma exclusiva las **Notas de Entrega (Para el Cliente)** (`notasEntrega`), preservando la confidencialidad de mediciones, fallas internas y pruebas de banco del laboratorio.
+  - **Paginación segura y pie de página dinámico (`src/lib/pdf.ts`):** Se agregó soporte para notas de entrega extensas con salto de página automático (`doc.addPage()`) y renderizado del membrete/pie de página en cada hoja, evitando desbordamientos o solapamiento con el texto.
+  - **Aclaración contextual en la ficha de Orden (`src/pages/Orden.tsx`):** Se incorporaron indicadores visuales en la pestaña *Taller & Reparación*: leyenda de uso confidencial interno para el campo *Informe Técnico / Diagnóstico de Banco*, y recordatorio de visibilidad en el informe PDF para el campo *Notas para el Cliente*.
+  - **Priorización en el Portal Público de Seguimiento (`src/pages/TrackingPublico.tsx`):** Se adaptó la tarjeta de detalle para mostrar prioritariamente las *Notas para el Cliente* con saltos de línea (`whiteSpace: 'pre-line'`) cuando estén redactadas, evitando exponer terminología técnica cruda al cliente que consulta su orden por enlace.
+
 ### `2026-10-30` — Optimización Integral Responsiva Móvil y Eliminación de Auto-Zoom en todos los Sectores
 - **Archivos modificados/creados:** `index.html`, `src/App.tsx`, `src/index.css`, `src/components/Navbar.tsx`, `src/components/ItemsTableIT.tsx`, `src/pages/Login.tsx`, `src/pages/Dashboard.tsx`, `src/pages/Home.tsx`, `src/pages/Presupuestos.tsx`, `src/pages/PresupuestoIT.tsx`, `src/pages/Orden.tsx`, `src/pages/Clientes.tsx`, `src/pages/Productos.tsx`, `src/pages/Ventas.tsx`, `src/pages/BeneficiosPromo.tsx`, `src/pages/TrackingPublico.tsx`, `src/pages/Settings.tsx`, `src/pages/Proveedores.tsx`, `src/pages/Equipos.tsx`, `src/pages/ConsumiblesScrap.tsx`, `src/pages/BaseConocimiento.tsx`, `src/pages/VisitasTecnicas.tsx`, `src/pages/Abonos.tsx`, `readme-presu.md`
 - **Detalle:**

@@ -253,10 +253,10 @@ export default function TrackingPublico() {
                 <div className="p-3 bg-light rounded-3 h-100">
                   <h6 className="fw-bold text-dark mb-2">
                     <i className="bi bi-clipboard-pulse text-primary me-2"></i>
-                    Diagnóstico Técnico
+                    {orden.notasEntrega ? 'Detalle del Servicio' : 'Diagnóstico Técnico'}
                   </h6>
-                  <p className="small text-muted mb-0">
-                    {orden.diagnostico || 'Equipo en etapa de revisión en banco de pruebas.'}
+                  <p className="small text-muted mb-0" style={{ whiteSpace: 'pre-line' }}>
+                    {orden.notasEntrega || orden.diagnostico || 'Equipo en etapa de revisión en banco de pruebas.'}
                   </p>
                 </div>
               </div>

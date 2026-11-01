@@ -889,6 +889,10 @@ export default function OrdenPage() {
                       className="form-control"
                       placeholder="Detalla las mediciones en placa, voltajes, fallas de componentes y trabajo a realizar..."
                     />
+                    <div className="form-text text-muted x-small mt-1">
+                      <i className="bi bi-shield-lock me-1"></i>
+                      Uso exclusivo del laboratorio técnico. No se incluye en el informe entregado al cliente.
+                    </div>
                   </div>
                   <div className="col-12">
                     <label className="small fw-bold text-muted text-uppercase mb-2 d-block">
@@ -900,6 +904,10 @@ export default function OrdenPage() {
                       className="form-control"
                       placeholder="Recomendaciones de cuidado, advertencias o detalles de la entrega..."
                     />
+                    <div className="form-text text-muted x-small mt-1">
+                      <i className="bi bi-info-circle me-1"></i>
+                      Mensaje y recomendaciones que se imprimen en el Informe PDF entregado al cliente.
+                    </div>
                   </div>
                 </div>
 
